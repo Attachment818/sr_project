@@ -1,7 +1,7 @@
 PREDICT:
-  device: cuda:3
-  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/model_SuperRetinaWithPerceptualLoss_0.05_3.pth  # 修改为你训练好的模型路径
-  model_type: with_perceptual_loss #with_perceptual_loss #with_vessel_regularization #with_vessel_only
+  device: cuda:0
+  model_save_path:  /home/data1/zhangjunhong/sr_project/sr/save/shared_ep45_baseline.pth # 修改为你训练好的模型路径
+  #model_type: with_perceptual_loss #with_perceptual_loss #with_vessel_regularization #with_vessel_only
 
 
   # 模型类型选择：

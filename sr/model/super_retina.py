@@ -1487,13 +1487,19 @@ class SuperRetinaWithPerceptualLoss(SuperRetina):
     带感知损失（Perceptual Loss）的 SuperRetina 变体（0.05 单层 relu4_2 最佳版本）。
     - 仅新增单层 PerceptualLoss 模块
     - 保持原有 PKE、VALUE_MAP、descriptor_loss 逻辑完全不变
+    - 支持 perceptual_start_epoch 延迟启用
     """
 
     def __init__(self, config=None, device='cpu', n_class=1):
         super().__init__(config=config, device=device, n_class=n_class)
         self.perceptual_loss = PerceptualLoss(device=device)
         self.perceptual_weight = config.get('perceptual_weight', 0.05) if config is not None else 0.05
-        print(f"✅ SuperRetinaWithPerceptualLoss 初始化完成，perceptual_weight={self.perceptual_weight}（单层 relu4_2）")
+        self.perceptual_start_epoch = config.get('perceptual_start_epoch', 0) if config is not None else 0
+        self.current_epoch = 0
+        print(
+            f"✅ SuperRetinaWithPerceptualLoss 初始化完成，perceptual_weight={self.perceptual_weight}，"
+            f"perceptual_start_epoch={self.perceptual_start_epoch}（单层 relu4_2）"
+        )
 
     def forward(self, x, label_point_positions=None, value_map=None, learn_index=None):
         detector_pred, descriptor_pred = self.network(x)
@@ -1526,9 +1532,14 @@ class SuperRetinaWithPerceptualLoss(SuperRetina):
                               label_point_positions[learn_index], value_map[learn_index],
                               self.config, self.PKE_learn)
 
-            # === 0.05 单层感知损失（核心恢复点）===
-            if self.PKE_learn and len(learn_index[0]) != 0 and hasattr(self, 'perceptual_loss'):
-                perc_input = affine_detector_pred.repeat(1, 3, 1, 1)
+            # === 0.05 单层感知损失（支持延迟引入）===
+            # 感知损失是否启用不应依赖 PKE；即使关闭 PKE，也可以在稳定若干轮后对有标签样本启用。
+            if (
+                len(learn_index[0]) != 0
+                and hasattr(self, 'perceptual_loss')
+                and self.current_epoch >= self.perceptual_start_epoch
+            ):
+                perc_input = affine_detector_pred[learn_index].repeat(1, 3, 1, 1)
                 perc_target = detector_pred[learn_index].repeat(1, 3, 1, 1)
                 perc_loss = self.perceptual_loss(perc_input, perc_target)
                 loss_detector = loss_detector + self.perceptual_weight * perc_loss
@@ -1781,7 +1792,7 @@ class SuperRetinaWithVesselRegularization(SuperRetinaWithPerceptualLoss):
                 loss_descriptor_num = x.shape[0]
             else:
                 loss_detector_num = len(learn_index[0])
-                loss_descriptor_num = loss_descriptor_num
+                loss_descriptor_num = loss_detector_num
 
             number_pts = 0
             value_map_update = None
@@ -1944,7 +1955,7 @@ class SuperRetinaWithVesselOnly(SuperRetina):
                 loss_descriptor_num = x.shape[0]
             else:
                 loss_detector_num = len(learn_index[0])
-                loss_descriptor_num = loss_descriptor_num
+                loss_descriptor_num = loss_detector_num
 
             number_pts = 0
             value_map_update = None

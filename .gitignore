@@ -15,14 +15,21 @@ env/
 # OS
 .DS_Store
 
-# Project artifacts
-sr/data/
+# 权重不上传
 sr/save/
-sr/res/
-sr/FIRE_results/
 sr/*.pth
 
+# sr/res：忽略图片等大文件，只保留日志与 FIRE 误差明细
+sr/res/**/*
+!sr/res/**/
+!sr/res/**/*.log
+!sr/res/**/FIRE_point_errors.txt
+
+# sr/FIRE_results：同样只保留误差文本（约 136KB）
+sr/FIRE_results/**/*
+!sr/FIRE_results/**/
+!sr/FIRE_results/**/FIRE_point_errors.txt
+
 # Temporary files
-*.log
 *.tmp
 *.swp

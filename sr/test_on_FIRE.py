@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser(description='Test SuperRetina on FIRE dataset')
 parser.add_argument('--config', type=str, default='./config/test.yaml',
                     help='Path to config file (default: ./config/test.yaml)')
 parser.add_argument('--save_dir', type=str, default=None,
-                    help='Directory to save results (default: /home/data1/zhangjunhong/sr_project/sr/res/output_SuperRetinaWithPerceptualLoss_0.05_3)')
+                    help='Directory to save results (default: /home/data1/zhangjunhong/sr_project/sr/res/output_SuperRetinaWithoutPKE_2)')
 args = parser.parse_args()
 
 config_path = args.config
@@ -53,7 +53,11 @@ if apply_mask_categories is not None and isinstance(apply_mask_categories, list)
 original_mask = Pred.eye_mask
 
 # 设置保存目录
-save_dir = args.save_dir if args.save_dir is not None else '/home/data1/zhangjunhong/sr_project/sr/res/output_SuperRetinaWithPerceptualLoss_0.05_3'
+if args.save_dir is not None:
+    save_dir = args.save_dir
+else:
+    model_stem = os.path.splitext(os.path.basename(config['PREDICT']['model_save_path']))[0]
+    save_dir = f'/home/data1/zhangjunhong/sr_project/sr/res/{model_stem}'
 os.makedirs(save_dir, exist_ok=True)
 
 data_path = './data/'  # Change the data_path according to your own setup

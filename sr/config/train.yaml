@@ -1,24 +1,25 @@
 MODEL:
+  model_variant: perceptual
   nms_size: 10
   nms_thresh: 0.1
 
   batch_size: 4
   num_epoch: 150
 
-  device: cuda:3
-  load_pre_trained_model: false  # 设置为false，不加载预训练模型，从头开始训练
-  pretrained_path: /home/data1/zhangjunhong/sr_project/sr/save/model_6.pth  # 当load_pre_trained_model为false时，此路径不会被使用
+  device: cuda:0
+  load_pre_trained_model: true
+  pretrained_path: /home/data1/zhangjunhong/sr_project/sr/save/shared_ep45_baseline.pth
+  resume_optimizer: false
 
-  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/model_SuperRetinaWithVesselRegularization_1.pth
+  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/shared_ep45_perceptual_branch.pth
   model_save_epoch: 1
-  
-  # 显存管理配置
-  memory_fraction: 0.9  # GPU显存使用比例（0.0-1.0），防止其他进程挤占显存
+
+  memory_fraction: 0.9
 
   perceptual_weight: 0.05
+  perceptual_start_epoch: 45
 
-  vessel_weight: 0.3  
-
+  vessel_weight: 0.3
 
 DATASET:
   model_image_width: 768
@@ -29,26 +30,21 @@ DATASET:
   auxiliary: /home/data1/zhangjunhong/sr_project/sr/data/Auxiliary
 
 PKE:
-  pke_start_epoch: 0  # the epoch to start PKE learn
+  pke_start_epoch: 0
   geometric_thresh: 0.5
   content_thresh: 0.7
-  gaussian_kernel_size: 13  # used to generate heatmap
+  gaussian_kernel_size: 13
   gaussian_sigma: 2
 
   pke_show: false
   pke_show_epoch: 5
-  pke_show_list: []  # if pke_show_list == [], then randomly select one sample to show
+  pke_show_list: []
 
-
-# value_map is used to record history learned points. The value of the position of the newly added keypoint will increase.
 VALUE_MAP:
-  area: 8  # if the neighbor of the keypoint have non-zero values, the values will increase by `value_increase_area`
-  value_increase_point: 5  # if the neighbor of the keypoint is all zero, the keypoint position's value will increase by `value_increase_point`
+  area: 8
+  value_increase_point: 5
   value_increase_area: 1
-  value_decay: 1  # if the history keypoints don't appear in this epoch, the correspoding value will decay
-  is_value_map_save: false  # if false, running in RAM, otherwise, the value map will store as a temp file in `value_map_save_dir`
-  value_map_save_dir: /home/data1/zhangjunhong/sr_project/sr/data/lab_values
-
-
-
-  
+  value_decay: 1
+  is_value_map_save: true
+  resume_value_map: true
+  value_map_save_dir: /home/data1/zhangjunhong/sr_project/sr/data/shared_ep45_perceptual_value_maps

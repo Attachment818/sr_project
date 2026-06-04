@@ -1,0 +1,2 @@
+# 超过 GitHub 单文件 100MB 限制的权重需用 Git LFS（先执行 git lfs install）
+*.pth filter=lfs diff=lfs merge=lfs -text

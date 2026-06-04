@@ -3,6 +3,7 @@ import os
 import random
 import shutil
 import time
+import warnings
 import torch
 from torchvision import transforms as T
 from torch.nn import functional as F
@@ -110,7 +111,7 @@ def value_map_save(save_dir, names, input_with_label, value_maps, value_maps_run
                 cv2.imwrite(path, vp)
 
 
-def train_model(model, optimizer, dataloaders, device, num_epochs, train_config):
+def train_model(model, optimizer, dataloaders, device, num_epochs, train_config, start_epoch=0):
     model_save_path = train_config['model_save_path']
     model_save_epoch = train_config['model_save_epoch']
     pke_start_epoch = train_config['pke_start_epoch']
@@ -118,18 +119,48 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config)
     pke_show_list = train_config['pke_show_list']
     is_value_map_save = train_config['is_value_map_save']
     value_map_save_dir = train_config['value_map_save_dir']
+    resume_value_map = train_config.get('resume_value_map', False)
+
+    if start_epoch < 0:
+        raise ValueError('start_epoch must be >= 0')
+    if start_epoch >= num_epochs:
+        raise ValueError(f'start_epoch ({start_epoch}) must be smaller than num_epochs ({num_epochs})')
+    if resume_value_map and not is_value_map_save:
+        raise ValueError('resume_value_map=True requires is_value_map_save=True; in-memory value_map cannot be resumed across runs')
+
+    model_save_dir = os.path.dirname(model_save_path)
+    if model_save_dir:
+        os.makedirs(model_save_dir, exist_ok=True)
+
+    pretrained_path = train_config.get('pretrained_path')
+    if pretrained_path and os.path.abspath(pretrained_path) == os.path.abspath(model_save_path):
+        raise ValueError('model_save_path must be different from pretrained_path to avoid overwriting the source checkpoint')
 
     if is_value_map_save:
         if os.path.exists(value_map_save_dir):
-            shutil.rmtree(value_map_save_dir)
-        os.makedirs(value_map_save_dir)
+            if not resume_value_map:
+                shutil.rmtree(value_map_save_dir)
+                os.makedirs(value_map_save_dir)
+        else:
+            if resume_value_map and start_epoch > 0:
+                raise FileNotFoundError(
+                    f'resume_value_map=True but value_map_save_dir does not exist: {value_map_save_dir}'
+                )
+            os.makedirs(value_map_save_dir)
+    elif start_epoch > 0:
+        warnings.warn(
+            'Resuming from a checkpoint without persisted value_map. '
+            'Model/optimizer/epoch will resume, but PKE sample history will be reinitialized.',
+            RuntimeWarning,
+        )
     
     value_maps_running = None
     if not is_value_map_save:
         value_maps_running = {}
 
-    for epoch in range(num_epochs):
+    for epoch in range(start_epoch, num_epochs):
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
+        model.current_epoch = epoch
         # Each epoch may have some phases
         phases = list(dataloaders.keys())
         model.PKE_learn = True
