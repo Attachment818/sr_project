@@ -5,6 +5,9 @@ MODEL:
 
   batch_size: 4
   num_epoch: 150
+  seed: 3407
+  deterministic: true
+  num_workers: 8
 
   device: cuda:0
   load_pre_trained_model: true

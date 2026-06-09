@@ -1,5 +1,6 @@
 import torch
 import os
+import random
 
 from torch.utils.data import DataLoader
 
@@ -15,6 +16,40 @@ from model.super_retina import (
 import torch.optim as optim
 import yaml
 import warnings
+import numpy as np
+
+
+def set_global_seed(seed, deterministic=True):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+    try:
+        import imgaug as ia
+        ia.seed(seed)
+    except Exception:
+        pass
+
+    if deterministic:
+        torch.backends.cudnn.benchmark = False
+        torch.backends.cudnn.deterministic = True
+        try:
+            torch.use_deterministic_algorithms(True, warn_only=True)
+        except TypeError:
+            torch.use_deterministic_algorithms(True)
+
+
+def seed_worker(worker_id):
+    worker_seed = torch.initial_seed() % 2 ** 32
+    np.random.seed(worker_seed)
+    random.seed(worker_seed)
+    try:
+        import imgaug as ia
+        ia.seed(worker_seed)
+    except Exception:
+        pass
 
 if __name__ == '__main__':
     warnings.filterwarnings('ignore')
@@ -46,6 +81,11 @@ if __name__ == '__main__':
 
     batch_size = train_config['batch_size']
     num_epoch = train_config['num_epoch']
+    seed = int(train_config.get('seed', 3407))
+    deterministic = bool(train_config.get('deterministic', True))
+    num_workers = int(train_config.get('num_workers', 8))
+    set_global_seed(seed, deterministic=deterministic)
+
     device = train_config['device']
     device = torch.device(device if torch.cuda.is_available() else "cpu")
 
@@ -93,9 +133,16 @@ if __name__ == '__main__':
         if 'epoch' in checkpoint:
             start_epoch = int(checkpoint['epoch']) + 1
 
+    train_generator = torch.Generator()
+    train_generator.manual_seed(seed)
+    val_generator = torch.Generator()
+    val_generator.manual_seed(seed + 1)
+
     dataloaders = {
-            'train': DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=8),
-            'val': DataLoader(val_set, batch_size=batch_size, shuffle=True, num_workers=8)
+            'train': DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers,
+                                worker_init_fn=seed_worker, generator=train_generator),
+            'val': DataLoader(val_set, batch_size=batch_size, shuffle=True, num_workers=num_workers,
+                              worker_init_fn=seed_worker, generator=val_generator)
         }
 
     print("🔍 GPU 检查报告:")
@@ -103,6 +150,7 @@ if __name__ == '__main__':
     print(f"  - 当前 device: {device}")
     print(f"  - 模型是否在 GPU 上: {next(model.parameters()).device}")  # 关键一行
     print(f"  - batch_size: {batch_size}, num_workers: 查看 DataLoader")
+    print(f"  - seed: {seed}, deterministic: {deterministic}, num_workers: {num_workers}")
     print(f"  - model_variant: {model_variant}")
     print(f"  - start_epoch: {start_epoch}")
     print(f"  - resume_optimizer: {resume_optimizer}")
