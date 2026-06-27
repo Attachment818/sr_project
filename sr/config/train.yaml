@@ -1,5 +1,5 @@
 MODEL:
-  model_variant: perceptual
+  model_variant: baseline
   nms_size: 10
   nms_thresh: 0.1
 
@@ -10,19 +10,14 @@ MODEL:
   num_workers: 8
 
   device: cuda:0
-  load_pre_trained_model: true
-  pretrained_path: /home/data1/zhangjunhong/sr_project/sr/save/shared_ep45_baseline.pth
+  load_pre_trained_model: false
+  pretrained_path: /home/data1/zhangjunhong/sr_project/sr/save/model_6.pth
   resume_optimizer: false
 
-  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/shared_ep45_perceptual_branch.pth
+  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/seed3407_baseline_ep149.pth
   model_save_epoch: 1
 
   memory_fraction: 0.9
-
-  perceptual_weight: 0.05
-  perceptual_start_epoch: 45
-
-  vessel_weight: 0.3
 
 DATASET:
   model_image_width: 768
@@ -49,5 +44,5 @@ VALUE_MAP:
   value_increase_area: 1
   value_decay: 1
   is_value_map_save: true
-  resume_value_map: true
-  value_map_save_dir: /home/data1/zhangjunhong/sr_project/sr/data/shared_ep45_perceptual_value_maps
+  resume_value_map: false
+  value_map_save_dir: /home/data1/zhangjunhong/sr_project/sr/data/seed3407_baseline_value_maps

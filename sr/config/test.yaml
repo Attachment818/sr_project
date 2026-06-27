@@ -1,81 +1,30 @@
 PREDICT:
-  device: cuda:0
-  model_save_path:  /home/data1/zhangjunhong/sr_project/sr/save/shared_ep45_baseline.pth # 修改为你训练好的模型路径
-  #model_type: with_perceptual_loss #with_perceptual_loss #with_vessel_regularization #with_vessel_only
+  device: cuda:2
+  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/seed3407_baseline_ep149.pth
+  model_type: original
 
-
-  # 模型类型选择：
-  #   - 'original': 原始SuperRetina模型
-  #   - 'attention': CBAM/Channel/Spatial注意力模型
-  #   - 'self_attention': 自注意力模型
-  #   - 'fpn': FPN多尺度模型
-  #   - 'without_pke': 不使用PKE模块的模型
-  #   - 'without_pke_attention': 不使用PKE模块 + 带自注意力机制的模型
-  ########################################################################
-  # model_type: original # 测试 without_pke_with_attention 模型
-  # use_aspp: true
-  # aspp_rates: [1, 2, 4, 8]
-  # use_multi_scale_desc: true
-  # use_self_attention: true  # 对于 without_pke_attention 模型，必须设置为 true
-  # attention_reduction: 8  # 自注意力的降维比例，与训练时保持一致
   model_image_width: 768
   model_image_height: 768
   use_matching_trick: True
-  
-  # Registration method selection
-  # Options: 'homography' or 'quadratic'
-  #   - 'homography': Use homography transformation (requires at least 4 points)
-  #   - 'quadratic': Use quadratic polynomial transformation (requires at least 6 points)
-  # Note: This parameter is now used as a fallback. The actual method is automatically selected
-  #       based on the initial displacement between image pairs (see displacement_threshold below)
+
   registration_method: 'quadratic'
-  
-  # Displacement threshold for automatic registration method selection (in pixels)
-  # The system will:
-  #   - Calculate the average displacement between matched keypoints
-  #   - If displacement > threshold: use quadratic polynomial transformation
-  #   - If displacement <= threshold: use homography transformation
-  # Default: 50.0 pixels
+
   displacement_threshold: 300.0
 
   nms_size: 10
   nms_thresh: 0.01
 
   knn_thresh: 0.9
-  
-  # Inverse consistency check and outlier filtering (optional)
-  # Enable inverse consistency check to filter matches that don't satisfy bidirectional consistency
+
   use_inverse_consistency: True
-  # Inverse consistency criteria limit (in pixels), default: 3.0
   iccl: 3.0
-  
-  # Enable outlier filtering based on transformation error
+
   use_outlier_filter: True
-  # Transformation type for outlier filtering: 'homography' or 'affine', default: 'homography'
   outlier_criteria: 'homography'
-  # Error threshold for outlier filtering (in pixels), default: 20.0
   outlier_threshold: 20.0
-  
-  # Eye boundary mask path (optional)
-  # If specified, keypoints on eye boundary (mask value <= 0.5) will be filtered out
-  # Mask should be a grayscale image where:
-  #   - Values > 0.5: valid regions (keep keypoints)
-  #   - Values <= 0.5: eye boundary (remove keypoints)
+
   eye_mask_path: /home/data1/zhangjunhong/sr_project/sr/data/FIRE/Masks/feature_mask.png
-  
-  # Categories to apply mask filtering (optional)
-  # Specify which categories (S, P, A) should use mask filtering
-  # Options:
-  #   - Not specified or None: Don't apply mask to any class (disabled)
-  #   - []: Don't apply mask to any class (disabled)
-  #   - ['S', 'A']: Apply mask only to S and A classes (P class won't use mask)
-  #   - ['S', 'P', 'A']: Apply mask to all classes
-  #   - 'S,A': String format, will be converted to ['S', 'A']
-  # Note: If eye_mask_path is not specified or file doesn't exist, mask filtering is automatically disabled
+
   apply_mask_categories: ['S', 'P', 'A']
-  
-  # Checkerboard mosaic visualization (optional)
-  # Size of each tile in the checkerboard mosaic (in pixels), default: 32
-  # Smaller values create finer checkerboard pattern, larger values create coarser pattern
+
   checkerboard_tile_size: 240
-  

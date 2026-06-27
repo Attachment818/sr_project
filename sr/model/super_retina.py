@@ -1820,9 +1820,9 @@ class SuperRetinaWithVesselRegularization(SuperRetinaWithPerceptualLoss):
                 loss_detector = loss_detector + self.perceptual_weight * perc_loss
 
             # === 新增：vessel regularization（使用 enhanced_label 作为 pseudo vessel mask）===
-            if cPa is not None and enhanced_label is not None:
-                vessel_pred = self.vessel_head(cPa)                    # vessel head 使用 decoder 特征
-                vessel_loss = loss_cal(vessel_pred, enhanced_label)    # DiceLoss
+            if cPa is not None and enhanced_label is not None and len(learn_index[0]) != 0:
+                vessel_pred = self.vessel_head(cPa[learn_index])
+                vessel_loss = loss_cal(vessel_pred, enhanced_label)
                 loss_detector = loss_detector + self.vessel_weight * vessel_loss
                 # print(f"Vessel loss: {vessel_loss.item():.4f} (weight={self.vessel_weight})")  # 调试时打开
 
@@ -1892,6 +1892,8 @@ class SuperRetinaWithVesselOnly(SuperRetina):
 
         # 可配置权重（train.yaml 中设置）
         self.vessel_weight = config.get('vessel_weight', 0.3) if config is not None else 0.3
+
+        self.vessel_head.to(device)
 
         print(f"✅ SuperRetinaWithVesselOnly 初始化完成，vessel_weight={self.vessel_weight}（纯 vessel regularization）")
 
@@ -1976,8 +1978,9 @@ class SuperRetinaWithVesselOnly(SuperRetina):
                               self.config, self.PKE_learn)
 
             # === 纯 vessel regularization（无 perceptual loss）===
-            if cPa is not None and enhanced_label is not None:
-                vessel_pred = self.vessel_head(cPa)
+            # enhanced_label 仅含 learn_index 子集，须对 cPa 同索引切片（与 pke_learn 输入一致）
+            if cPa is not None and enhanced_label is not None and len(learn_index[0]) != 0:
+                vessel_pred = self.vessel_head(cPa[learn_index])
                 vessel_loss = loss_cal(vessel_pred, enhanced_label)
                 loss_detector = loss_detector + self.vessel_weight * vessel_loss
                 # print(f"Vessel loss: {vessel_loss.item():.4f} (weight={self.vessel_weight})")  # 调试时打开

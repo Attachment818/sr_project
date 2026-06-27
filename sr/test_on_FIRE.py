@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser(description='Test SuperRetina on FIRE dataset')
 parser.add_argument('--config', type=str, default='./config/test.yaml',
                     help='Path to config file (default: ./config/test.yaml)')
 parser.add_argument('--save_dir', type=str, default=None,
-                    help='Directory to save results (default: /home/data1/zhangjunhong/sr_project/sr/res/output_SuperRetinaWithoutPKE_2)')
+                    help='Directory to save results (default: sr/res/<checkpoint_stem>)')
 args = parser.parse_args()
 
 config_path = args.config
