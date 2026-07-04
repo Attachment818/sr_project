@@ -15,20 +15,17 @@ env/
 # OS
 .DS_Store
 
-# 权重不上传
+# Local datasets (FIRE/Lab4/FIMD/value_maps 等)
+sr/data/
+old_sr/
+
+# Checkpoints
 sr/save/
 sr/*.pth
 
-# sr/res：忽略图片等大文件，只保留日志与 FIRE 误差明细
-sr/res/**/*
-!sr/res/**/
-!sr/res/**/*.log
-!sr/res/**/FIRE_point_errors.txt
-
-# sr/FIRE_results：同样只保留误差文本（约 136KB）
-sr/FIRE_results/**/*
-!sr/FIRE_results/**/
-!sr/FIRE_results/**/FIRE_point_errors.txt
+# Experiment outputs (logs, images, error dumps)
+sr/res/
+sr/FIRE_results/
 
 # Temporary files
 *.tmp

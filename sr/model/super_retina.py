@@ -1812,14 +1812,19 @@ class SuperRetinaWithVesselRegularization(SuperRetinaWithPerceptualLoss):
                               label_point_positions[learn_index], value_map[learn_index],
                               self.config, self.PKE_learn)
 
-            # === 原有 0.05 perceptual loss（完全不变）===
-            if self.PKE_learn and len(learn_index[0]) != 0 and hasattr(self, 'perceptual_loss'):
-                perc_input = affine_detector_pred.repeat(1, 3, 1, 1)
+            # === 0.05 单层感知损失（与 SuperRetinaWithPerceptualLoss 一致）===
+            if (
+                len(learn_index[0]) != 0
+                and hasattr(self, 'perceptual_loss')
+                and self.current_epoch >= self.perceptual_start_epoch
+            ):
+                perc_input = affine_detector_pred[learn_index].repeat(1, 3, 1, 1)
                 perc_target = detector_pred[learn_index].repeat(1, 3, 1, 1)
                 perc_loss = self.perceptual_loss(perc_input, perc_target)
                 loss_detector = loss_detector + self.perceptual_weight * perc_loss
 
             # === 新增：vessel regularization（使用 enhanced_label 作为 pseudo vessel mask）===
+            # enhanced_label 仅含 learn_index 子集，须对 cPa 同索引切片（与 vessel_only 一致）
             if cPa is not None and enhanced_label is not None and len(learn_index[0]) != 0:
                 vessel_pred = self.vessel_head(cPa[learn_index])
                 vessel_loss = loss_cal(vessel_pred, enhanced_label)

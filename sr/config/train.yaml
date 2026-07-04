@@ -1,5 +1,6 @@
 MODEL:
-  model_variant: baseline
+  # baseline | perceptual | vessel_only | vessel_regularization
+  model_variant: vessel_only
   nms_size: 10
   nms_thresh: 0.1
 
@@ -14,8 +15,15 @@ MODEL:
   pretrained_path: /home/data1/zhangjunhong/sr_project/sr/save/model_6.pth
   resume_optimizer: false
 
-  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/seed3407_baseline_ep149.pth
+  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/seed3407_vessel_only_ep149.pth
   model_save_epoch: 1
+
+  # perceptual / vessel_regularization 使用
+  perceptual_weight: 0.05
+  perceptual_start_epoch: 0
+
+  # vessel_only / vessel_regularization 使用
+  vessel_weight: 0.3
 
   memory_fraction: 0.9
 
@@ -45,4 +53,4 @@ VALUE_MAP:
   value_decay: 1
   is_value_map_save: true
   resume_value_map: false
-  value_map_save_dir: /home/data1/zhangjunhong/sr_project/sr/data/seed3407_baseline_value_maps
+  value_map_save_dir: /home/data1/zhangjunhong/sr_project/sr/data/seed3407_vessel_only_value_maps

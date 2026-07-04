@@ -1,7 +1,7 @@
 PREDICT:
-  device: cuda:2
-  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/seed3407_baseline_ep149.pth
-  model_type: original
+  device: cuda:0
+  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/seed3407_vessel_only_ep149.pth
+  model_type: with_vessel_only
 
   model_image_width: 768
   model_image_height: 768
