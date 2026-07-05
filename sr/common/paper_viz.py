@@ -364,3 +364,34 @@ def save_fire_success_curves(
     fig.tight_layout()
     fig.savefig(save_path)
     plt.close(fig)
+
+
+def save_dataset_success_curve(
+    errors,
+    save_path: str,
+    dataset_name: str = "FIMD",
+    threshold_max: int = 25,
+) -> None:
+    """Single success-rate curve for datasets without S/P/A split."""
+    if plt is None:
+        return
+    _d = os.path.dirname(save_path)
+    if _d:
+        os.makedirs(_d, exist_ok=True)
+    errs = np.array(errors, dtype=np.float64)
+    if errs.size == 0:
+        return
+    fig, ax = plt.subplots(figsize=(7, 4.5), dpi=150)
+    xs = list(range(1, threshold_max + 1))
+    ys = [100.0 * np.sum(errs < t) / len(errs) for t in xs]
+    ax.plot(xs, ys, color="steelblue", linewidth=2, label=f"{dataset_name} (N={len(errs)})")
+    ax.set_xlabel("Error threshold (pixels)")
+    ax.set_ylabel("Pair success rate (%)")
+    ax.set_title(f"{dataset_name}: success rate vs threshold")
+    ax.set_xlim(1, threshold_max)
+    ax.set_ylim(0, 105)
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="lower right")
+    fig.tight_layout()
+    fig.savefig(save_path)
+    plt.close(fig)

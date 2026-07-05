@@ -34,6 +34,9 @@ class Predictor:
 
         self.model_image_width = predict_config['model_image_width']
         self.model_image_height = predict_config['model_image_height']
+
+        # FIMD 等跨分辨率数据集：将 refer 缩放到 query 尺寸后再匹配
+        self.resize_refer_to_query = predict_config.get('resize_refer_to_query', False)
         
         # Eye boundary mask (optional)
         # If provided, keypoints on eye boundary (mask == 0) will be filtered out
@@ -215,7 +218,18 @@ class Predictor:
             query_image = pre_processing(query_image)
         refer_image = cv2.imread(refer_path, cv2.IMREAD_COLOR)
 
-        assert query_image.shape[:2] == refer_image.shape[:2]
+        if query_image.shape[:2] != refer_image.shape[:2]:
+            if self.resize_refer_to_query:
+                refer_image = cv2.resize(
+                    refer_image,
+                    (query_image.shape[1], query_image.shape[0]),
+                    interpolation=cv2.INTER_LINEAR,
+                )
+            else:
+                raise AssertionError(
+                    f"Image size mismatch: query {query_image.shape[:2]} vs refer {refer_image.shape[:2]}. "
+                    "Set resize_refer_to_query: true for FIMD."
+                )
         self.image_height, self.image_width = query_image.shape[:2]
 
         refer_image = refer_image[:, :, 1]

@@ -1,50 +1,36 @@
+# FIMD 测试配置（评估协议与 FIRE test.yaml 保持一致，无 S/P/A 分类）
+FIMD:
+  data_root: /home/data1/zhangjunhong/sr_project/sr/data/FIMD
+
 PREDICT:
-  # Device for inference
-  device: cuda:0
+  device: cuda:3
 
-  # Path to baseline SuperRetina model (no extra modules)
-  # TODO: replace with your actual .pth path
-  model_save_path: ./save/model_6-2.pth
+  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/seed3409_vessel_only_w03_ep149.pth
+  model_type: with_vessel_only
 
-  # Use original SuperRetina (no FPN/attention/etc.)
-  model_type: original
+  # FIMD 跨设备/分辨率：refer(r) 缩放到 query(t) 尺寸，GT reference 点同步缩放
+  resize_refer_to_query: true
 
-  # Input resolution for the model
   model_image_width: 768
   model_image_height: 768
-
-  # Do not use matching tricks or extra post-processing in this baseline
   use_matching_trick: True
 
-  # Registration method selection
-  # Options: 'homography' or 'quadratic' or 'auto'
-  #   - 'homography': Always use homography transformation (requires at least 4 points)
-  #   - 'quadratic': Always use quadratic polynomial transformation (requires at least 6 points)
-  #   - 'auto': Automatically select based on displacement threshold (default)
-  registration_method: 'homography'
-  
-  # Displacement threshold for automatic registration method selection (in pixels)
-  # Only used when registration_method is 'auto'
-  # The system will:
-  #   - Calculate the average displacement between matched keypoints
-  #   - If displacement > threshold: use quadratic polynomial transformation
-  #   - If displacement <= threshold: use homography transformation
-  # Default: 50.0 pixels
-  # displacement_threshold: 50.0
+  # 与 FIRE 相同：按匹配点位移动态选择 homography / quadratic
+  registration_method: 'quadratic'
+  displacement_threshold: 300.0
 
-  # NMS and matching thresholds (copy from your default config if needed)
   nms_size: 10
   nms_thresh: 0.01
   knn_thresh: 0.9
 
-  # No inverse consistency check / outlier filtering for baseline
   use_inverse_consistency: True
   iccl: 3.0
 
   use_outlier_filter: True
-  outlier_criteria: homography
+  outlier_criteria: 'homography'
   outlier_threshold: 20.0
 
-  # Eye mask is not used for FIMD
+  # FIMD 不使用 FIRE 眼区 mask
   eye_mask_path: null
 
+  checkerboard_tile_size: 240

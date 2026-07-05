@@ -6,16 +6,16 @@ MODEL:
 
   batch_size: 4
   num_epoch: 150
-  seed: 3407
+  seed: 3409
   deterministic: true
   num_workers: 8
 
-  device: cuda:0
+  device: cuda:1
   load_pre_trained_model: false
   pretrained_path: /home/data1/zhangjunhong/sr_project/sr/save/model_6.pth
   resume_optimizer: false
 
-  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/seed3407_vessel_only_ep149.pth
+  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/seed3409_vessel_only_w03_ep149.pth
   model_save_epoch: 1
 
   # perceptual / vessel_regularization 使用
@@ -53,4 +53,4 @@ VALUE_MAP:
   value_decay: 1
   is_value_map_save: true
   resume_value_map: false
-  value_map_save_dir: /home/data1/zhangjunhong/sr_project/sr/data/seed3407_vessel_only_value_maps
+  value_map_save_dir: /home/data1/zhangjunhong/sr_project/sr/data/seed3409_vessel_only_w03_value_maps
