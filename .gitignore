@@ -23,9 +23,15 @@ old_sr/
 sr/save/
 sr/*.pth
 
-# Experiment outputs (logs, images, error dumps)
-sr/res/
-sr/FIRE_results/
+# Experiment outputs: ignore images/visualizations, keep logs and text error dumps
+sr/res/**/*
+!sr/res/**/
+!sr/res/**/*.log
+!sr/res/**/*.txt
+
+sr/FIRE_results/**/*
+!sr/FIRE_results/**/
+!sr/FIRE_results/**/*.txt
 
 # Temporary files
 *.tmp
