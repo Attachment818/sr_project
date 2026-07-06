@@ -1,5 +1,4 @@
 MODEL:
-  # baseline | perceptual | vessel_only | vessel_only_masked | vessel_regularization
   model_variant: vessel_only_masked
   nms_size: 10
   nms_thresh: 0.1
@@ -10,23 +9,20 @@ MODEL:
   deterministic: true
   num_workers: 8
 
-  device: cuda:0
+  device: cuda:1
   load_pre_trained_model: false
   pretrained_path: /home/data1/zhangjunhong/sr_project/sr/save/model_6.pth
   resume_optimizer: false
 
-  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/seed3407_vessel_masked_w03_ep149.pth
+  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/seed3407_vessel_masked_w02_ep149.pth
   model_save_epoch: 1
 
-  # perceptual / vessel_regularization 使用
   perceptual_weight: 0.05
   perceptual_start_epoch: 0
 
-  # vessel_only / vessel_only_masked / vessel_regularization 使用
-  vessel_weight: 0.3
+  vessel_weight: 0.2
 
-  # vessel_only_masked (Phase 1A): online vessel mask，仅在血管内计算 vessel Dice
-  vessel_mask_backend: morph   # morph | frangi
+  vessel_mask_backend: morph
   vessel_mask_threshold: 0.25
   vessel_mask_dilate: 3
 
@@ -58,4 +54,4 @@ VALUE_MAP:
   value_decay: 1
   is_value_map_save: true
   resume_value_map: false
-  value_map_save_dir: /home/data1/zhangjunhong/sr_project/sr/data/seed3407_vessel_masked_w03_value_maps
+  value_map_save_dir: /home/data1/zhangjunhong/sr_project/sr/data/seed3407_vessel_masked_w02_value_maps

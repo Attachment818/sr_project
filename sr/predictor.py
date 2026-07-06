@@ -8,7 +8,7 @@ from scipy.ndimage import map_coordinates
 
 from common.common_util import pre_processing, simple_nms, remove_borders, \
     sample_keypoint_desc, remove_keypoints_by_mask
-from model.super_retina import SuperRetina, SuperRetinaFPN, SuperRetinaWithSelfAttention, SuperRetinaWithMultiScaleDescriptor, SuperRetinaWithASPP, SuperRetinaWithoutPKE, SuperRetinaWithoutPKEWithAttention,SuperRetinaWithPerceptualLoss,SuperRetinaWithVesselRegularization,SuperRetinaWithVesselOnly
+from model.super_retina import SuperRetina, SuperRetinaFPN, SuperRetinaWithSelfAttention, SuperRetinaWithMultiScaleDescriptor, SuperRetinaWithASPP, SuperRetinaWithoutPKE, SuperRetinaWithoutPKEWithAttention,SuperRetinaWithPerceptualLoss,SuperRetinaWithVesselRegularization,SuperRetinaWithVesselOnly,SuperRetinaWithVesselOnlyMasked
 from model.super_retina_attention import SuperRetinaWithAttention
 
 from PIL import Image
@@ -171,6 +171,16 @@ class Predictor:
             )
             model.load_pretrained_weights(model_save_path, device=device, strict=False)
             print(f"✅ Loaded SuperRetinaWithVesselOnly model (vessel_weight={getattr(model, 'vessel_weight', 'N/A')})")
+        elif model_type == 'with_vessel_only_masked':
+            model = SuperRetinaWithVesselOnlyMasked(
+                config=None,
+                device=device
+            )
+            model.load_pretrained_weights(model_save_path, device=device, strict=False)
+            print(
+                f"✅ Loaded SuperRetinaWithVesselOnlyMasked model "
+                f"(vessel_weight={getattr(model, 'vessel_weight', 'N/A')}; inference same as vessel_only)"
+            )
         else:
             # 使用原始模型（默认，保持向后兼容），并兼容带 FPN/注意力的权重文件
             model = SuperRetina()

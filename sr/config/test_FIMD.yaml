@@ -5,8 +5,8 @@ FIMD:
 PREDICT:
   device: cuda:3
 
-  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/seed3409_vessel_only_w03_ep149.pth
-  model_type: with_vessel_only
+  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/seed3407_vessel_masked_w01_ep149.pth
+  model_type: with_vessel_only_masked
 
   # FIMD 跨设备/分辨率：refer(r) 缩放到 query(t) 尺寸，GT reference 点同步缩放
   resize_refer_to_query: true

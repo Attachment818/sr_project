@@ -8,13 +8,14 @@ from torch.nn import functional as F
 import torch
 import torch.nn as nn
 
-from loss.dice_loss import DiceBCELoss, DiceLoss
+from loss.dice_loss import DiceBCELoss, DiceLoss, MaskedDiceLoss
 from loss.triplet_loss import triplet_margin_loss_gor, triplet_margin_loss_gor_one, sos_reg
 from loss.perceptual_loss import PerceptualLoss
 
 from common.common_util import remove_borders, sample_keypoint_desc, simple_nms, nms, \
     sample_descriptors
 from common.train_util import get_gaussian_kernel, affine_images
+from common.vessel_mask_util import compute_vessel_mask_batch
 
 # 导入自注意力模块（如果存在）
 try:
@@ -2034,3 +2035,127 @@ class SuperRetinaWithVesselOnly(SuperRetina):
         self.load_state_dict(model_dict, strict=strict)
         print(f"✅ Loaded SuperRetinaWithVesselOnly from {model_path} "
               f"(matched {len(filtered_dict)}/{len(pretrained_dict)} tensors)")
+
+
+class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
+    """
+    Phase 1A：区域选择性 vessel regularization。
+    - 结构与 SuperRetinaWithVesselOnly 相同（推理路径一致）
+    - vessel loss 仅在 online vessel mask 内计算，非血管区域不参与 vessel 梯度
+    - target 仍为 PKE enhanced_label，与 mask 逐像素相乘后再做 MaskedDice
+    """
+
+    def __init__(self, config=None, device='cpu', n_class=1):
+        super().__init__(config=config, device=device, n_class=n_class)
+        self.masked_dice = MaskedDiceLoss()
+        cfg = config or {}
+        self.vessel_mask_backend = cfg.get('vessel_mask_backend', 'morph')
+        self.vessel_mask_threshold = float(cfg.get('vessel_mask_threshold', 0.25))
+        self.vessel_mask_dilate = int(cfg.get('vessel_mask_dilate', 3))
+        print(
+            f"✅ SuperRetinaWithVesselOnlyMasked 初始化完成，"
+            f"vessel_weight={self.vessel_weight}，"
+            f"mask_backend={self.vessel_mask_backend}，"
+            f"threshold={self.vessel_mask_threshold}"
+        )
+
+    def _build_vessel_masks(self, images):
+        return compute_vessel_mask_batch(
+            images,
+            backend=self.vessel_mask_backend,
+            threshold=self.vessel_mask_threshold,
+            dilate_kernel=self.vessel_mask_dilate,
+        )
+
+    def forward(self, x, label_point_positions=None, value_map=None, learn_index=None):
+        if label_point_positions is not None:
+            detector_pred, descriptor_pred, cPa = self.network(x, return_cPa=True)
+        else:
+            detector_pred, descriptor_pred = self.network(x)
+            cPa = None
+
+        enhanced_label_pts = None
+        enhanced_label = None
+
+        if label_point_positions is not None:
+            if self.PKE_learn:
+                loss_detector_num = len(learn_index[0])
+                loss_descriptor_num = x.shape[0]
+            else:
+                loss_detector_num = len(learn_index[0])
+                loss_descriptor_num = loss_detector_num
+
+            number_pts = 0
+            value_map_update = None
+            loss_detector = torch.tensor(0., requires_grad=True).to(x)
+            loss_descriptor = torch.tensor(0., requires_grad=True).to(x)
+
+            with torch.no_grad():
+                affine_x, grid, grid_inverse = affine_images(x, used_for='detector')
+                affine_detector_pred, affine_descriptor_pred = self.network(affine_x)
+
+            loss_cal = self.dice
+            if len(learn_index[0]) != 0:
+                loss_detector, number_pts, value_map_update, enhanced_label_pts, enhanced_label = \
+                    pke_learn(detector_pred[learn_index], descriptor_pred[learn_index],
+                              grid_inverse[learn_index], affine_detector_pred[learn_index],
+                              affine_descriptor_pred[learn_index], self.kernel, loss_cal,
+                              label_point_positions[learn_index], value_map[learn_index],
+                              self.config, self.PKE_learn)
+
+            if cPa is not None and enhanced_label is not None and len(learn_index[0]) != 0:
+                with torch.no_grad():
+                    vessel_mask = self._build_vessel_masks(x)
+                vessel_pred = self.vessel_head(cPa[learn_index])
+                # enhanced_label from pke_learn is already aligned with learn_index batch
+                vessel_mask_sub = vessel_mask[learn_index]
+                vessel_loss = self.masked_dice(vessel_pred, enhanced_label, vessel_mask_sub)
+                loss_detector = loss_detector + self.vessel_weight * vessel_loss
+
+            if enhanced_label_pts is not None:
+                enhanced_label_pts_tmp = label_point_positions.clone()
+                enhanced_label_pts_tmp[learn_index] = enhanced_label_pts
+                enhanced_label_pts = enhanced_label_pts_tmp
+            if enhanced_label is not None:
+                enhanced_label_tmp = label_point_positions.clone()
+                enhanced_label_tmp[learn_index] = enhanced_label
+                enhanced_label = enhanced_label_tmp
+
+            detector_pred_copy = detector_pred.clone().detach()
+
+            affine_x_for_desc, grid_for_desc, grid_inverse_for_desc = affine_images(x, used_for='descriptor')
+            _, affine_descriptor_pred_for_desc = self.network(affine_x_for_desc)
+            loss_descriptor, descriptor_train_flag = self.descriptor_loss(
+                detector_pred_copy, label_point_positions,
+                descriptor_pred, affine_descriptor_pred_for_desc, grid_inverse_for_desc)
+
+            if self.PKE_learn and len(learn_index[0]) != 0:
+                value_map[learn_index] = value_map_update
+
+            loss = loss_detector + loss_descriptor
+
+            return loss, number_pts, loss_detector.cpu().data.sum(), \
+                   loss_descriptor.cpu().data.sum(), enhanced_label_pts, \
+                   enhanced_label, detector_pred, loss_detector_num, loss_descriptor_num
+
+        return detector_pred, descriptor_pred
+
+    def load_pretrained_weights(self, model_path, device=None, strict=False):
+        if device is None:
+            device = next(self.parameters()).device
+        checkpoint = torch.load(model_path, map_location=device)
+        if 'net' in checkpoint:
+            pretrained_dict = checkpoint['net']
+        else:
+            pretrained_dict = checkpoint
+        model_dict = self.state_dict()
+        filtered_dict = {
+            k: v for k, v in pretrained_dict.items()
+            if k in model_dict and model_dict[k].shape == v.shape
+        }
+        model_dict.update(filtered_dict)
+        self.load_state_dict(model_dict, strict=strict)
+        print(
+            f"✅ Loaded SuperRetinaWithVesselOnlyMasked from {model_path} "
+            f"(matched {len(filtered_dict)}/{len(pretrained_dict)} tensors)"
+        )

@@ -1,3 +1,4 @@
+import argparse
 import torch
 import os
 import random
@@ -12,6 +13,7 @@ from model.super_retina import (
     SuperRetinaWithPerceptualLoss,
     SuperRetinaWithVesselRegularization,
     SuperRetinaWithVesselOnly,
+    SuperRetinaWithVesselOnlyMasked,
 )
 import torch.optim as optim
 import yaml
@@ -65,7 +67,15 @@ if __name__ == '__main__':
             except:
                 pass
 
-    config_path = '/home/data1/zhangjunhong/sr_project/sr/config/train.yaml'
+    parser = argparse.ArgumentParser(description='Train SuperRetina variants')
+    parser.add_argument(
+        '--config',
+        type=str,
+        default='/home/data1/zhangjunhong/sr_project/sr/config/train.yaml',
+        help='Path to train yaml (default: config/train.yaml)',
+    )
+    args = parser.parse_args()
+    config_path = args.config
 
     if os.path.exists(config_path):
         with open(config_path, 'r', encoding='utf-8') as f:
@@ -114,6 +124,8 @@ if __name__ == '__main__':
         model = SuperRetinaWithVesselRegularization(train_config, device=device)
     elif model_variant == 'vessel_only':
         model = SuperRetinaWithVesselOnly(train_config, device=device)
+    elif model_variant == 'vessel_only_masked':
+        model = SuperRetinaWithVesselOnlyMasked(train_config, device=device)
     else:
         raise ValueError(f"Unknown model_variant: {model_variant}")
 

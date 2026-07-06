@@ -50,3 +50,26 @@ class DiceLoss(nn.Module):
             return loss
         else:
             raise Exception('Unexpected reduction {}'.format(self.reduction))
+
+
+class MaskedDiceLoss(nn.Module):
+    """Dice loss computed only inside ``mask`` (Phase 1A region-selective vessel loss)."""
+
+    def __init__(self, smooth=1e-3):
+        super().__init__()
+        self.smooth = smooth
+
+    def forward(self, predict, target, mask):
+        """
+        Args:
+            predict, target, mask: (N, 1, H, W) or broadcastable; values in [0, 1].
+        """
+        if mask is None:
+            raise ValueError('mask is required for MaskedDiceLoss')
+        p = (predict * mask).reshape(-1)
+        t = (target * mask).reshape(-1)
+        if t.sum() <= 0:
+            return predict.sum() * 0.0
+        num = 2.0 * (p * t).sum() + self.smooth
+        den = p.sum() + t.sum() + self.smooth
+        return 1.0 - num / den
