@@ -1540,7 +1540,12 @@ class SuperRetinaWithPerceptualLoss(SuperRetina):
                 and hasattr(self, 'perceptual_loss')
                 and self.current_epoch >= self.perceptual_start_epoch
             ):
-                perc_input = affine_detector_pred[learn_index].repeat(1, 3, 1, 1)
+                # affine_detector_pred is expressed in the affine-image coordinate
+                # system; align it with detector_pred before comparing features.
+                affine_pred_inverse = F.grid_sample(
+                    affine_detector_pred[learn_index], grid_inverse[learn_index], align_corners=True
+                )
+                perc_input = affine_pred_inverse.repeat(1, 3, 1, 1)
                 perc_target = detector_pred[learn_index].repeat(1, 3, 1, 1)
                 perc_loss = self.perceptual_loss(perc_input, perc_target)
                 loss_detector = loss_detector + self.perceptual_weight * perc_loss
@@ -1819,7 +1824,12 @@ class SuperRetinaWithVesselRegularization(SuperRetinaWithPerceptualLoss):
                 and hasattr(self, 'perceptual_loss')
                 and self.current_epoch >= self.perceptual_start_epoch
             ):
-                perc_input = affine_detector_pred[learn_index].repeat(1, 3, 1, 1)
+                # affine_detector_pred is expressed in the affine-image coordinate
+                # system; align it with detector_pred before comparing features.
+                affine_pred_inverse = F.grid_sample(
+                    affine_detector_pred[learn_index], grid_inverse[learn_index], align_corners=True
+                )
+                perc_input = affine_pred_inverse.repeat(1, 3, 1, 1)
                 perc_target = detector_pred[learn_index].repeat(1, 3, 1, 1)
                 perc_loss = self.perceptual_loss(perc_input, perc_target)
                 loss_detector = loss_detector + self.perceptual_weight * perc_loss
@@ -2056,6 +2066,16 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
         self.vessel_weight_stage2 = float(cfg.get('vessel_weight_stage2', 0.05))
         self.vessel_weight_floor = float(cfg.get('vessel_weight_floor', 0.0))
         self.stage2_decay = max(1, int(cfg.get('vessel_stage2_decay', 50)))
+        # constant: fixed vessel_weight; three_stage: historical schedule;
+        # continuous_to_floor: smoothly decays from vessel_weight to floor.
+        self.vessel_schedule_mode = cfg.get('vessel_schedule_mode', 'three_stage')
+        self.vessel_schedule_end_epoch = int(
+            cfg.get('vessel_schedule_end_epoch', self.stage1_epochs + self.stage2_decay)
+        )
+        if self.vessel_schedule_mode not in {'constant', 'three_stage', 'continuous_to_floor'}:
+            raise ValueError(
+                f"Unknown vessel_schedule_mode: {self.vessel_schedule_mode}"
+            )
         self.current_epoch = 0
         print(
             f"✅ SuperRetinaWithVesselOnlyMasked 初始化完成，"
@@ -2063,7 +2083,8 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
             f"mask_backend={self.vessel_mask_backend}，"
             f"threshold={self.vessel_mask_threshold}，"
             f"stage1_epochs={self.stage1_epochs}，"
-            f"stage2_vessel_weight={self.vessel_weight_stage2}"
+            f"stage2_vessel_weight={self.vessel_weight_stage2}，"
+            f"schedule={self.vessel_schedule_mode}"
         )
 
     def _build_vessel_masks(self, images):
@@ -2075,8 +2096,21 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
         )
 
     def _get_stage_vessel_weight(self):
+        if self.vessel_schedule_mode == 'constant':
+            return self.vessel_weight
+
         if self.current_epoch < self.stage1_epochs:
             return self.vessel_weight
+
+        if self.vessel_schedule_mode == 'continuous_to_floor':
+            total_decay = max(1, self.vessel_schedule_end_epoch - self.stage1_epochs)
+            progress = min(
+                (self.current_epoch - self.stage1_epochs) / float(total_decay), 1.0
+            )
+            return self.vessel_weight + progress * (
+                self.vessel_weight_floor - self.vessel_weight
+            )
+
         stage2_step = self.current_epoch - self.stage1_epochs
         if stage2_step >= self.stage2_decay:
             return self.vessel_weight_floor
