@@ -6,38 +6,32 @@ MODEL:
 
   batch_size: 4
   num_epoch: 150
-  seed: 3407
+  seed: 3408
   deterministic: true
   num_workers: 8
 
   device: cuda:0
   load_pre_trained_model: false
-  pretrained_path: /home/data1/zhangjunhong/sr_project/sr/save/model_6.pth
+  pretrained_path: /home/data1/zhangjunhong/sr_project/sr/save/seed3408_vessel_masked_w03_ep149.pth
   resume_optimizer: false
 
-  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/seed3407_vessel_masked_w03_ep149.pth
+  model_save_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3408_vessel_two_stages/seed3408_vessel_two_stage_03_50_005_0_50/seed3408_vessel_two_stage_ep149.pth
   model_save_epoch: 1
+  extra_save_epochs: [49, 99]
 
-  # perceptual / vessel_regularization 使用
-  perceptual_weight: 0.05
-  perceptual_start_epoch: 0
-
-  # vessel_only / vessel_only_masked / vessel_regularization 使用
+  # vessel_only / vessel_only_masked 使用
   vessel_weight: 0.3
-
-  # vessel_only_masked 两阶段训练：Stage 1 强血管约束，Stage 2 退火放开
   vessel_stage1_epochs: 50
   vessel_weight_stage2: 0.05
-  vessel_weight_floor: 0.01
+  vessel_weight_floor: 0.0
   vessel_stage2_decay: 50
 
-  # vessel_only_masked (Phase 1A): online vessel mask，仅在血管内计算 vessel Dice
-  vessel_mask_backend: morph   # morph | frangi
+  # vessel_only_masked：online vessel mask，仅在血管内计算 vessel Dice
+  vessel_mask_backend: morph
   vessel_mask_threshold: 0.25
   vessel_mask_dilate: 3
 
   memory_fraction: 0.9
-  extra_save_epochs: [49, 99]
 
 DATASET:
   model_image_width: 768
@@ -65,4 +59,4 @@ VALUE_MAP:
   value_decay: 1
   is_value_map_save: true
   resume_value_map: false
-  value_map_save_dir: /home/data1/zhangjunhong/sr_project/sr/data/seed3407_vessel_masked_w03_value_maps
+  value_map_save_dir: /home/data1/zhangjunhong/sr_project/sr/data/seed3408_vessel_two_stage_value_maps

@@ -120,6 +120,7 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
     is_value_map_save = train_config['is_value_map_save']
     value_map_save_dir = train_config['value_map_save_dir']
     resume_value_map = train_config.get('resume_value_map', False)
+    extra_save_epochs = set(train_config.get('extra_save_epochs', []))
 
     if start_epoch < 0:
         raise ValueError('start_epoch must be >= 0')
@@ -175,10 +176,18 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
             enhanced_kp_shows = []
             show_names = []
             if 'val' in phase:
-                if epoch % model_save_epoch == 0:
-                    print(f'save model for epoch {epoch}')
+                should_save = (epoch % model_save_epoch == 0) or (epoch in extra_save_epochs)
+                if should_save:
+                    if epoch in extra_save_epochs:
+                        base_dir = os.path.dirname(model_save_path)
+                        base_name = os.path.splitext(os.path.basename(model_save_path))[0]
+                        ext = os.path.splitext(model_save_path)[1] or '.pth'
+                        save_path = os.path.join(base_dir, f'{base_name}_epoch{epoch}{ext}')
+                    else:
+                        save_path = model_save_path
+                    print(f'save model for epoch {epoch} -> {save_path}')
                     state = {'net': model.state_dict(), 'optimizer': optimizer.state_dict(), 'epoch': epoch}
-                    torch.save(state, model_save_path)
+                    torch.save(state, save_path)
                 continue
             print('-' * 10 + 'phase:' + phase + '\t PKE_learn:' + str(model.PKE_learn) + '-' * 10)
             if 'train' in phase:

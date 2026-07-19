@@ -1,6 +1,6 @@
 PREDICT:
-  device: cuda:1
-  model_save_path: /home/data1/zhangjunhong/sr_project/sr/save/seed3407_vessel_masked_w03_ep149.pth
+  device: cuda:0
+  model_save_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_vessel_two_stages/seed3407_vessel_two_stage_03_50_005_001_50/seed3407_vessel_two_stage_ep149.pth
   model_type: with_vessel_only_masked
 
   model_image_width: 768

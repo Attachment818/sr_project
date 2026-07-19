@@ -2052,11 +2052,18 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
         self.vessel_mask_backend = cfg.get('vessel_mask_backend', 'morph')
         self.vessel_mask_threshold = float(cfg.get('vessel_mask_threshold', 0.25))
         self.vessel_mask_dilate = int(cfg.get('vessel_mask_dilate', 3))
+        self.stage1_epochs = int(cfg.get('vessel_stage1_epochs', 50))
+        self.vessel_weight_stage2 = float(cfg.get('vessel_weight_stage2', 0.05))
+        self.vessel_weight_floor = float(cfg.get('vessel_weight_floor', 0.0))
+        self.stage2_decay = max(1, int(cfg.get('vessel_stage2_decay', 50)))
+        self.current_epoch = 0
         print(
             f"✅ SuperRetinaWithVesselOnlyMasked 初始化完成，"
             f"vessel_weight={self.vessel_weight}，"
             f"mask_backend={self.vessel_mask_backend}，"
-            f"threshold={self.vessel_mask_threshold}"
+            f"threshold={self.vessel_mask_threshold}，"
+            f"stage1_epochs={self.stage1_epochs}，"
+            f"stage2_vessel_weight={self.vessel_weight_stage2}"
         )
 
     def _build_vessel_masks(self, images):
@@ -2066,6 +2073,15 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
             threshold=self.vessel_mask_threshold,
             dilate_kernel=self.vessel_mask_dilate,
         )
+
+    def _get_stage_vessel_weight(self):
+        if self.current_epoch < self.stage1_epochs:
+            return self.vessel_weight
+        stage2_step = self.current_epoch - self.stage1_epochs
+        if stage2_step >= self.stage2_decay:
+            return self.vessel_weight_floor
+        progress = stage2_step / float(self.stage2_decay)
+        return self.vessel_weight_stage2 + (self.vessel_weight - self.vessel_weight_stage2) * (1.0 - progress)
 
     def forward(self, x, label_point_positions=None, value_map=None, learn_index=None):
         if label_point_positions is not None:
@@ -2110,7 +2126,8 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
                 # enhanced_label from pke_learn is already aligned with learn_index batch
                 vessel_mask_sub = vessel_mask[learn_index]
                 vessel_loss = self.masked_dice(vessel_pred, enhanced_label, vessel_mask_sub)
-                loss_detector = loss_detector + self.vessel_weight * vessel_loss
+                vessel_weight = self._get_stage_vessel_weight()
+                loss_detector = loss_detector + vessel_weight * vessel_loss
 
             if enhanced_label_pts is not None:
                 enhanced_label_pts_tmp = label_point_positions.clone()
