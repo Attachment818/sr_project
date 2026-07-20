@@ -8,6 +8,7 @@ from scipy.ndimage import map_coordinates
 
 from common.common_util import pre_processing, simple_nms, remove_borders, \
     sample_keypoint_desc, remove_keypoints_by_mask
+from common.inference_diagnostics import summarize_keypoints
 from model.super_retina import SuperRetina, SuperRetinaFPN, SuperRetinaWithSelfAttention, SuperRetinaWithMultiScaleDescriptor, SuperRetinaWithASPP, SuperRetinaWithoutPKE, SuperRetinaWithoutPKEWithAttention,SuperRetinaWithPerceptualLoss,SuperRetinaWithVesselRegularization,SuperRetinaWithVesselOnly,SuperRetinaWithVesselOnlyMasked
 from model.super_retina_attention import SuperRetinaWithAttention
 
@@ -28,6 +29,18 @@ class Predictor:
         self.nms_thresh = predict_config['nms_thresh']
         self.scale = 8
         self.knn_thresh = predict_config['knn_thresh']
+        self.inference_diagnostic_grid_size = int(
+            predict_config.get('diagnostic_grid_size', 4)
+        )
+        self.inference_diagnostic_vessel_backend = predict_config.get(
+            'diagnostic_vessel_backend', 'morph'
+        )
+        self.inference_diagnostic_vessel_threshold = float(
+            predict_config.get('diagnostic_vessel_threshold', 0.25)
+        )
+        self.inference_diagnostic_vessel_dilate = int(
+            predict_config.get('diagnostic_vessel_dilate', 3)
+        )
 
         self.image_width = None
         self.image_height = None
@@ -944,9 +957,10 @@ class Predictor:
             print(f"Warning: Error in filter_outliers: {e}")
             return query_pts, refer_pts, None
 
-    def match_with_consistency_check(self, query_path, refer_path, query_is_image=False, 
+    def match_with_consistency_check(self, query_path, refer_path, query_is_image=False,
                                      use_inverse_consistency=True, iccl=3.0,
-                                     use_outlier_filter=True, outlier_criteria='homography', outlier_threshold=20.0):
+                                     use_outlier_filter=True, outlier_criteria='homography', outlier_threshold=20.0,
+                                     return_diagnostics=False):
         """
         带逆一致性检查和异常值过滤的匹配方法
         
@@ -985,6 +999,29 @@ class Predictor:
                                           int(i[1] / self.model_image_height * self.image_height), 30)
                              for i in refer_keypoints]
         
+        diagnostics = {
+            'detected_query_keypoints': len(cv_kpts_query_full),
+            'detected_refer_keypoints': len(cv_kpts_refer_full),
+            'ratio_matches': 0,
+            'inverse_consistency_matches': None,
+            'outlier_filter_matches': None,
+        }
+        if return_diagnostics:
+            diagnostics['detected_query_regions'] = summarize_keypoints(
+                cv_kpts_query_full, query_image,
+                grid_size=self.inference_diagnostic_grid_size,
+                vessel_backend=self.inference_diagnostic_vessel_backend,
+                vessel_threshold=self.inference_diagnostic_vessel_threshold,
+                vessel_dilate=self.inference_diagnostic_vessel_dilate,
+            )
+            diagnostics['detected_refer_regions'] = summarize_keypoints(
+                cv_kpts_refer_full, refer_image,
+                grid_size=self.inference_diagnostic_grid_size,
+                vessel_backend=self.inference_diagnostic_vessel_backend,
+                vessel_threshold=self.inference_diagnostic_vessel_threshold,
+                vessel_dilate=self.inference_diagnostic_vessel_dilate,
+            )
+
         # 第一步：基础匹配
         goodMatch = []
         try:
@@ -995,8 +1032,10 @@ class Predictor:
         except Exception:
             pass
         
+        diagnostics['ratio_matches'] = len(goodMatch)
         if len(goodMatch) == 0:
-            return [], cv_kpts_query_full, cv_kpts_refer_full, query_image, refer_image
+            result = ([], cv_kpts_query_full, cv_kpts_refer_full, query_image, refer_image)
+            return (*result, diagnostics) if return_diagnostics else result
         
         # 第二步：逆一致性检查
         if use_inverse_consistency:
@@ -1006,6 +1045,9 @@ class Predictor:
             
             if len(filtered_matches) > 0:
                 goodMatch = filtered_matches
+            diagnostics['inverse_consistency_matches'] = len(goodMatch)
+        else:
+            diagnostics['inverse_consistency_matches'] = len(goodMatch)
         
         # 第三步：异常值过滤
         if use_outlier_filter and len(goodMatch) >= 4:
@@ -1058,8 +1100,27 @@ class Predictor:
                 goodMatch = new_goodMatch
                 cv_kpts_query_full = new_cv_kpts_query
                 cv_kpts_refer_full = new_cv_kpts_refer
+        diagnostics['outlier_filter_matches'] = len(goodMatch)
+        diagnostics['returned_query_keypoints'] = len(cv_kpts_query_full)
+        diagnostics['returned_refer_keypoints'] = len(cv_kpts_refer_full)
+        if return_diagnostics:
+            diagnostics['returned_query_regions'] = summarize_keypoints(
+                cv_kpts_query_full, query_image,
+                grid_size=self.inference_diagnostic_grid_size,
+                vessel_backend=self.inference_diagnostic_vessel_backend,
+                vessel_threshold=self.inference_diagnostic_vessel_threshold,
+                vessel_dilate=self.inference_diagnostic_vessel_dilate,
+            )
+            diagnostics['returned_refer_regions'] = summarize_keypoints(
+                cv_kpts_refer_full, refer_image,
+                grid_size=self.inference_diagnostic_grid_size,
+                vessel_backend=self.inference_diagnostic_vessel_backend,
+                vessel_threshold=self.inference_diagnostic_vessel_threshold,
+                vessel_dilate=self.inference_diagnostic_vessel_dilate,
+            )
         
-        return goodMatch, cv_kpts_query_full, cv_kpts_refer_full, query_image, refer_image
+        result = (goodMatch, cv_kpts_query_full, cv_kpts_refer_full, query_image, refer_image)
+        return (*result, diagnostics) if return_diagnostics else result
 
 if __name__ == '__main__':
     import yaml

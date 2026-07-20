@@ -11,6 +11,7 @@ from common.paper_viz import (
     save_overlay,
     save_fire_success_curves,
 )
+from common.inference_diagnostics import write_jsonl
 from predictor import Predictor
 import os
 import cv2
@@ -59,6 +60,10 @@ else:
     model_stem = os.path.splitext(os.path.basename(config['PREDICT']['model_save_path']))[0]
     save_dir = f'/home/data1/zhangjunhong/sr_project/sr/res/{model_stem}'
 os.makedirs(save_dir, exist_ok=True)
+save_inference_diagnostics = config['PREDICT'].get('save_inference_diagnostics', False)
+diagnostics_path = os.path.join(save_dir, 'inference_diagnostics.jsonl')
+if save_inference_diagnostics and os.path.exists(diagnostics_path):
+    os.remove(diagnostics_path)
 
 data_path = './data/'  # Change the data_path according to your own setup
 testset = 'FIRE'
@@ -146,14 +151,20 @@ for pair_file in tqdm(match_pairs):
     outlier_threshold = config['PREDICT'].get('outlier_threshold', 20.0)
     
     # 调用带逆一致性检查和异常值过滤的匹配方法
-    goodMatch, cv_kpts_query, cv_kpts_refer, query_image, refer_image = Pred.match_with_consistency_check(
+    match_result = Pred.match_with_consistency_check(
         query_im_path, refer_im_path,
         use_inverse_consistency=use_inverse_consistency,
         iccl=iccl,
         use_outlier_filter=use_outlier_filter,
         outlier_criteria=outlier_criteria,
-        outlier_threshold=outlier_threshold
+        outlier_threshold=outlier_threshold,
+        return_diagnostics=save_inference_diagnostics,
     )
+    if save_inference_diagnostics:
+        goodMatch, cv_kpts_query, cv_kpts_refer, query_image, refer_image, match_diag = match_result
+    else:
+        goodMatch, cv_kpts_query, cv_kpts_refer, query_image, refer_image = match_result
+        match_diag = None
     # 保存原始的goodMatch用于保存匹配图片
     goodMatch_for_save = goodMatch
     num_initial_matches = len(goodMatch) if goodMatch is not None else 0
@@ -400,6 +411,7 @@ for pair_file in tqdm(match_pairs):
         except Exception as ex:
             print(f"[Warn] paper figure export failed for {file_name}: {ex}")
     
+    failure_reason = None
     if not registration_success:
         failed += 1
         avg_dist = big_num
@@ -468,6 +480,23 @@ for pair_file in tqdm(match_pairs):
         mee = np.median(dis)
         if mae > 50 or mee > 20:
             inaccurate += 1
+
+    if match_diag is not None:
+        match_diag.update({
+            'pair_id': file_name,
+            'dataset': 'FIRE',
+            'category': category,
+            'selected_method': selected_method,
+            'matches_after_consistency': int(num_initial_matches),
+            'geometry_inliers': int(num_inliers),
+            'geometry_inlier_rate': float(inliers_num_rate),
+            'stage1_inlier_rate': float(stage1_inliers_rate),
+            'matching_trick_used': bool(H_m2 is not None),
+            'registration_success': bool(registration_success),
+            'failure_reason': failure_reason,
+            'average_control_point_error': float(avg_dist),
+        })
+        write_jsonl(diagnostics_path, match_diag)
     
     auc_record[category].append(avg_dist)
     
