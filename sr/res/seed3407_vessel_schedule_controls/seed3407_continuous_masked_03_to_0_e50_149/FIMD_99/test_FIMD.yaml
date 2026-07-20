@@ -1,0 +1,22 @@
+FIMD:
+  data_root: /home/data1/zhangjunhong/sr_project/sr/data/FIMD
+PREDICT:
+  device: cuda:1
+  model_type: with_vessel_only_masked
+  resize_refer_to_query: true
+  model_image_width: 768
+  model_image_height: 768
+  use_matching_trick: true
+  registration_method: quadratic
+  displacement_threshold: 300.0
+  nms_size: 10
+  nms_thresh: 0.01
+  knn_thresh: 0.9
+  use_inverse_consistency: true
+  iccl: 3.0
+  use_outlier_filter: true
+  outlier_criteria: homography
+  outlier_threshold: 20.0
+  eye_mask_path: null
+  checkerboard_tile_size: 240
+  model_save_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_vessel_schedule_controls/seed3407_continuous_masked_03_to_0_e50_149/seed3407_continuous_masked_03_to_0_e50_149_ep149_epoch99.pth
