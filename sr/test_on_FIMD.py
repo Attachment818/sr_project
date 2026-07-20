@@ -12,6 +12,7 @@ from common.paper_viz import (
     save_dataset_success_curve,
 )
 from common.inference_diagnostics import write_jsonl
+from common.spatial_geometry import estimate_homography_with_spatial_support
 from predictor import Predictor
 import os
 import cv2
@@ -56,6 +57,7 @@ if not os.path.isabs(fimd_root):
 
 use_matching_trick = config['PREDICT']['use_matching_trick']
 displacement_threshold = config['PREDICT'].get('displacement_threshold', 300.0)
+spatial_support_config = config['PREDICT'].get('spatial_support', {})
 pair_items = list_fimd_pairs(fimd_root)
 print(f"Loaded {len(pair_items)} FIMD pairs from: {fimd_root}")
 big_num = 1e6
@@ -148,6 +150,7 @@ for pair_item in tqdm(pair_items):
     inliers_num_rate = 0
     num_inliers_stage2 = 0
     inliers_num_rate_stage2 = 0
+    spatial_support_diag = None
     
     # 动态选择的配准方法（根据初始位移决定）
     selected_method = None
@@ -187,7 +190,16 @@ for pair_item in tqdm(pair_items):
                 # 所以 H 可以将 query 图像中的点变换到 refer 图像的坐标系
                 src_pts_array = np.float32(src_pts).reshape(-1, 1, 2)  # query 图像中的点
                 dst_pts_array = np.float32(dst_pts).reshape(-1, 1, 2)  # refer 图像中的点
-                H_m1, mask = cv2.findHomography(src_pts_array, dst_pts_array, cv2.LMEDS)
+                H_m1, spatial_mask, spatial_support_diag = estimate_homography_with_spatial_support(
+                    goodMatch, cv_kpts_query, cv_kpts_refer, query_image.shape,
+                    enabled=spatial_support_config.get('enabled', False),
+                    grid_size=int(spatial_support_config.get('grid_size', 4)),
+                    max_per_cell=int(spatial_support_config.get('max_per_cell', 3)),
+                    reprojection_threshold=float(spatial_support_config.get('reprojection_threshold', 20.0)),
+                    min_inlier_retention=float(spatial_support_config.get('min_inlier_retention', 0.9)),
+                    min_coverage_gain=int(spatial_support_config.get('min_coverage_gain', 1)),
+                )
+                mask = None if spatial_mask is None else spatial_mask.astype(np.uint8).reshape(-1, 1)
                 if H_m1 is not None:
                     num_inliers = int(mask.sum())
                     inliers_num_rate = num_inliers / len(mask.ravel())
@@ -456,6 +468,8 @@ for pair_item in tqdm(pair_items):
             'failure_reason': failure_reason,
             'average_control_point_error': float(avg_dist),
         })
+        if spatial_support_diag is not None:
+            match_diag.update(spatial_support_diag)
         write_jsonl(diagnostics_path, match_diag)
     
     pair_avg_error_record.append(avg_dist)
