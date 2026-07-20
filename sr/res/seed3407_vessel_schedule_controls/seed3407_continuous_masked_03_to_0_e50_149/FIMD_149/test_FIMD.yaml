@@ -1,7 +1,7 @@
 FIMD:
   data_root: /home/data1/zhangjunhong/sr_project/sr/data/FIMD
 PREDICT:
-  device: cuda:1
+  device: cuda:0
   model_type: with_vessel_only_masked
   resize_refer_to_query: true
   model_image_width: 768
