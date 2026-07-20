@@ -13,6 +13,7 @@ import scipy.stats as st
 import config
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+from common.inference_diagnostics import write_jsonl
 
 
 def affine_images(images, used_for='detector'):
@@ -121,6 +122,13 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
     value_map_save_dir = train_config['value_map_save_dir']
     resume_value_map = train_config.get('resume_value_map', False)
     extra_save_epochs = set(train_config.get('extra_save_epochs', []))
+    save_pke_diagnostics = bool(train_config.get('save_pke_diagnostics', False))
+    pke_diagnostics_path = train_config.get(
+        'pke_diagnostics_path',
+        os.path.join(os.path.dirname(model_save_path), 'pke_diagnostics.jsonl'),
+    )
+    if save_pke_diagnostics and os.path.exists(pke_diagnostics_path):
+        os.remove(pke_diagnostics_path)
 
     if start_epoch < 0:
         raise ValueError('start_epoch must be >= 0')
@@ -220,6 +228,15 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
                     loss, number_pts_one, print_loss_detector_one, print_loss_descriptor_one, enhanced_label_pts, \
                     enhanced_label, detector_pred, loss_detector_num, loss_descriptor_num \
                     = model(images, keypoint_positions, value_maps, learn_index)
+                    if save_pke_diagnostics and getattr(model, 'last_pke_diagnostics', None) is not None:
+                        for local_index, diagnostic in enumerate(model.last_pke_diagnostics):
+                            batch_index = int(learn_index[0][local_index])
+                            write_jsonl(pke_diagnostics_path, {
+                                'epoch': int(epoch),
+                                'phase': phase,
+                                'image_name': str(label_names[batch_index]),
+                                **diagnostic,
+                            })
                     if enhanced_label_pts is None:
                         enhanced_label_pts = keypoint_positions
 

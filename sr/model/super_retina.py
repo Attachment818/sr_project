@@ -16,6 +16,7 @@ from common.common_util import remove_borders, sample_keypoint_desc, simple_nms,
     sample_descriptors
 from common.train_util import get_gaussian_kernel, affine_images
 from common.vessel_mask_util import compute_vessel_mask_batch
+from common.pke_diagnostics import summarize_pke_stages
 
 # 导入自注意力模块（如果存在）
 try:
@@ -2077,6 +2078,9 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
                 f"Unknown vessel_schedule_mode: {self.vessel_schedule_mode}"
             )
         self.current_epoch = 0
+        self.save_pke_diagnostics = bool(cfg.get('save_pke_diagnostics', False))
+        self.pke_diagnostic_grid_size = int(cfg.get('pke_diagnostic_grid_size', 8))
+        self.last_pke_diagnostics = None
         print(
             f"✅ SuperRetinaWithVesselOnlyMasked 初始化完成，"
             f"vessel_weight={self.vessel_weight}，"
@@ -2118,6 +2122,7 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
         return self.vessel_weight_stage2 + (self.vessel_weight - self.vessel_weight_stage2) * (1.0 - progress)
 
     def forward(self, x, label_point_positions=None, value_map=None, learn_index=None):
+        self.last_pke_diagnostics = None
         if label_point_positions is not None:
             detector_pred, descriptor_pred, cPa = self.network(x, return_cPa=True)
         else:
@@ -2145,14 +2150,22 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
                 affine_detector_pred, affine_descriptor_pred = self.network(affine_x)
 
             loss_cal = self.dice
+            pke_stage_points = None
             if len(learn_index[0]) != 0:
-                loss_detector, number_pts, value_map_update, enhanced_label_pts, enhanced_label = \
-                    pke_learn(detector_pred[learn_index], descriptor_pred[learn_index],
-                              grid_inverse[learn_index], affine_detector_pred[learn_index],
-                              affine_descriptor_pred[learn_index], self.kernel, loss_cal,
-                              label_point_positions[learn_index], value_map[learn_index],
-                              self.config, self.PKE_learn)
+                pke_result = pke_learn(
+                    detector_pred[learn_index], descriptor_pred[learn_index],
+                    grid_inverse[learn_index], affine_detector_pred[learn_index],
+                    affine_descriptor_pred[learn_index], self.kernel, loss_cal,
+                    label_point_positions[learn_index], value_map[learn_index],
+                    self.config, self.PKE_learn,
+                    return_stage_points=self.save_pke_diagnostics,
+                )
+                if self.save_pke_diagnostics:
+                    loss_detector, number_pts, value_map_update, enhanced_label_pts, enhanced_label, pke_stage_points = pke_result
+                else:
+                    loss_detector, number_pts, value_map_update, enhanced_label_pts, enhanced_label = pke_result
 
+            vessel_mask = None
             if cPa is not None and enhanced_label is not None and len(learn_index[0]) != 0:
                 with torch.no_grad():
                     vessel_mask = self._build_vessel_masks(x)
@@ -2162,6 +2175,15 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
                 vessel_loss = self.masked_dice(vessel_pred, enhanced_label, vessel_mask_sub)
                 vessel_weight = self._get_stage_vessel_weight()
                 loss_detector = loss_detector + vessel_weight * vessel_loss
+
+            if self.save_pke_diagnostics and pke_stage_points is not None:
+                with torch.no_grad():
+                    if vessel_mask is None:
+                        vessel_mask = self._build_vessel_masks(x)
+                    self.last_pke_diagnostics = summarize_pke_stages(
+                        pke_stage_points, vessel_mask[learn_index], x.shape[-2:],
+                        grid_size=self.pke_diagnostic_grid_size,
+                    )
 
             if enhanced_label_pts is not None:
                 enhanced_label_pts_tmp = label_point_positions.clone()

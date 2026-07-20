@@ -91,7 +91,7 @@ def geometric_filter(affine_detector_pred, points, affine_points, max_num=1024, 
 
 def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred,
               affine_descriptor_pred, kernel, loss_cal, label_point_positions,
-              value_map, config, PKE_learn=True):
+              value_map, config, PKE_learn=True, return_stage_points=False):
     """
     pke process used for detector
     :param detector_pred: probability map from raw image
@@ -111,7 +111,8 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
     initial_label[initial_label > 1] = 1
 
     if not PKE_learn:
-        return loss_cal(detector_pred, initial_label.to(detector_pred)), 0, None, None, initial_label
+        result = (loss_cal(detector_pred, initial_label.to(detector_pred)), 0, None, None, initial_label)
+        return (*result, None) if return_stage_points else result
 
     nms_size = config['nms_size']
     nms_thresh = config['nms_thresh']
@@ -139,6 +140,7 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
                                                                affine_geo_points, content_thresh=content_thresh,
                                                                scale=scale)
         enhanced_label_pts = []
+        value_map_points = []
         for step in range(len(content_points)):
             # used to combine initial points and learned points
             positions = torch.where(label_point_positions[step, 0] == 1)
@@ -148,6 +150,7 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
                 positions = positions[0]
 
             final_points = update_value_map(value_map[step], content_points[step], config)
+            value_map_points.append(final_points.detach().clone())
 
             # final_points = torch.cat((final_points, positions))
 
@@ -190,4 +193,13 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
 
     loss = loss1+loss2
 
-    return loss, number_pts, value_map, enhanced_label_pts, enhanced_label
+    result = (loss, number_pts, value_map, enhanced_label_pts, enhanced_label)
+    if not return_stage_points:
+        return result
+    stage_points = {
+        'detector_candidates': [point.detach().clone() for point in points],
+        'geometric_pass': [point.detach().clone() for point in geo_points],
+        'content_pass': [point.detach().clone() for point in content_points],
+        'value_map_points': value_map_points,
+    }
+    return (*result, stage_points)
