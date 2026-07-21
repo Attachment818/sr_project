@@ -7,6 +7,7 @@ It is therefore safe to run against an existing checkpoint.
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 import cv2
@@ -14,6 +15,12 @@ import numpy as np
 import torch
 import yaml
 from torch.utils.data import DataLoader
+
+# Scripts launched as ``python tools/<script>.py`` need the sr/ directory on
+# sys.path; normal train/test entrypoints already start from that directory.
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from common.common_util import nms
 from common.train_util import affine_images
