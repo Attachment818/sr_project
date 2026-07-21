@@ -68,7 +68,8 @@ def content_filter(descriptor_pred, affine_descriptor_pred, geo_points,
     return content_points, affine_content_points
 
 
-def geometric_filter(affine_detector_pred, points, affine_points, max_num=1024, geometric_thresh=0.5):
+def geometric_filter(affine_detector_pred, points, affine_points, max_num=1024, geometric_thresh=0.5,
+                     vessel_masks=None, relaxed_non_core_thresh=None):
     """
     geometric matching in paper
     :param affine_detector_pred: geo_points probability of affine image
@@ -83,6 +84,21 @@ def geometric_filter(affine_detector_pred, points, affine_points, max_num=1024, 
     for s, k in enumerate(affine_points):
         sample_aff_values = affine_detector_pred[s, 0, k[:, 1].long(), k[:, 0].long()]
         check = sample_aff_values.squeeze() >= geometric_thresh
+        if vessel_masks is not None and relaxed_non_core_thresh is not None:
+            # Preserve the strict threshold for vessel core.  Border/non-vessel
+            # candidates in the gray interval are admitted to the existing
+            # descriptor content filter; no point is fabricated or accepted
+            # without that later verification.
+            vessel = vessel_masks[s:s + 1].float()
+            # Match the 3x3 elliptical (cross-shaped at this size) erosion
+            # used by the D2 audit to distinguish vessel core from edge.
+            cross_kernel = vessel.new_tensor(
+                [[0., 1., 0.], [1., 1., 1.], [0., 1., 0.]]
+            ).view(1, 1, 3, 3)
+            core = F.conv2d(vessel, cross_kernel, padding=1) >= 5.0
+            point_is_core = core[0, 0, points[s][:, 1].long(), points[s][:, 0].long()]
+            relaxed = sample_aff_values.squeeze() >= relaxed_non_core_thresh
+            check = check | (relaxed & ~point_is_core)
         geo_points.append(points[s][check][:max_num])
         affine_geo_points.append(k[check][:max_num])
 
@@ -91,7 +107,8 @@ def geometric_filter(affine_detector_pred, points, affine_points, max_num=1024, 
 
 def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred,
               affine_descriptor_pred, kernel, loss_cal, label_point_positions,
-              value_map, config, PKE_learn=True, return_stage_points=False):
+              value_map, config, PKE_learn=True, return_stage_points=False,
+              vessel_masks=None, relaxed_non_core_thresh=None):
     """
     pke process used for detector
     :param detector_pred: probability map from raw image
@@ -132,7 +149,9 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
         # geometric matching
         points, affine_points = mapping_points(grid_inverse, points, h, w)
         geo_points, affine_geo_points = geometric_filter(affine_detector_pred, points, affine_points,
-                                                         geometric_thresh=geometric_thresh)
+                                                         geometric_thresh=geometric_thresh,
+                                                         vessel_masks=vessel_masks,
+                                                         relaxed_non_core_thresh=relaxed_non_core_thresh)
 
 
         # content matching

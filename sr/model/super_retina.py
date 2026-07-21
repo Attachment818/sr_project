@@ -2080,6 +2080,16 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
         self.current_epoch = 0
         self.save_pke_diagnostics = bool(cfg.get('save_pke_diagnostics', False))
         self.pke_diagnostic_grid_size = int(cfg.get('pke_diagnostic_grid_size', 8))
+        relaxed_threshold = cfg.get('pke_region_relaxed_threshold')
+        self.pke_region_relaxed_threshold = (
+            None if relaxed_threshold is None else float(relaxed_threshold)
+        )
+        if self.pke_region_relaxed_threshold is not None:
+            base_threshold = float(cfg.get('geometric_thresh', 0.5))
+            if not 0 <= self.pke_region_relaxed_threshold < base_threshold:
+                raise ValueError(
+                    'pke_region_relaxed_threshold must be non-negative and smaller than geometric_thresh'
+                )
         self.last_pke_diagnostics = None
         print(
             f"✅ SuperRetinaWithVesselOnlyMasked 初始化完成，"
@@ -2148,6 +2158,10 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
             with torch.no_grad():
                 affine_x, grid, grid_inverse = affine_images(x, used_for='detector')
                 affine_detector_pred, affine_descriptor_pred = self.network(affine_x)
+                vessel_mask = (
+                    self._build_vessel_masks(x)
+                    if self.pke_region_relaxed_threshold is not None else None
+                )
 
             loss_cal = self.dice
             pke_stage_points = None
@@ -2159,16 +2173,18 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
                     label_point_positions[learn_index], value_map[learn_index],
                     self.config, self.PKE_learn,
                     return_stage_points=self.save_pke_diagnostics,
+                    vessel_masks=None if vessel_mask is None else vessel_mask[learn_index],
+                    relaxed_non_core_thresh=self.pke_region_relaxed_threshold,
                 )
                 if self.save_pke_diagnostics:
                     loss_detector, number_pts, value_map_update, enhanced_label_pts, enhanced_label, pke_stage_points = pke_result
                 else:
                     loss_detector, number_pts, value_map_update, enhanced_label_pts, enhanced_label = pke_result
 
-            vessel_mask = None
             if cPa is not None and enhanced_label is not None and len(learn_index[0]) != 0:
                 with torch.no_grad():
-                    vessel_mask = self._build_vessel_masks(x)
+                    if vessel_mask is None:
+                        vessel_mask = self._build_vessel_masks(x)
                 vessel_pred = self.vessel_head(cPa[learn_index])
                 # enhanced_label from pke_learn is already aligned with learn_index batch
                 vessel_mask_sub = vessel_mask[learn_index]

@@ -1,0 +1,55 @@
+# PKE 几何准入对照 G0：全局阈值由 0.50 降至 0.40。
+# 与 C0（恒定 vessel_weight=0.3）相比，除 geometric_thresh 外保持一致。
+MODEL:
+  model_variant: vessel_only_masked
+  nms_size: 10
+  nms_thresh: 0.1
+  batch_size: 4
+  num_epoch: 150
+  seed: 3407
+  deterministic: true
+  num_workers: 8
+  device: cuda:0
+  load_pre_trained_model: false
+  pretrained_path: /home/data1/zhangjunhong/sr_project/sr/save/seed3407_vessel_masked_w03_ep149.pth
+  resume_optimizer: false
+  model_save_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149.pth
+  model_save_epoch: 1
+  extra_save_epochs: [49, 99]
+  vessel_weight: 0.3
+  vessel_schedule_mode: constant
+  vessel_stage1_epochs: 50
+  vessel_weight_stage2: 0.05
+  vessel_weight_floor: 0.0
+  vessel_stage2_decay: 50
+  vessel_mask_backend: morph
+  vessel_mask_threshold: 0.25
+  vessel_mask_dilate: 3
+  memory_fraction: 0.9
+
+DATASET:
+  model_image_width: 768
+  model_image_height: 768
+  dataset_path: /home/data1/zhangjunhong/sr_project/sr/data/Lab4
+  train_split_file: train.txt
+  val_split_file: val.txt
+  auxiliary: /home/data1/zhangjunhong/sr_project/sr/data/Auxiliary
+
+PKE:
+  pke_start_epoch: 0
+  geometric_thresh: 0.4
+  content_thresh: 0.7
+  gaussian_kernel_size: 13
+  gaussian_sigma: 2
+  pke_show: false
+  pke_show_epoch: 5
+  pke_show_list: []
+
+VALUE_MAP:
+  area: 8
+  value_increase_point: 5
+  value_increase_area: 1
+  value_decay: 1
+  is_value_map_save: true
+  resume_value_map: false
+  value_map_save_dir: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/value_maps
