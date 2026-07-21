@@ -196,10 +196,18 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
     result = (loss, number_pts, value_map, enhanced_label_pts, enhanced_label)
     if not return_stage_points:
         return result
+    def copy_stage_points(point):
+        # content_filter uses [] (rather than an empty Tensor) when a sample
+        # has no valid content correspondence.  Diagnostics must preserve that
+        # valid zero-count case without changing the PKE decision itself.
+        if torch.is_tensor(point):
+            return point.detach().clone()
+        return torch.empty((0, 2), dtype=torch.long, device=detector_pred.device)
+
     stage_points = {
-        'detector_candidates': [point.detach().clone() for point in points],
-        'geometric_pass': [point.detach().clone() for point in geo_points],
-        'content_pass': [point.detach().clone() for point in content_points],
-        'value_map_points': value_map_points,
+        'detector_candidates': [copy_stage_points(point) for point in points],
+        'geometric_pass': [copy_stage_points(point) for point in geo_points],
+        'content_pass': [copy_stage_points(point) for point in content_points],
+        'value_map_points': [copy_stage_points(point) for point in value_map_points],
     }
     return (*result, stage_points)
