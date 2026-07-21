@@ -1,0 +1,8 @@
+AUDIT:
+  device: cuda:2
+  train_config_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_diagnostics/c0_constant_masked/train.yaml
+  checkpoint_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_diagnostics/c0_constant_masked/seed3407_pke_diagnostics_c0_ep149.pth
+  output_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_diagnostics/c0_constant_masked/D1_geometry_149/geometry_audit.json
+  affine_passes: 5
+  geometric_threshold: 0.5
+  local_radius: 8

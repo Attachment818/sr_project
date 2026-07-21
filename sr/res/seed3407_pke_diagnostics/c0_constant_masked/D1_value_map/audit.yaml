@@ -1,0 +1,6 @@
+AUDIT:
+  value_map_dir: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_diagnostics/c0_constant_masked/value_maps
+  output_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_diagnostics/c0_constant_masked/D1_value_map/value_map_audit.json
+  grid_size: 8
+  point_threshold: 5
+  nms_radius: 16
