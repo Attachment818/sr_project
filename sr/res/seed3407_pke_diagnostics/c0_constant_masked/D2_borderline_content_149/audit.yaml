@@ -1,0 +1,6 @@
+AUDIT:
+  device: cuda:2
+  train_config_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_diagnostics/c0_constant_masked/train.yaml
+  checkpoint_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_diagnostics/c0_constant_masked/seed3407_pke_diagnostics_c0_ep149.pth
+  output_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_diagnostics/c0_constant_masked/D2_borderline_content_149/borderline_content_audit.json
+  affine_passes: 5
