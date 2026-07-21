@@ -1,6 +1,6 @@
 # FIRE-149 evaluation for R0.  Only the trained checkpoint differs from C0.
 PREDICT:
-  device: cuda:1
+  device: cuda:2
   model_save_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/region_relaxed_noncore_04/seed3407_region_relaxed_noncore_04_ep149.pth
   model_type: with_vessel_only_masked
   model_image_width: 768
