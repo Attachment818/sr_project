@@ -1,0 +1,59 @@
+{
+  "config": {
+    "affine_passes": 5,
+    "content_threshold": 0.7
+  },
+  "regions": {
+    "vessel_core": {
+      "low_below_04": {
+        "count": 37095,
+        "content_pass_count": 16348,
+        "content_pass_rate": 0.4407062946488745
+      },
+      "borderline_04_to_05": {
+        "count": 22764,
+        "content_pass_count": 10389,
+        "content_pass_rate": 0.45637849235635214
+      },
+      "standard_at_least_05": {
+        "count": 238332,
+        "content_pass_count": 126205,
+        "content_pass_rate": 0.5295344309618515
+      }
+    },
+    "vessel_edge": {
+      "low_below_04": {
+        "count": 9366,
+        "content_pass_count": 4741,
+        "content_pass_rate": 0.5061926115737775
+      },
+      "borderline_04_to_05": {
+        "count": 3286,
+        "content_pass_count": 1768,
+        "content_pass_rate": 0.5380401704199634
+      },
+      "standard_at_least_05": {
+        "count": 9824,
+        "content_pass_count": 5685,
+        "content_pass_rate": 0.5786848534201955
+      }
+    },
+    "non_vessel": {
+      "low_below_04": {
+        "count": 38589,
+        "content_pass_count": 20688,
+        "content_pass_rate": 0.5361113270621162
+      },
+      "borderline_04_to_05": {
+        "count": 11176,
+        "content_pass_count": 6353,
+        "content_pass_rate": 0.5684502505368647
+      },
+      "standard_at_least_05": {
+        "count": 25589,
+        "content_pass_count": 14799,
+        "content_pass_rate": 0.5783344405799367
+      }
+    }
+  }
+}
