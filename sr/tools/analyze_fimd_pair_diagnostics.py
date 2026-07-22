@@ -1,4 +1,4 @@
-"""Aggregate read-only FIMD inference diagnostics across model variants.
+"""Aggregate read-only FIRE/FIMD inference diagnostics across model variants.
 
 The test runner writes one JSON record per image pair when
 ``save_inference_diagnostics: true``.  This tool only reads those records and
@@ -69,6 +69,8 @@ def main():
     parser.add_argument('--source', action='append', required=True, type=parse_source,
                         help='LABEL=diagnostics.jsonl; may be repeated.')
     parser.add_argument('--output-dir', required=True, type=Path)
+    parser.add_argument('--dataset-label', default='FIMD',
+                        help='Dataset label written in the report title (for example FIRE or FIMD).')
     parser.add_argument('--focus-pair', action='append', default=['control_points_39_r_t', 'control_points_40_r_t'],
                         help='Pair ID highlighted in the Markdown report; may be repeated.')
     args = parser.parse_args()
@@ -96,7 +98,7 @@ def main():
                 row[f'{label}__refer_grid_coverage'] = region_value(record, 'returned_refer_regions')
             writer.writerow(row)
 
-    report = ['# FIMD 逐对推理诊断', '', '## 全体 70 对的聚合统计', '',
+    report = [f'# {args.dataset_label} 逐对推理诊断', '', f'## 全体 {len(pair_ids)} 对的聚合统计', '',
               '| 方法 | 有记录对数 | 配准成功率 | 最终匹配数均值 | 第一阶段几何内点均值 | 最终几何内点率均值 | Query 覆盖均值 | Refer 覆盖均值 | 成功对控制点误差均值 |',
               '|---|---:|---:|---:|---:|---:|---:|---:|---:|']
     for label, records in records_by_label.items():
@@ -127,7 +129,7 @@ def main():
                '- `ratio_matches → inverse_consistency_matches → outlier_filter_matches` 的下降位置，可区分 descriptor 比率筛选、逆一致性、几何异常值过滤造成的匹配损失。',
                '- `geometry_inliers` 是第一阶段几何估计的内点数；若启用 matching trick，`geometry_inlier_rate` 可能来自第二阶段，因此二者不应直接相除。',
                '- `grid_coverage` 是 4×4 网格的已占用比例，只作空间覆盖诊断；不会参与此次测试的匹配或几何估计。',
-               '- 报告仅比较同一 FIMD 协议、同一 seed、同一 ep149 权重下的推理观测。']
+               f'- 报告仅比较同一 {args.dataset_label} 协议、同一 seed、同一 ep149 权重下的推理观测。']
     (args.output_dir / 'pair_diagnostics_report.md').write_text('\n'.join(report) + '\n', encoding='utf-8')
     print(f'Wrote {csv_path} and {args.output_dir / "pair_diagnostics_report.md"}')
 
