@@ -1,0 +1,21 @@
+# T-G0 FIRE ep149 evaluation; same protocol as previous G0/three-stage tests.
+PREDICT:
+  device: cuda:3
+  model_type: with_vessel_only_masked
+  model_save_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_tg0_three_stage_global_threshold_04/seed3407_tg0_three_stage_global_threshold_04_ep149.pth
+  model_image_width: 768
+  model_image_height: 768
+  use_matching_trick: true
+  registration_method: quadratic
+  displacement_threshold: 300.0
+  nms_size: 10
+  nms_thresh: 0.01
+  knn_thresh: 0.9
+  use_inverse_consistency: true
+  iccl: 3.0
+  use_outlier_filter: true
+  outlier_criteria: homography
+  outlier_threshold: 20.0
+  eye_mask_path: /home/data1/zhangjunhong/sr_project/sr/data/FIRE/Masks/feature_mask.png
+  apply_mask_categories: [S, P, A]
+  checkerboard_tile_size: 240

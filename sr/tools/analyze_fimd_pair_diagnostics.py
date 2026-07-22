@@ -97,7 +97,7 @@ def main():
             writer.writerow(row)
 
     report = ['# seed3409 FIMD 逐对推理诊断', '', '## 全体 70 对的聚合统计', '',
-              '| 方法 | 有记录对数 | 配准成功率 | 最终匹配数均值 | 几何内点均值 | 内点率均值 | Query 覆盖均值 | Refer 覆盖均值 | 成功对控制点误差均值 |',
+              '| 方法 | 有记录对数 | 配准成功率 | 最终匹配数均值 | 第一阶段几何内点均值 | 最终几何内点率均值 | Query 覆盖均值 | Refer 覆盖均值 | 成功对控制点误差均值 |',
               '|---|---:|---:|---:|---:|---:|---:|---:|---:|']
     for label, records in records_by_label.items():
         rows = list(records.values())
@@ -112,7 +112,7 @@ def main():
 
     report += ['', '## 重点困难对', '']
     for pair_id in args.focus_pair:
-        report += [f'### {pair_id}', '', '| 方法 | 最终匹配 | 几何内点 | 内点率 | Query 覆盖 | Refer 覆盖 | 配准成功 | 控制点误差 | 失败原因 |',
+        report += [f'### {pair_id}', '', '| 方法 | 最终匹配 | 第一阶段几何内点 | 最终几何内点率 | Query 覆盖 | Refer 覆盖 | 配准成功 | 控制点误差 | 失败原因 |',
                    '|---|---:|---:|---:|---:|---:|---|---:|---|']
         for label, records in records_by_label.items():
             r = records.get(pair_id, {})
@@ -125,6 +125,7 @@ def main():
 
     report += ['## 使用说明', '',
                '- `ratio_matches → inverse_consistency_matches → outlier_filter_matches` 的下降位置，可区分 descriptor 比率筛选、逆一致性、几何异常值过滤造成的匹配损失。',
+               '- `geometry_inliers` 是第一阶段几何估计的内点数；若启用 matching trick，`geometry_inlier_rate` 可能来自第二阶段，因此二者不应直接相除。',
                '- `grid_coverage` 是 4×4 网格的已占用比例，只作空间覆盖诊断；不会参与此次测试的匹配或几何估计。',
                '- 报告仅比较同一 FIMD 协议、同一 seed、同一 ep149 权重下的推理观测。']
     (args.output_dir / 'pair_diagnostics_report.md').write_text('\n'.join(report) + '\n', encoding='utf-8')
