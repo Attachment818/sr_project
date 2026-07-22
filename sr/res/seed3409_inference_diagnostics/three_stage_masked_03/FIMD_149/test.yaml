@@ -3,7 +3,7 @@ FIMD:
   data_root: /home/data1/zhangjunhong/sr_project/sr/data/FIMD
 
 PREDICT:
-  device: cuda:1
+  device: cuda:0
   model_type: with_vessel_only_masked
   model_save_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3409_vessel_schedule_controls/seed3409_three_stage_masked_03_50_005_0_50/seed3409_three_stage_masked_03_50_005_0_50_ep149.pth
   resize_refer_to_query: true
