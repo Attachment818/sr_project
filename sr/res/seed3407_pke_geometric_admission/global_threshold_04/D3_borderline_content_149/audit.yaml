@@ -1,0 +1,6 @@
+AUDIT:
+  device: cuda:0
+  train_config_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/train.yaml
+  checkpoint_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149.pth
+  output_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/D3_borderline_content_149/borderline_content_audit.json
+  affine_passes: 5
