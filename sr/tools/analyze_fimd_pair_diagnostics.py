@@ -96,7 +96,7 @@ def main():
                 row[f'{label}__refer_grid_coverage'] = region_value(record, 'returned_refer_regions')
             writer.writerow(row)
 
-    report = ['# seed3409 FIMD 逐对推理诊断', '', '## 全体 70 对的聚合统计', '',
+    report = ['# FIMD 逐对推理诊断', '', '## 全体 70 对的聚合统计', '',
               '| 方法 | 有记录对数 | 配准成功率 | 最终匹配数均值 | 第一阶段几何内点均值 | 最终几何内点率均值 | Query 覆盖均值 | Refer 覆盖均值 | 成功对控制点误差均值 |',
               '|---|---:|---:|---:|---:|---:|---:|---:|---:|']
     for label, records in records_by_label.items():
