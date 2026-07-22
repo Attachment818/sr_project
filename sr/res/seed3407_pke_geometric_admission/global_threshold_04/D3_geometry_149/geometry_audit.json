@@ -1,0 +1,75 @@
+{
+  "raw_nms_candidates": 589020,
+  "in_bounds_candidates": 538024,
+  "out_of_bounds_candidates": 50996,
+  "regions": {
+    "vessel_core": {
+      "count": 361949,
+      "geometric_pass_count": 336368,
+      "local_rescue_count": 5257,
+      "affine_score_histogram": [
+        5287,
+        6040,
+        6160,
+        8094,
+        16783,
+        63720,
+        126609,
+        69168,
+        40004,
+        20084
+      ],
+      "geometric_pass_rate": 0.9293242970694766,
+      "local_rescue_rate": 0.014524145666930976,
+      "mean_affine_score": 0.6497220408561587,
+      "mean_local_max_score": 0.6745061734404035
+    },
+    "vessel_edge": {
+      "count": 33575,
+      "geometric_pass_count": 24765,
+      "local_rescue_count": 1102,
+      "affine_score_histogram": [
+        1871,
+        2537,
+        2137,
+        2265,
+        2999,
+        5165,
+        6631,
+        5298,
+        3846,
+        826
+      ],
+      "geometric_pass_rate": 0.737602382725242,
+      "local_rescue_rate": 0.03282204020848846,
+      "mean_affine_score": 0.5448744766768074,
+      "mean_local_max_score": 0.5798181412163587
+    },
+    "non_vessel": {
+      "count": 142500,
+      "geometric_pass_count": 85125,
+      "local_rescue_count": 5041,
+      "affine_score_histogram": [
+        13543,
+        17729,
+        13095,
+        13008,
+        14995,
+        21188,
+        21711,
+        15677,
+        9904,
+        1650
+      ],
+      "geometric_pass_rate": 0.5973684210526315,
+      "local_rescue_rate": 0.03537543859649123,
+      "mean_affine_score": 0.4581428621177039,
+      "mean_local_max_score": 0.48723621370363257
+    }
+  },
+  "config": {
+    "affine_passes": 5,
+    "local_radius": 8,
+    "geometric_threshold": 0.4
+  }
+}
