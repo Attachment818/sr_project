@@ -2085,14 +2085,21 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
         self.pke_geometric_relaxed_thresh = float(
             cfg.get('pke_geometric_relaxed_thresh', self.pke_geometric_thresh)
         )
+        self.pke_geometric_relax_start_epoch = int(
+            cfg.get('pke_geometric_relax_start_epoch', 0)
+        )
         self.pke_geometric_relax_until_epoch = int(
             cfg.get('pke_geometric_relax_until_epoch', 0)
         )
-        if self.pke_geometric_schedule_mode not in {'constant', 'relax_then_base'}:
+        if self.pke_geometric_schedule_mode not in {
+            'constant', 'relax_then_base', 'strict_relax_strict'
+        }:
             raise ValueError(
                 f"Unknown pke_geometric_schedule_mode: {self.pke_geometric_schedule_mode}"
             )
-        if self.pke_geometric_schedule_mode == 'relax_then_base':
+        if self.pke_geometric_schedule_mode in {
+            'relax_then_base', 'strict_relax_strict'
+        }:
             if not 0 <= self.pke_geometric_relaxed_thresh <= self.pke_geometric_thresh:
                 raise ValueError(
                     'pke_geometric_relaxed_thresh must be in [0, geometric_thresh]'
@@ -2100,6 +2107,12 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
             if self.pke_geometric_relax_until_epoch <= 0:
                 raise ValueError(
                     'pke_geometric_relax_until_epoch must be positive for relax_then_base'
+                )
+            if self.pke_geometric_schedule_mode == 'strict_relax_strict' and not (
+                0 <= self.pke_geometric_relax_start_epoch < self.pke_geometric_relax_until_epoch
+            ):
+                raise ValueError(
+                    'strict_relax_strict requires 0 <= relax_start_epoch < relax_until_epoch'
                 )
         self.current_epoch = 0
         self.save_pke_diagnostics = bool(cfg.get('save_pke_diagnostics', False))
@@ -2161,6 +2174,12 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
         if (
             self.pke_geometric_schedule_mode == 'relax_then_base'
             and self.current_epoch < self.pke_geometric_relax_until_epoch
+        ):
+            return self.pke_geometric_relaxed_thresh
+        if (
+            self.pke_geometric_schedule_mode == 'strict_relax_strict'
+            and self.pke_geometric_relax_start_epoch <= self.current_epoch
+            < self.pke_geometric_relax_until_epoch
         ):
             return self.pke_geometric_relaxed_thresh
         return self.pke_geometric_thresh
