@@ -2077,6 +2077,30 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
             raise ValueError(
                 f"Unknown vessel_schedule_mode: {self.vessel_schedule_mode}"
             )
+        # PKE geometry admission can optionally follow a separate curriculum.
+        # Defaults preserve every existing experiment: the configured threshold
+        # remains fixed throughout training.
+        self.pke_geometric_thresh = float(cfg.get('geometric_thresh', 0.5))
+        self.pke_geometric_schedule_mode = cfg.get('pke_geometric_schedule_mode', 'constant')
+        self.pke_geometric_relaxed_thresh = float(
+            cfg.get('pke_geometric_relaxed_thresh', self.pke_geometric_thresh)
+        )
+        self.pke_geometric_relax_until_epoch = int(
+            cfg.get('pke_geometric_relax_until_epoch', 0)
+        )
+        if self.pke_geometric_schedule_mode not in {'constant', 'relax_then_base'}:
+            raise ValueError(
+                f"Unknown pke_geometric_schedule_mode: {self.pke_geometric_schedule_mode}"
+            )
+        if self.pke_geometric_schedule_mode == 'relax_then_base':
+            if not 0 <= self.pke_geometric_relaxed_thresh <= self.pke_geometric_thresh:
+                raise ValueError(
+                    'pke_geometric_relaxed_thresh must be in [0, geometric_thresh]'
+                )
+            if self.pke_geometric_relax_until_epoch <= 0:
+                raise ValueError(
+                    'pke_geometric_relax_until_epoch must be positive for relax_then_base'
+                )
         self.current_epoch = 0
         self.save_pke_diagnostics = bool(cfg.get('save_pke_diagnostics', False))
         self.pke_diagnostic_grid_size = int(cfg.get('pke_diagnostic_grid_size', 8))
@@ -2098,7 +2122,8 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
             f"threshold={self.vessel_mask_threshold}，"
             f"stage1_epochs={self.stage1_epochs}，"
             f"stage2_vessel_weight={self.vessel_weight_stage2}，"
-            f"schedule={self.vessel_schedule_mode}"
+            f"schedule={self.vessel_schedule_mode}，"
+            f"pke_geometry={self.pke_geometric_schedule_mode}"
         )
 
     def _build_vessel_masks(self, images):
@@ -2130,6 +2155,15 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
             return self.vessel_weight_floor
         progress = stage2_step / float(self.stage2_decay)
         return self.vessel_weight_stage2 + (self.vessel_weight - self.vessel_weight_stage2) * (1.0 - progress)
+
+    def _get_pke_geometric_thresh(self):
+        """Return the PKE admission threshold for the current training epoch."""
+        if (
+            self.pke_geometric_schedule_mode == 'relax_then_base'
+            and self.current_epoch < self.pke_geometric_relax_until_epoch
+        ):
+            return self.pke_geometric_relaxed_thresh
+        return self.pke_geometric_thresh
 
     def forward(self, x, label_point_positions=None, value_map=None, learn_index=None):
         self.last_pke_diagnostics = None
@@ -2166,12 +2200,16 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
             loss_cal = self.dice
             pke_stage_points = None
             if len(learn_index[0]) != 0:
+                # Never mutate self.config: the per-step override is isolated
+                # to this PKE call and leaves legacy configurations unchanged.
+                pke_config = dict(self.config)
+                pke_config['geometric_thresh'] = self._get_pke_geometric_thresh()
                 pke_result = pke_learn(
                     detector_pred[learn_index], descriptor_pred[learn_index],
                     grid_inverse[learn_index], affine_detector_pred[learn_index],
                     affine_descriptor_pred[learn_index], self.kernel, loss_cal,
                     label_point_positions[learn_index], value_map[learn_index],
-                    self.config, self.PKE_learn,
+                    pke_config, self.PKE_learn,
                     return_stage_points=self.save_pke_diagnostics,
                     vessel_masks=None if vessel_mask is None else vessel_mask[learn_index],
                     relaxed_non_core_thresh=self.pke_region_relaxed_threshold,
