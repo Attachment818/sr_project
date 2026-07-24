@@ -1,8 +1,4 @@
 sr/
-├── 实验规划（2026-07-24）
-│   ├── seed3407_descriptor_consistency_g1_v1/: G1-main，CUDA 0，双向 PKE 加弱反馈
-│   ├── seed3407_descriptor_consistency_g1hard_v1/: G1-hard，CUDA 1，仅双向 PKE 通过点
-│   └── seed3407_g0_baseline_fimd_chain_d0/: D0，CUDA 2，baseline 与 G0 的 FIMD 链条诊断
 ├── common/
 │   ├── common_util.py
 │   ├── eval_util.py
@@ -5264,6 +5260,179 @@ sr/
 │   │           ├── inference_diagnostics.jsonl
 │   │           ├── test.log
 │   │           └── test.yaml
+│   ├── seed3407_descriptor_consistency_g1_v1/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
+│   │   └── train.yaml
+│   ├── seed3407_descriptor_consistency_g1hard_v1/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
+│   │   └── train.yaml
+│   ├── seed3407_g0_baseline_fimd_chain_d0/
+│   │   ├── baseline_FIMD_149/
+│   │   │   ├── aligned_images/
+│   │   │   ├── diagnostics/
+│   │   │   │   └── inference_diagnostics.jsonl
+│   │   │   ├── match_images/
+│   │   │   ├── paper_figures/
+│   │   │   │   ├── control_points_01_r_t/
+│   │   │   │   ├── control_points_02_r_t/
+│   │   │   │   ├── control_points_03_r_t/
+│   │   │   │   ├── control_points_04_r_t/
+│   │   │   │   ├── control_points_05_r_t/
+│   │   │   │   ├── control_points_06_r_t/
+│   │   │   │   ├── control_points_07_r_t/
+│   │   │   │   ├── control_points_08_r_t/
+│   │   │   │   ├── control_points_09_r_t/
+│   │   │   │   ├── control_points_10_r_t/
+│   │   │   │   ├── control_points_11_r_t/
+│   │   │   │   ├── control_points_12_r_t/
+│   │   │   │   ├── control_points_13_r_t/
+│   │   │   │   ├── control_points_14_r_t/
+│   │   │   │   ├── control_points_15_r_t/
+│   │   │   │   ├── control_points_16_r_t/
+│   │   │   │   ├── control_points_17_r_t/
+│   │   │   │   ├── control_points_18_r_t/
+│   │   │   │   ├── control_points_19_r_t/
+│   │   │   │   ├── control_points_20_r_t/
+│   │   │   │   ├── control_points_21_r_t/
+│   │   │   │   ├── control_points_22_r_t/
+│   │   │   │   ├── control_points_23_r_t/
+│   │   │   │   ├── control_points_24_r_t/
+│   │   │   │   ├── control_points_25_r_t/
+│   │   │   │   ├── control_points_26_r_t/
+│   │   │   │   ├── control_points_27_r_t/
+│   │   │   │   ├── control_points_28_r_t/
+│   │   │   │   ├── control_points_29_r_t/
+│   │   │   │   ├── control_points_30_r_t/
+│   │   │   │   ├── control_points_31_r_t/
+│   │   │   │   ├── control_points_32_r_t/
+│   │   │   │   ├── control_points_33_r_t/
+│   │   │   │   ├── control_points_34_r_t/
+│   │   │   │   ├── control_points_35_r_t/
+│   │   │   │   ├── control_points_36_r_t/
+│   │   │   │   ├── control_points_37_r_t/
+│   │   │   │   ├── control_points_38_r_t/
+│   │   │   │   ├── control_points_39_r_t/
+│   │   │   │   ├── control_points_40_r_t/
+│   │   │   │   ├── control_points_41_r_t/
+│   │   │   │   ├── control_points_42_r_t/
+│   │   │   │   ├── control_points_43_r_t/
+│   │   │   │   ├── control_points_44_r_t/
+│   │   │   │   ├── control_points_45_r_t/
+│   │   │   │   ├── control_points_46_r_t/
+│   │   │   │   ├── control_points_47_r_t/
+│   │   │   │   ├── control_points_48_r_t/
+│   │   │   │   ├── control_points_49_r_t/
+│   │   │   │   ├── control_points_50_r_t/
+│   │   │   │   ├── control_points_51_r_t/
+│   │   │   │   ├── control_points_52_r_t/
+│   │   │   │   ├── control_points_53_r_t/
+│   │   │   │   ├── control_points_54_r_t/
+│   │   │   │   ├── control_points_55_r_t/
+│   │   │   │   ├── control_points_56_r_t/
+│   │   │   │   ├── control_points_57_r_t/
+│   │   │   │   ├── control_points_58_r_t/
+│   │   │   │   ├── control_points_59_r_t/
+│   │   │   │   ├── control_points_60_r_t/
+│   │   │   │   ├── control_points_61_r_t/
+│   │   │   │   ├── control_points_62_r_t/
+│   │   │   │   ├── control_points_63_r_t/
+│   │   │   │   ├── control_points_64_r_t/
+│   │   │   │   ├── control_points_65_r_t/
+│   │   │   │   ├── control_points_66_r_t/
+│   │   │   │   ├── control_points_67_r_t/
+│   │   │   │   ├── control_points_68_r_t/
+│   │   │   │   ├── control_points_69_r_t/
+│   │   │   │   └── control_points_70_r_t/
+│   │   │   ├── FIMD_point_errors.txt
+│   │   │   └── test.yaml
+│   │   ├── g0_FIMD_149/
+│   │   │   ├── aligned_images/
+│   │   │   ├── diagnostics/
+│   │   │   │   └── inference_diagnostics.jsonl
+│   │   │   ├── match_images/
+│   │   │   ├── paper_figures/
+│   │   │   │   ├── control_points_01_r_t/
+│   │   │   │   ├── control_points_02_r_t/
+│   │   │   │   ├── control_points_03_r_t/
+│   │   │   │   ├── control_points_04_r_t/
+│   │   │   │   ├── control_points_05_r_t/
+│   │   │   │   ├── control_points_06_r_t/
+│   │   │   │   ├── control_points_07_r_t/
+│   │   │   │   ├── control_points_08_r_t/
+│   │   │   │   ├── control_points_09_r_t/
+│   │   │   │   ├── control_points_10_r_t/
+│   │   │   │   ├── control_points_11_r_t/
+│   │   │   │   ├── control_points_12_r_t/
+│   │   │   │   ├── control_points_13_r_t/
+│   │   │   │   ├── control_points_14_r_t/
+│   │   │   │   ├── control_points_15_r_t/
+│   │   │   │   ├── control_points_16_r_t/
+│   │   │   │   ├── control_points_17_r_t/
+│   │   │   │   ├── control_points_18_r_t/
+│   │   │   │   ├── control_points_19_r_t/
+│   │   │   │   ├── control_points_20_r_t/
+│   │   │   │   ├── control_points_21_r_t/
+│   │   │   │   ├── control_points_22_r_t/
+│   │   │   │   ├── control_points_23_r_t/
+│   │   │   │   ├── control_points_24_r_t/
+│   │   │   │   ├── control_points_25_r_t/
+│   │   │   │   ├── control_points_26_r_t/
+│   │   │   │   ├── control_points_27_r_t/
+│   │   │   │   ├── control_points_28_r_t/
+│   │   │   │   ├── control_points_29_r_t/
+│   │   │   │   ├── control_points_30_r_t/
+│   │   │   │   ├── control_points_31_r_t/
+│   │   │   │   ├── control_points_32_r_t/
+│   │   │   │   ├── control_points_33_r_t/
+│   │   │   │   ├── control_points_34_r_t/
+│   │   │   │   ├── control_points_35_r_t/
+│   │   │   │   ├── control_points_36_r_t/
+│   │   │   │   ├── control_points_37_r_t/
+│   │   │   │   ├── control_points_38_r_t/
+│   │   │   │   ├── control_points_39_r_t/
+│   │   │   │   ├── control_points_40_r_t/
+│   │   │   │   ├── control_points_41_r_t/
+│   │   │   │   ├── control_points_42_r_t/
+│   │   │   │   ├── control_points_43_r_t/
+│   │   │   │   ├── control_points_44_r_t/
+│   │   │   │   ├── control_points_45_r_t/
+│   │   │   │   ├── control_points_46_r_t/
+│   │   │   │   ├── control_points_47_r_t/
+│   │   │   │   ├── control_points_48_r_t/
+│   │   │   │   ├── control_points_49_r_t/
+│   │   │   │   ├── control_points_50_r_t/
+│   │   │   │   ├── control_points_51_r_t/
+│   │   │   │   ├── control_points_52_r_t/
+│   │   │   │   ├── control_points_53_r_t/
+│   │   │   │   ├── control_points_54_r_t/
+│   │   │   │   ├── control_points_55_r_t/
+│   │   │   │   ├── control_points_56_r_t/
+│   │   │   │   ├── control_points_57_r_t/
+│   │   │   │   ├── control_points_58_r_t/
+│   │   │   │   ├── control_points_59_r_t/
+│   │   │   │   ├── control_points_60_r_t/
+│   │   │   │   ├── control_points_61_r_t/
+│   │   │   │   ├── control_points_62_r_t/
+│   │   │   │   ├── control_points_63_r_t/
+│   │   │   │   ├── control_points_64_r_t/
+│   │   │   │   ├── control_points_65_r_t/
+│   │   │   │   ├── control_points_66_r_t/
+│   │   │   │   ├── control_points_67_r_t/
+│   │   │   │   ├── control_points_68_r_t/
+│   │   │   │   ├── control_points_69_r_t/
+│   │   │   │   └── control_points_70_r_t/
+│   │   │   ├── FIMD_point_errors.txt
+│   │   │   └── test.yaml
+│   │   ├── summary/
+│   │   │   ├── pair_diagnostics_comparison.csv
+│   │   │   └── pair_diagnostics_report.md
+│   │   └── pipeline.log
 │   ├── seed3407_inference_diagnostics/
 │   │   ├── c0_constant_masked/
 │   │   │   └── FIMD_149/
