@@ -28,7 +28,10 @@ def mapping_points(grid, points, h, w):
 
 
 def content_filter(descriptor_pred, affine_descriptor_pred, geo_points,
-                   affine_geo_points, content_thresh=0.7, scale=8):
+                   affine_geo_points, content_thresh=0.7, scale=8,
+                   mode='one_way', weak_feedback=False,
+                   strong_feedback_multiplier=1, weak_feedback_multiplier=1,
+                   return_feedback_weights=False):
     """
     content-based matching in paper
     :param descriptor_pred: descriptors of input_image images
@@ -37,7 +40,13 @@ def content_filter(descriptor_pred, affine_descriptor_pred, geo_points,
     :param affine_geo_points:
     :param content_thresh:
     :param scale: down sampling size of descriptor_pred
-    :return: content-filtered keypoints
+    :param mode: ``one_way`` preserves the original PKE criterion.  In
+        ``bidirectional`` mode the known affine correspondence must also be
+        the nearest-neighbour ratio match in the reverse direction.
+    :param weak_feedback: in bidirectional mode, retain forward-valid but
+        reverse-invalid points with a smaller value-map update multiplier.
+        They remain subject to the original geometry and forward content gate.
+    :return: content-filtered keypoints, and optionally integer feedback weights
     """
 
     descriptors = [sample_keypoint_desc(k[None], d[None], scale)[0].permute(1, 0)
@@ -46,6 +55,11 @@ def content_filter(descriptor_pred, affine_descriptor_pred, geo_points,
                        for k, d in zip(affine_geo_points, affine_descriptor_pred)]
     content_points = []
     affine_content_points = []
+    feedback_weights = []
+    if mode not in {'one_way', 'bidirectional'}:
+        raise ValueError(f'Unknown PKE content mode: {mode}')
+    if strong_feedback_multiplier < 1 or weak_feedback_multiplier < 1:
+        raise ValueError('PKE feedback multipliers must be at least 1')
     dist = [torch.norm(descriptors[d][:, None] - aff_descriptors[d], dim=2, p=2)
             for d in range(len(descriptors))]
     for i in range(len(dist)):
@@ -53,6 +67,7 @@ def content_filter(descriptor_pred, affine_descriptor_pred, geo_points,
         if len(D) <= 1:
             content_points.append([])
             affine_content_points.append([])
+            feedback_weights.append(torch.empty(0, dtype=torch.long, device=D.device))
             continue
         val, ind = torch.topk(D, 2, dim=1, largest=False)
 
@@ -62,9 +77,29 @@ def content_filter(descriptor_pred, affine_descriptor_pred, geo_points,
         # rule2 pass the ratio test
         c2 = val[:, 0] < val[:, 1] * content_thresh
 
-        check = c2 * c1
+        forward_check = c2 & c1
+        if mode == 'one_way':
+            strong_check = forward_check
+            weak_check = torch.zeros_like(forward_check)
+        else:
+            reverse_val, reverse_ind = torch.topk(D, 2, dim=0, largest=False)
+            reverse_check = (
+                (reverse_ind[0] == arange.to(reverse_ind.device))
+                & (reverse_val[0] < reverse_val[1] * content_thresh)
+            )
+            strong_check = forward_check & reverse_check
+            weak_check = forward_check & ~reverse_check if weak_feedback else torch.zeros_like(forward_check)
+        check = strong_check | weak_check
         content_points.append(geo_points[i][check])
         affine_content_points.append(affine_geo_points[i][check])
+        weights = torch.full(
+            (len(D),), strong_feedback_multiplier, dtype=torch.long, device=D.device
+        )
+        if weak_feedback:
+            weights[weak_check] = weak_feedback_multiplier
+        feedback_weights.append(weights[check])
+    if return_feedback_weights:
+        return content_points, affine_content_points, feedback_weights
     return content_points, affine_content_points
 
 
@@ -138,6 +173,10 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
     enhanced_label = None
     geometric_thresh = config['geometric_thresh']
     content_thresh = config['content_thresh']
+    content_mode = config.get('pke_content_mode', 'one_way')
+    weak_feedback = bool(config.get('pke_content_weak_feedback', False))
+    strong_feedback_multiplier = int(config.get('pke_content_strong_feedback_multiplier', 1))
+    weak_feedback_multiplier = int(config.get('pke_content_weak_feedback_multiplier', 1))
     with torch.no_grad():
         h, w = detector_pred.shape[2:]
 
@@ -155,9 +194,13 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
 
 
         # content matching
-        content_points, affine_contend_points = content_filter(descriptor_pred, affine_descriptor_pred, geo_points,
-                                                               affine_geo_points, content_thresh=content_thresh,
-                                                               scale=scale)
+        content_points, affine_contend_points, content_feedback_weights = content_filter(
+            descriptor_pred, affine_descriptor_pred, geo_points, affine_geo_points,
+            content_thresh=content_thresh, scale=scale, mode=content_mode,
+            weak_feedback=weak_feedback, strong_feedback_multiplier=strong_feedback_multiplier,
+            weak_feedback_multiplier=weak_feedback_multiplier,
+            return_feedback_weights=True,
+        )
         enhanced_label_pts = []
         value_map_points = []
         for step in range(len(content_points)):
@@ -168,7 +211,10 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
             else:
                 positions = positions[0]
 
-            final_points = update_value_map(value_map[step], content_points[step], config)
+            final_points = update_value_map(
+                value_map[step], content_points[step], config,
+                point_weights=content_feedback_weights[step],
+            )
             value_map_points.append(final_points.detach().clone())
 
             # final_points = torch.cat((final_points, positions))
@@ -227,6 +273,17 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
         'detector_candidates': [copy_stage_points(point) for point in points],
         'geometric_pass': [copy_stage_points(point) for point in geo_points],
         'content_pass': [copy_stage_points(point) for point in content_points],
+        # These two stages expose G1's decision without affecting the loss or
+        # value map.  In legacy one-way mode all accepted points are strong.
+        'content_strong_pass': [
+            copy_stage_points(point[weights == strong_feedback_multiplier])
+            for point, weights in zip(content_points, content_feedback_weights)
+        ],
+        'content_weak_pass': [
+            copy_stage_points(point[weights == weak_feedback_multiplier])
+            if weak_feedback else copy_stage_points(point[:0])
+            for point, weights in zip(content_points, content_feedback_weights)
+        ],
         'value_map_points': [copy_stage_points(point) for point in value_map_points],
     }
     return (*result, stage_points)

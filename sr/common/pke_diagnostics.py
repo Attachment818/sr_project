@@ -8,6 +8,8 @@ PKE_STAGES = (
     'detector_candidates',
     'geometric_pass',
     'content_pass',
+    'content_strong_pass',
+    'content_weak_pass',
     'value_map_points',
 )
 
@@ -55,8 +57,14 @@ def summarize_pke_stages(stage_points, vessel_masks, image_shape, grid_size=8):
     for index in range(len(vessel_masks)):
         record = {'grid_size': int(grid_size), 'stages': {}}
         for stage in PKE_STAGES:
+            # Older saved diagnostic callers may not provide the optional G1
+            # split; represent it as a true zero-count stage rather than
+            # changing their training behaviour or failing the audit.
+            points = stage_points.get(stage)
+            if points is None:
+                points = [vessel_masks.new_empty((0, 2))] * len(vessel_masks)
             record['stages'][stage] = _summarize_points(
-                stage_points[stage][index], vessel_masks[index], image_shape, grid_size
+                points[index], vessel_masks[index], image_shape, grid_size
             )
         records.append(record)
     return records

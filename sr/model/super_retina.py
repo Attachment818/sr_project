@@ -2115,6 +2115,22 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
                     'strict_relax_strict requires 0 <= relax_start_epoch < relax_until_epoch'
                 )
         self.current_epoch = 0
+        # PKE content matching defaults to the historical one-way criterion.
+        # These validations make the G1 training options explicit while
+        # leaving every older YAML fully compatible.
+        self.pke_content_mode = cfg.get('pke_content_mode', 'one_way')
+        self.pke_content_weak_feedback = bool(cfg.get('pke_content_weak_feedback', False))
+        self.pke_content_strong_feedback_multiplier = int(
+            cfg.get('pke_content_strong_feedback_multiplier', 1)
+        )
+        self.pke_content_weak_feedback_multiplier = int(
+            cfg.get('pke_content_weak_feedback_multiplier', 1)
+        )
+        if self.pke_content_mode not in {'one_way', 'bidirectional'}:
+            raise ValueError(f'Unknown pke_content_mode: {self.pke_content_mode}')
+        if (self.pke_content_strong_feedback_multiplier < 1
+                or self.pke_content_weak_feedback_multiplier < 1):
+            raise ValueError('PKE content feedback multipliers must be at least 1')
         self.save_pke_diagnostics = bool(cfg.get('save_pke_diagnostics', False))
         self.pke_diagnostic_grid_size = int(cfg.get('pke_diagnostic_grid_size', 8))
         relaxed_threshold = cfg.get('pke_region_relaxed_threshold')
