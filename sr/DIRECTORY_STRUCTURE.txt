@@ -1,4 +1,8 @@
 sr/
+├── 实验规划（2026-07-24）
+│   ├── seed3407_descriptor_consistency_g1_v1/: G1-main，CUDA 0，双向 PKE 加弱反馈
+│   ├── seed3407_descriptor_consistency_g1hard_v1/: G1-hard，CUDA 1，仅双向 PKE 通过点
+│   └── seed3407_g0_baseline_fimd_chain_d0/: D0，CUDA 2，baseline 与 G0 的 FIMD 链条诊断
 ├── common/
 │   ├── common_util.py
 │   ├── eval_util.py
