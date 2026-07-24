@@ -168,6 +168,18 @@ if __name__ == '__main__':
     print(f"  - resume_optimizer: {resume_optimizer}")
     print(f"  - is_value_map_save: {train_config.get('is_value_map_save')}")
     print(f"  - resume_value_map: {train_config.get('resume_value_map', False)}")
+    print(f"  - pke_content_mode: {train_config.get('pke_content_mode', 'one_way')}")
+    print(f"  - pke_content_weak_feedback: {train_config.get('pke_content_weak_feedback', False)}")
+    print(f"  - pke_content_strong_feedback_multiplier: "
+          f"{train_config.get('pke_content_strong_feedback_multiplier', 1)}")
+    print(f"  - pke_content_weak_feedback_multiplier: "
+          f"{train_config.get('pke_content_weak_feedback_multiplier', 1)}")
+    print(f"  - pke_content_mode: {train_config.get('pke_content_mode', 'one_way')}")
+    print(f"  - pke_content_weak_feedback: {train_config.get('pke_content_weak_feedback', False)}")
+    print(f"  - pke_content_strong_feedback_multiplier: "
+          f"{train_config.get('pke_content_strong_feedback_multiplier', 1)}")
+    print(f"  - pke_content_weak_feedback_multiplier: "
+          f"{train_config.get('pke_content_weak_feedback_multiplier', 1)}")
 
     model = train_model(
         model,

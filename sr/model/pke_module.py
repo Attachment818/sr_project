@@ -273,17 +273,6 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
         'detector_candidates': [copy_stage_points(point) for point in points],
         'geometric_pass': [copy_stage_points(point) for point in geo_points],
         'content_pass': [copy_stage_points(point) for point in content_points],
-        # These two stages expose G1's decision without affecting the loss or
-        # value map.  In legacy one-way mode all accepted points are strong.
-        'content_strong_pass': [
-            copy_stage_points(point[weights == strong_feedback_multiplier])
-            for point, weights in zip(content_points, content_feedback_weights)
-        ],
-        'content_weak_pass': [
-            copy_stage_points(point[weights == weak_feedback_multiplier])
-            if weak_feedback else copy_stage_points(point[:0])
-            for point, weights in zip(content_points, content_feedback_weights)
-        ],
         'value_map_points': [copy_stage_points(point) for point in value_map_points],
     }
     return (*result, stage_points)

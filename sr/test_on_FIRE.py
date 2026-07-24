@@ -62,7 +62,12 @@ else:
     save_dir = f'/home/data1/zhangjunhong/sr_project/sr/res/{model_stem}'
 os.makedirs(save_dir, exist_ok=True)
 save_inference_diagnostics = config['PREDICT'].get('save_inference_diagnostics', False)
-diagnostics_path = os.path.join(save_dir, 'inference_diagnostics.jsonl')
+diagnostics_dir = config['PREDICT'].get('inference_diagnostics_dir', save_dir)
+if not os.path.isabs(diagnostics_dir):
+    diagnostics_dir = os.path.abspath(os.path.join(os.path.dirname(config_path), diagnostics_dir))
+if save_inference_diagnostics:
+    os.makedirs(diagnostics_dir, exist_ok=True)
+diagnostics_path = os.path.join(diagnostics_dir, 'inference_diagnostics.jsonl')
 if save_inference_diagnostics and os.path.exists(diagnostics_path):
     os.remove(diagnostics_path)
 
