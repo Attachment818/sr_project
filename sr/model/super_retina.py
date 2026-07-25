@@ -208,6 +208,10 @@ class SuperRetina(nn.Module):
             with torch.no_grad():
                 dis = torch.norm(descriptor - affine_descriptor, dim=0)
                 dis[ar, ar] = dis.max() + 1
+                min_negative_distance = float(self.config.get('descriptor_hard_negative_min_distance', 0.0))
+                if min_negative_distance > 0:
+                    spatial = torch.cdist(keypoints[i].float(), keypoints[i].float())
+                    dis[spatial < min_negative_distance] = dis.max() + 1
                 neg_index1 = dis.argmin(axis=1)
 
             positive.append(affine_descriptor[:, 0, :].permute(1, 0))
