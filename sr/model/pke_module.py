@@ -103,23 +103,6 @@ def content_filter(descriptor_pred, affine_descriptor_pred, geo_points,
     return content_points, affine_content_points
 
 
-def select_diagnostic_feedback_points(point, weights, multiplier, device):
-    """Return a diagnostic feedback subset without changing PKE decisions.
-
-    ``content_filter`` intentionally represents a sample with fewer than two
-    candidates as ``[]``.  This helper normalizes only the diagnostic copy, so
-    a boolean Tensor mask is never applied to that Python list.
-    """
-    if not torch.is_tensor(point):
-        return torch.empty((0, 2), dtype=torch.long, device=device)
-    if point.numel() == 0:
-        return point.detach().clone()
-    weight_tensor = torch.as_tensor(weights, device=point.device)
-    if weight_tensor.numel() != len(point):
-        raise ValueError('PKE feedback weights must align with content points')
-    return point[weight_tensor == multiplier].detach().clone()
-
-
 def geometric_filter(affine_detector_pred, points, affine_points, max_num=1024, geometric_thresh=0.5,
                      vessel_masks=None, relaxed_non_core_thresh=None):
     """
@@ -286,20 +269,25 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
             return point.detach().clone()
         return torch.empty((0, 2), dtype=torch.long, device=detector_pred.device)
 
+    def select_feedback_stage(point, weights, multiplier):
+        """Select a diagnostic subset while preserving valid empty-list PKE cases."""
+        if not torch.is_tensor(point) or point.numel() == 0:
+            return copy_stage_points(point)
+        weight_tensor = torch.as_tensor(weights, device=point.device)
+        if weight_tensor.numel() != len(point):
+            raise ValueError('PKE feedback weights must align with content points')
+        return copy_stage_points(point[weight_tensor == multiplier])
+
     stage_points = {
         'detector_candidates': [copy_stage_points(point) for point in points],
         'geometric_pass': [copy_stage_points(point) for point in geo_points],
         'content_pass': [copy_stage_points(point) for point in content_points],
         'content_strong_pass': [
-            select_diagnostic_feedback_points(
-                point, weights, strong_feedback_multiplier, detector_pred.device
-            )
+            select_feedback_stage(point, weights, strong_feedback_multiplier)
             for point, weights in zip(content_points, content_feedback_weights)
         ],
         'content_weak_pass': [
-            select_diagnostic_feedback_points(
-                point, weights, weak_feedback_multiplier, detector_pred.device
-            )
+            select_feedback_stage(point, weights, weak_feedback_multiplier)
             if weak_feedback else copy_stage_points(point[:0])
             for point, weights in zip(content_points, content_feedback_weights)
         ],
