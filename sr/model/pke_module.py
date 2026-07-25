@@ -269,16 +269,25 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
             return point.detach().clone()
         return torch.empty((0, 2), dtype=torch.long, device=detector_pred.device)
 
+    def select_feedback_stage(point, weights, multiplier):
+        """Select a diagnostic subset while preserving valid empty-list PKE cases."""
+        if not torch.is_tensor(point) or point.numel() == 0:
+            return copy_stage_points(point)
+        weight_tensor = torch.as_tensor(weights, device=point.device)
+        if weight_tensor.numel() != len(point):
+            raise ValueError('PKE feedback weights must align with content points')
+        return copy_stage_points(point[weight_tensor == multiplier])
+
     stage_points = {
         'detector_candidates': [copy_stage_points(point) for point in points],
         'geometric_pass': [copy_stage_points(point) for point in geo_points],
         'content_pass': [copy_stage_points(point) for point in content_points],
         'content_strong_pass': [
-            copy_stage_points(point[weights == strong_feedback_multiplier])
+            select_feedback_stage(point, weights, strong_feedback_multiplier)
             for point, weights in zip(content_points, content_feedback_weights)
         ],
         'content_weak_pass': [
-            copy_stage_points(point[weights == weak_feedback_multiplier])
+            select_feedback_stage(point, weights, weak_feedback_multiplier)
             if weak_feedback else copy_stage_points(point[:0])
             for point, weights in zip(content_points, content_feedback_weights)
         ],

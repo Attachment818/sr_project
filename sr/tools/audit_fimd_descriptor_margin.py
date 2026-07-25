@@ -3,6 +3,7 @@ import argparse, csv, json, sys
 from pathlib import Path
 import cv2, numpy as np, torch, yaml
 from PIL import Image
+from tqdm import tqdm
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -18,13 +19,18 @@ def main():
     p.add_argument('--source', action='append', required=True, type=source)
     p.add_argument('--output-dir', required=True, type=Path)
     p.add_argument('--device', default='cuda:0')
-    p.add_argument('--pair', action='append', default=['39_r_t', '40_r_t'])
+    p.add_argument('--pair', action='append', default=[],
+                   help='FIMD pair id; defaults to 39_r_t and 40_r_t when omitted')
     a = p.parse_args(); a.output_dir.mkdir(parents=True, exist_ok=True)
+    pair_ids = a.pair or ['39_r_t', '40_r_t']
     rows=[]
-    for label, cfg_path in a.source:
+    for label, cfg_path in tqdm(a.source, desc='Loading descriptor sources', unit='model'):
         cfg=yaml.safe_load(cfg_path.read_text(encoding='utf-8')); cfg['PREDICT']['device']=a.device; pred=Predictor(cfg)
         pairs={x['pair_name']:x for x in list_fimd_pairs(cfg['FIMD']['data_root'])}
-        for pair_id in a.pair:
+        missing = [pair_id for pair_id in pair_ids if pair_id not in pairs]
+        if missing:
+            raise KeyError(f'Unknown FIMD pair id(s): {missing}')
+        for pair_id in tqdm(pair_ids, desc=f'Auditing {label}', leave=False, unit='pair'):
             item=pairs[pair_id]; q,r=pred.image_read(item['query_im_path'], item['refer_im_path'])
             q_t=pred.trasformer(Image.fromarray(q)); r_t=pred.trasformer(Image.fromarray(r))
             k,d=pred.model_run_pair(q_t,r_t); qd=d[0].permute(1,0).numpy(); rd=d[1].permute(1,0).numpy()

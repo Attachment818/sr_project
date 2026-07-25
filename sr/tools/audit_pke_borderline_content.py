@@ -15,6 +15,7 @@ import numpy as np
 import torch
 import yaml
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
@@ -76,8 +77,13 @@ def main():
                         for band in BANDS} for region in REGIONS}
 
     with torch.no_grad():
-        for _ in range(passes):
-            for images, _, _, _ in loader:
+        for pass_index in range(passes):
+            for images, _, _, _ in tqdm(
+                    loader,
+                    desc=f'PKE audit affine pass {pass_index + 1}/{passes}',
+                    leave=False,
+                    unit='batch',
+            ):
                 images = images.to(device)
                 detector, descriptor = model.network(images)
                 affine_tensor, _, grid_inverse = affine_images(images, used_for='detector')
