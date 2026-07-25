@@ -177,6 +177,8 @@ if __name__ == '__main__':
     print(f"  - pke_descriptor_feedback_weight: {train_config.get('pke_descriptor_feedback_weight', 0.0)}")
     print(f"  - pke_descriptor_margin: {train_config.get('pke_descriptor_margin', 0.2)}")
     print(f"  - pke_descriptor_negative_distance: {train_config.get('pke_descriptor_negative_distance', 16.0)}")
+    print(f"  - descriptor_hard_negative_min_distance: "
+          f"{train_config.get('descriptor_hard_negative_min_distance', 0.0)}")
 
     model = train_model(
         model,
