@@ -163,7 +163,8 @@ class SuperRetina(nn.Module):
         descriptors, affine_descriptors, keypoints = \
             sample_descriptors(detector_pred, descriptor_pred, affine_descriptor_pred, grid_inverse,
                                nms_size=self.nms_size, nms_thresh=self.nms_thresh, scale=self.scale,
-                               affine_detector_pred=affine_detector_pred)
+                               affine_detector_pred=affine_detector_pred,
+                               return_valid_keypoints=True)
 
         # descriptors_tmp = []
         # affine_descriptor_tmp = []
@@ -211,6 +212,11 @@ class SuperRetina(nn.Module):
                 min_negative_distance = float(self.config.get('descriptor_hard_negative_min_distance', 0.0))
                 if min_negative_distance > 0:
                     spatial = torch.cdist(keypoints[i].float(), keypoints[i].float())
+                    if spatial.shape != dis.shape:
+                        raise RuntimeError(
+                            'Descriptor hard-negative spatial coordinates must align with '
+                            'the sampled descriptor matrix'
+                        )
                     dis[spatial < min_negative_distance] = dis.max() + 1
                 neg_index1 = dis.argmin(axis=1)
 

@@ -187,7 +187,8 @@ def sample_keypoint_desc(keypoints, descriptors, s: int = 8):
 
 
 def sample_descriptors(detector_pred, descriptor_pred, affine_descriptor_pred, grid_inverse,
-                       nms_size=10, nms_thresh=0.1, scale=8, affine_detector_pred=None):
+                       nms_size=10, nms_thresh=0.1, scale=8, affine_detector_pred=None,
+                       return_valid_keypoints=False):
     """
     sample descriptors based on keypoints
     :param affine_descriptor_pred:
@@ -197,6 +198,9 @@ def sample_descriptors(detector_pred, descriptor_pred, affine_descriptor_pred, g
     :param nms_size
     :param nms_thresh
     :param scale: down sampling size of detector
+    :param return_valid_keypoints: return only source keypoints whose affine
+        projections are in bounds.  Defaults to False to preserve the legacy
+        third return value.
     :return: sampled descriptors
     """
     B, _, h, w = detector_pred.shape
@@ -220,4 +224,4 @@ def sample_descriptors(detector_pred, descriptor_pred, affine_descriptor_pred, g
                    for k, d in zip(kp, descriptor_pred)] ## None相当于是unsqueeze（0）加上batch维度，最后通过【0】变回原来格式
     affine_descriptors = [sample_keypoint_desc(k[None], d[None], s=scale)[0]
                           for k, d in zip(affine_kp, affine_descriptor_pred)]
-    return descriptors, affine_descriptors, keypoints
+    return descriptors, affine_descriptors, (kp if return_valid_keypoints else keypoints)

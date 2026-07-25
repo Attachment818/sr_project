@@ -1,7 +1,8 @@
-# 实验目录补充（2026-07-25）：G2-v1 保留其失败日志，不复用；G2-v2 为修复后独立重跑目录。
+# 实验目录补充（2026-07-25）：G2-v1、G3-v1 保留其失败日志，不复用；v2 为修复后独立重跑目录。
 # sr/res/seed3407_pke_descriptor_feedback_g2_v1/  （已中止，不再写入）
 # sr/res/seed3407_pke_descriptor_feedback_g2_v2/  （PKE 描述子闭环，CUDA 0）
-# sr/res/seed3407_descriptor_spatial_negative_g3_v1/  （空间排除描述子负样本，CUDA 1）
+# sr/res/seed3407_descriptor_spatial_negative_g3_v1/  （已中止，不再写入）
+# sr/res/seed3407_descriptor_spatial_negative_g3_v2/  （空间排除描述子负样本，CUDA 1）
 sr/
 ├── common/
 │   ├── common_util.py
