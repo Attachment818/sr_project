@@ -1,0 +1,6 @@
+AUDIT:
+  device: cuda:0
+  affine_passes: 5
+  train_config_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_descriptor_consistency_g1_v1/train.yaml
+  checkpoint_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_descriptor_consistency_g1_v1/seed3407_descriptor_consistency_g1_v1_ep149.pth
+  output_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_descriptor_consistency_g1_d1/g1_main_pke_feedback_audit.json

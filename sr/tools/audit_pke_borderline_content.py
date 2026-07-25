@@ -71,7 +71,9 @@ def main():
     model = SuperRetinaWithVesselOnlyMasked(config, device=device)
     model.load_pretrained_weights(audit['checkpoint_path'], device=device, strict=False)
     model.eval()
-    results = {region: {band: {'count': 0, 'content_pass_count': 0} for band in BANDS} for region in REGIONS}
+    results = {region: {band: {'count': 0, 'forward_pass_count': 0,
+                               'strong_pass_count': 0, 'weak_pass_count': 0}
+                        for band in BANDS} for region in REGIONS}
 
     with torch.no_grad():
         for _ in range(passes):
@@ -93,7 +95,12 @@ def main():
                     distances = torch.cdist(desc, affine_desc, p=2)
                     values, indices = torch.topk(distances, 2, dim=1, largest=False)
                     order = torch.arange(len(points_one), device=device)
-                    content_pass = (indices[:, 0] == order) & (values[:, 0] < values[:, 1] * config['content_thresh'])
+                    forward_pass = (indices[:, 0] == order) & (values[:, 0] < values[:, 1] * config['content_thresh'])
+                    reverse_values, reverse_indices = torch.topk(distances, 2, dim=0, largest=False)
+                    reverse_pass = ((reverse_indices[0] == order)
+                                    & (reverse_values[0] < reverse_values[1] * config['content_thresh']))
+                    strong_pass = forward_pass & reverse_pass
+                    weak_pass = forward_pass & ~reverse_pass
                     for index, (point, affine_point) in enumerate(zip(points_one, affine_one)):
                         x, y = int(point[0]), int(point[1])
                         ax = min(width - 1, max(0, int(affine_point[0])))
@@ -101,12 +108,17 @@ def main():
                         band = score_band(float(affine_detector[batch_index, 0, ay, ax]))
                         region = classify_point(vessel_masks[batch_index], x, y)
                         results[region][band]['count'] += 1
-                        results[region][band]['content_pass_count'] += int(content_pass[index])
+                        results[region][band]['forward_pass_count'] += int(forward_pass[index])
+                        results[region][band]['strong_pass_count'] += int(strong_pass[index])
+                        results[region][band]['weak_pass_count'] += int(weak_pass[index])
 
     for region in REGIONS:
         for band in BANDS:
             item = results[region][band]
-            item['content_pass_rate'] = item['content_pass_count'] / item['count'] if item['count'] else 0.0
+            denom = item['count'] or 1
+            item['forward_pass_rate'] = item['forward_pass_count'] / denom
+            item['strong_pass_rate'] = item['strong_pass_count'] / denom
+            item['weak_pass_rate'] = item['weak_pass_count'] / denom
     output = {'config': {'affine_passes': passes, 'content_threshold': config['content_thresh']}, 'regions': results}
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(output, ensure_ascii=False, indent=2), encoding='utf-8')

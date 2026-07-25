@@ -1,0 +1,10 @@
+AUDIT:
+  device: cuda:1
+  pairs: ['39_r_t', '40_r_t']
+  sources:
+    - label: baseline
+      config: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_g0_baseline_fimd_chain_d0/baseline_FIMD_149/test.yaml
+    - label: G0
+      config: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_g0_baseline_fimd_chain_d0/g0_FIMD_149/test.yaml
+    - label: G1_main
+      config: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_descriptor_consistency_g1_v1/FIMD_149/test.yaml
