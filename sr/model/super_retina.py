@@ -2,7 +2,7 @@ import random
 import sys
 import time
 
-from model.pke_module import pke_learn
+from model.pke_module import pke_learn, mapping_points, geometric_filter, content_filter
 
 from torch.nn import functional as F
 import torch
@@ -2126,11 +2126,18 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
         self.pke_content_weak_feedback_multiplier = int(
             cfg.get('pke_content_weak_feedback_multiplier', 1)
         )
+        self.pke_descriptor_feedback_weight = float(cfg.get('pke_descriptor_feedback_weight', 0.0))
+        self.pke_descriptor_margin = float(cfg.get('pke_descriptor_margin', 0.2))
+        self.pke_descriptor_negative_distance = float(
+            cfg.get('pke_descriptor_negative_distance', 16.0)
+        )
         if self.pke_content_mode not in {'one_way', 'bidirectional'}:
             raise ValueError(f'Unknown pke_content_mode: {self.pke_content_mode}')
         if (self.pke_content_strong_feedback_multiplier < 1
                 or self.pke_content_weak_feedback_multiplier < 1):
             raise ValueError('PKE content feedback multipliers must be at least 1')
+        if self.pke_descriptor_feedback_weight < 0 or self.pke_descriptor_margin < 0:
+            raise ValueError('PKE descriptor feedback weight and margin must be non-negative')
         self.save_pke_diagnostics = bool(cfg.get('save_pke_diagnostics', False))
         self.pke_diagnostic_grid_size = int(cfg.get('pke_diagnostic_grid_size', 8))
         relaxed_threshold = cfg.get('pke_region_relaxed_threshold')
@@ -2199,6 +2206,41 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
         ):
             return self.pke_geometric_relaxed_thresh
         return self.pke_geometric_thresh
+
+    def _pke_descriptor_feedback_loss(self, detector_pred, descriptor_pred, grid_inverse,
+                                      affine_detector_pred, affine_descriptor_pred, affine_x, learn_index):
+        """Directly train descriptors from bidirectionally verified PKE pairs."""
+        if self.pke_descriptor_feedback_weight <= 0 or len(learn_index[0]) == 0:
+            return descriptor_pred.sum() * 0
+        with torch.no_grad():
+            candidates = nms(detector_pred[learn_index], nms_thresh=self.nms_thresh,
+                             nms_size=self.nms_size)
+            points, affine_points = mapping_points(grid_inverse[learn_index], candidates,
+                                                   detector_pred.shape[-2], detector_pred.shape[-1])
+            geo, affine_geo = geometric_filter(affine_detector_pred[learn_index], points, affine_points,
+                                               geometric_thresh=self._get_pke_geometric_thresh())
+            pairs, affine_pairs = content_filter(descriptor_pred[learn_index].detach(),
+                                                 affine_descriptor_pred[learn_index].detach(),
+                                                 geo, affine_geo, mode='bidirectional')
+        # Recompute the affine descriptor branch with gradients; pair selection above is detached.
+        _, affine_desc = self.network(affine_x)
+        losses = []
+        for local, (pts, aff_pts) in enumerate(zip(pairs, affine_pairs)):
+            if not torch.is_tensor(pts) or len(pts) < 2:
+                continue
+            anchor = sample_keypoint_desc(pts[None], descriptor_pred[learn_index][local:local + 1], s=8)[0].T
+            positive = sample_keypoint_desc(aff_pts[None], affine_desc[learn_index][local:local + 1], s=8)[0].T
+            distances = torch.cdist(anchor, positive)
+            spatial = torch.cdist(pts.float(), pts.float()) >= self.pke_descriptor_negative_distance
+            inf = torch.full_like(distances, float('inf'))
+            neg_q = torch.where(spatial, distances, inf).min(dim=1).values
+            neg_r = torch.where(spatial, distances, inf).min(dim=0).values
+            pos = distances.diag()
+            valid = torch.isfinite(neg_q) & torch.isfinite(neg_r)
+            if valid.any():
+                losses.append((F.relu(pos[valid] - neg_q[valid] + self.pke_descriptor_margin).mean() +
+                               F.relu(pos[valid] - neg_r[valid] + self.pke_descriptor_margin).mean()) * 0.5)
+        return torch.stack(losses).mean() if losses else descriptor_pred.sum() * 0
 
     def forward(self, x, label_point_positions=None, value_map=None, learn_index=None):
         self.last_pke_diagnostics = None
@@ -2290,6 +2332,11 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
             loss_descriptor, descriptor_train_flag = self.descriptor_loss(
                 detector_pred_copy, label_point_positions,
                 descriptor_pred, affine_descriptor_pred_for_desc, grid_inverse_for_desc)
+            pke_descriptor_loss = self._pke_descriptor_feedback_loss(
+                detector_pred, descriptor_pred, grid_inverse, affine_detector_pred,
+                affine_descriptor_pred, affine_x, learn_index,
+            )
+            loss_descriptor = loss_descriptor + self.pke_descriptor_feedback_weight * pke_descriptor_loss
 
             if self.PKE_learn and len(learn_index[0]) != 0:
                 value_map[learn_index] = value_map_update

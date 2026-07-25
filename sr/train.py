@@ -174,6 +174,9 @@ if __name__ == '__main__':
           f"{train_config.get('pke_content_strong_feedback_multiplier', 1)}")
     print(f"  - pke_content_weak_feedback_multiplier: "
           f"{train_config.get('pke_content_weak_feedback_multiplier', 1)}")
+    print(f"  - pke_descriptor_feedback_weight: {train_config.get('pke_descriptor_feedback_weight', 0.0)}")
+    print(f"  - pke_descriptor_margin: {train_config.get('pke_descriptor_margin', 0.2)}")
+    print(f"  - pke_descriptor_negative_distance: {train_config.get('pke_descriptor_negative_distance', 16.0)}")
 
     model = train_model(
         model,
