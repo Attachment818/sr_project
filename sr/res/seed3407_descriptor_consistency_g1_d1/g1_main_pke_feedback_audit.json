@@ -1,0 +1,95 @@
+{
+  "config": {
+    "affine_passes": 5,
+    "content_threshold": 0.7
+  },
+  "regions": {
+    "vessel_core": {
+      "low_below_04": {
+        "count": 22687,
+        "forward_pass_count": 6713,
+        "strong_pass_count": 6595,
+        "weak_pass_count": 118,
+        "forward_pass_rate": 0.2958963282937365,
+        "strong_pass_rate": 0.2906951117379997,
+        "weak_pass_rate": 0.0052012165557367655
+      },
+      "borderline_04_to_05": {
+        "count": 21917,
+        "forward_pass_count": 9650,
+        "strong_pass_count": 9538,
+        "weak_pass_count": 112,
+        "forward_pass_rate": 0.4402974859697951,
+        "strong_pass_rate": 0.43518729753159646,
+        "weak_pass_rate": 0.005110188438198659
+      },
+      "standard_at_least_05": {
+        "count": 341506,
+        "forward_pass_count": 173515,
+        "strong_pass_count": 171787,
+        "weak_pass_count": 1728,
+        "forward_pass_rate": 0.5080877056332832,
+        "strong_pass_rate": 0.5030277652515622,
+        "weak_pass_rate": 0.005059940381720965
+      }
+    },
+    "vessel_edge": {
+      "low_below_04": {
+        "count": 7837,
+        "forward_pass_count": 3327,
+        "strong_pass_count": 3282,
+        "weak_pass_count": 45,
+        "forward_pass_rate": 0.4245246905703713,
+        "strong_pass_rate": 0.418782697460763,
+        "weak_pass_rate": 0.0057419931096082686
+      },
+      "borderline_04_to_05": {
+        "count": 4937,
+        "forward_pass_count": 2584,
+        "strong_pass_count": 2560,
+        "weak_pass_count": 24,
+        "forward_pass_rate": 0.5233947741543448,
+        "strong_pass_rate": 0.5185335223820133,
+        "weak_pass_rate": 0.0048612517723313755
+      },
+      "standard_at_least_05": {
+        "count": 33249,
+        "forward_pass_count": 17372,
+        "strong_pass_count": 17208,
+        "weak_pass_count": 164,
+        "forward_pass_rate": 0.5224818791542603,
+        "strong_pass_rate": 0.5175493999819544,
+        "weak_pass_rate": 0.004932479172305934
+      }
+    },
+    "non_vessel": {
+      "low_below_04": {
+        "count": 119978,
+        "forward_pass_count": 58032,
+        "strong_pass_count": 57437,
+        "weak_pass_count": 595,
+        "forward_pass_rate": 0.4836886762573138,
+        "strong_pass_rate": 0.4787294337295171,
+        "weak_pass_rate": 0.004959242527796763
+      },
+      "borderline_04_to_05": {
+        "count": 47054,
+        "forward_pass_count": 26166,
+        "strong_pass_count": 25952,
+        "weak_pass_count": 214,
+        "forward_pass_rate": 0.5560844986611128,
+        "strong_pass_rate": 0.5515365324945807,
+        "weak_pass_rate": 0.00454796616653207
+      },
+      "standard_at_least_05": {
+        "count": 203664,
+        "forward_pass_count": 106844,
+        "strong_pass_count": 105893,
+        "weak_pass_count": 951,
+        "forward_pass_rate": 0.5246091601854034,
+        "strong_pass_rate": 0.5199397046115171,
+        "weak_pass_rate": 0.004669455573886401
+      }
+    }
+  }
+}

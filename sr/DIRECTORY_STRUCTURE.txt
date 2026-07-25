@@ -1,11 +1,4 @@
 sr/
-├── 实验规划（2026-07-24）
-│   ├── seed3407_descriptor_consistency_g1_v1/: G1-main，CUDA 0，双向 PKE 加弱反馈
-│   ├── seed3407_descriptor_consistency_g1hard_v1/: G1-hard，CUDA 1，仅双向 PKE 通过点
-│   └── seed3407_g0_baseline_fimd_chain_d0/: D0，CUDA 2，baseline 与 G0 的 FIMD 链条诊断
-├── 短诊断（2026-07-25）
-│   ├── seed3407_descriptor_consistency_g1_d1/: CUDA 0，PKE 强/弱反馈只读审计
-│   └── seed3407_fimd_descriptor_margin_d2/: CUDA 1，cp39/cp40 descriptor ratio-margin 审计
 ├── common/
 │   ├── common_util.py
 │   ├── eval_util.py
@@ -5267,6 +5260,12 @@ sr/
 │   │           ├── inference_diagnostics.jsonl
 │   │           ├── test.log
 │   │           └── test.yaml
+│   ├── seed3407_descriptor_consistency_g1_d1/
+│   │   ├── g1_hard_audit.yaml
+│   │   ├── g1_hard_pke_feedback_audit.json
+│   │   ├── g1_main_audit.yaml
+│   │   ├── g1_main_pke_feedback_audit.json
+│   │   └── pipeline.log
 │   ├── seed3407_descriptor_consistency_g1_v1/
 │   │   ├── FIMD_149/
 │   │   │   ├── aligned_images/
@@ -5724,6 +5723,11 @@ sr/
 │   │   ├── seed3407_descriptor_consistency_g1hard_v1_ep149_epoch49.pth
 │   │   ├── seed3407_descriptor_consistency_g1hard_v1_ep149_epoch99.pth
 │   │   └── train.yaml
+│   ├── seed3407_fimd_descriptor_margin_d2/
+│   │   ├── audit_sources.yaml
+│   │   ├── descriptor_margin_summary.csv
+│   │   ├── descriptor_margin_summary.json
+│   │   └── pipeline.log
 │   ├── seed3407_g0_baseline_fimd_chain_d0/
 │   │   ├── baseline_FIMD_149/
 │   │   │   ├── aligned_images/
@@ -13715,6 +13719,7 @@ sr/
 │   └── shared_ep45_perceptual_branch.pth
 ├── tools/
 │   ├── analyze_fimd_pair_diagnostics.py
+│   ├── audit_fimd_descriptor_margin.py
 │   ├── audit_pke_borderline_content.py
 │   ├── audit_pke_geometry.py
 │   ├── audit_value_maps.py

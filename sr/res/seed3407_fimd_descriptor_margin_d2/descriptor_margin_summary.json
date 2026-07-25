@@ -1,0 +1,290 @@
+[
+  {
+    "method": "baseline",
+    "pair_id": "control_points_39_r_t",
+    "stage": "all",
+    "count": 280,
+    "ratio_mean": 0.9582887887954712,
+    "ratio_p90": 0.9966776847839356
+  },
+  {
+    "method": "baseline",
+    "pair_id": "control_points_39_r_t",
+    "stage": "ratio",
+    "count": 29,
+    "ratio_mean": 0.850753903388977,
+    "ratio_p90": 0.8904600739479065
+  },
+  {
+    "method": "baseline",
+    "pair_id": "control_points_39_r_t",
+    "stage": "mutual_ratio",
+    "count": 28,
+    "ratio_mean": 0.8493745923042297,
+    "ratio_p90": 0.8905409574508667
+  },
+  {
+    "method": "baseline",
+    "pair_id": "control_points_40_r_t",
+    "stage": "all",
+    "count": 288,
+    "ratio_mean": 0.9629961848258972,
+    "ratio_p90": 0.997110778093338
+  },
+  {
+    "method": "baseline",
+    "pair_id": "control_points_40_r_t",
+    "stage": "ratio",
+    "count": 25,
+    "ratio_mean": 0.8487136363983154,
+    "ratio_p90": 0.8956546306610107
+  },
+  {
+    "method": "baseline",
+    "pair_id": "control_points_40_r_t",
+    "stage": "mutual_ratio",
+    "count": 25,
+    "ratio_mean": 0.8487136363983154,
+    "ratio_p90": 0.8956546306610107
+  },
+  {
+    "method": "baseline",
+    "pair_id": "control_points_39_r_t",
+    "stage": "all",
+    "count": 280,
+    "ratio_mean": 0.9582887887954712,
+    "ratio_p90": 0.9966776847839356
+  },
+  {
+    "method": "baseline",
+    "pair_id": "control_points_39_r_t",
+    "stage": "ratio",
+    "count": 29,
+    "ratio_mean": 0.850753903388977,
+    "ratio_p90": 0.8904600739479065
+  },
+  {
+    "method": "baseline",
+    "pair_id": "control_points_39_r_t",
+    "stage": "mutual_ratio",
+    "count": 28,
+    "ratio_mean": 0.8493745923042297,
+    "ratio_p90": 0.8905409574508667
+  },
+  {
+    "method": "baseline",
+    "pair_id": "control_points_40_r_t",
+    "stage": "all",
+    "count": 288,
+    "ratio_mean": 0.9629961848258972,
+    "ratio_p90": 0.997110778093338
+  },
+  {
+    "method": "baseline",
+    "pair_id": "control_points_40_r_t",
+    "stage": "ratio",
+    "count": 25,
+    "ratio_mean": 0.8487136363983154,
+    "ratio_p90": 0.8956546306610107
+  },
+  {
+    "method": "baseline",
+    "pair_id": "control_points_40_r_t",
+    "stage": "mutual_ratio",
+    "count": 25,
+    "ratio_mean": 0.8487136363983154,
+    "ratio_p90": 0.8956546306610107
+  },
+  {
+    "method": "G0",
+    "pair_id": "control_points_39_r_t",
+    "stage": "all",
+    "count": 318,
+    "ratio_mean": 0.9596484899520874,
+    "ratio_p90": 0.9963373899459839
+  },
+  {
+    "method": "G0",
+    "pair_id": "control_points_39_r_t",
+    "stage": "ratio",
+    "count": 34,
+    "ratio_mean": 0.8365603089332581,
+    "ratio_p90": 0.8856240212917328
+  },
+  {
+    "method": "G0",
+    "pair_id": "control_points_39_r_t",
+    "stage": "mutual_ratio",
+    "count": 33,
+    "ratio_mean": 0.835406482219696,
+    "ratio_p90": 0.8857004046440125
+  },
+  {
+    "method": "G0",
+    "pair_id": "control_points_40_r_t",
+    "stage": "all",
+    "count": 320,
+    "ratio_mean": 0.965877890586853,
+    "ratio_p90": 0.9971289932727814
+  },
+  {
+    "method": "G0",
+    "pair_id": "control_points_40_r_t",
+    "stage": "ratio",
+    "count": 24,
+    "ratio_mean": 0.8555513024330139,
+    "ratio_p90": 0.8967278897762299
+  },
+  {
+    "method": "G0",
+    "pair_id": "control_points_40_r_t",
+    "stage": "mutual_ratio",
+    "count": 24,
+    "ratio_mean": 0.8555513024330139,
+    "ratio_p90": 0.8967278897762299
+  },
+  {
+    "method": "G0",
+    "pair_id": "control_points_39_r_t",
+    "stage": "all",
+    "count": 318,
+    "ratio_mean": 0.9596484899520874,
+    "ratio_p90": 0.9963373899459839
+  },
+  {
+    "method": "G0",
+    "pair_id": "control_points_39_r_t",
+    "stage": "ratio",
+    "count": 34,
+    "ratio_mean": 0.8365603089332581,
+    "ratio_p90": 0.8856240212917328
+  },
+  {
+    "method": "G0",
+    "pair_id": "control_points_39_r_t",
+    "stage": "mutual_ratio",
+    "count": 33,
+    "ratio_mean": 0.835406482219696,
+    "ratio_p90": 0.8857004046440125
+  },
+  {
+    "method": "G0",
+    "pair_id": "control_points_40_r_t",
+    "stage": "all",
+    "count": 320,
+    "ratio_mean": 0.965877890586853,
+    "ratio_p90": 0.9971289932727814
+  },
+  {
+    "method": "G0",
+    "pair_id": "control_points_40_r_t",
+    "stage": "ratio",
+    "count": 24,
+    "ratio_mean": 0.8555513024330139,
+    "ratio_p90": 0.8967278897762299
+  },
+  {
+    "method": "G0",
+    "pair_id": "control_points_40_r_t",
+    "stage": "mutual_ratio",
+    "count": 24,
+    "ratio_mean": 0.8555513024330139,
+    "ratio_p90": 0.8967278897762299
+  },
+  {
+    "method": "G1_main",
+    "pair_id": "control_points_39_r_t",
+    "stage": "all",
+    "count": 396,
+    "ratio_mean": 0.9611563086509705,
+    "ratio_p90": 0.9952143430709839
+  },
+  {
+    "method": "G1_main",
+    "pair_id": "control_points_39_r_t",
+    "stage": "ratio",
+    "count": 36,
+    "ratio_mean": 0.8484152555465698,
+    "ratio_p90": 0.8938438296318054
+  },
+  {
+    "method": "G1_main",
+    "pair_id": "control_points_39_r_t",
+    "stage": "mutual_ratio",
+    "count": 36,
+    "ratio_mean": 0.8484152555465698,
+    "ratio_p90": 0.8938438296318054
+  },
+  {
+    "method": "G1_main",
+    "pair_id": "control_points_40_r_t",
+    "stage": "all",
+    "count": 393,
+    "ratio_mean": 0.9683083295822144,
+    "ratio_p90": 0.9970975875854492
+  },
+  {
+    "method": "G1_main",
+    "pair_id": "control_points_40_r_t",
+    "stage": "ratio",
+    "count": 19,
+    "ratio_mean": 0.8608344197273254,
+    "ratio_p90": 0.8952983975410461
+  },
+  {
+    "method": "G1_main",
+    "pair_id": "control_points_40_r_t",
+    "stage": "mutual_ratio",
+    "count": 19,
+    "ratio_mean": 0.8608344197273254,
+    "ratio_p90": 0.8952983975410461
+  },
+  {
+    "method": "G1_main",
+    "pair_id": "control_points_39_r_t",
+    "stage": "all",
+    "count": 396,
+    "ratio_mean": 0.9611563086509705,
+    "ratio_p90": 0.9952143430709839
+  },
+  {
+    "method": "G1_main",
+    "pair_id": "control_points_39_r_t",
+    "stage": "ratio",
+    "count": 36,
+    "ratio_mean": 0.8484152555465698,
+    "ratio_p90": 0.8938438296318054
+  },
+  {
+    "method": "G1_main",
+    "pair_id": "control_points_39_r_t",
+    "stage": "mutual_ratio",
+    "count": 36,
+    "ratio_mean": 0.8484152555465698,
+    "ratio_p90": 0.8938438296318054
+  },
+  {
+    "method": "G1_main",
+    "pair_id": "control_points_40_r_t",
+    "stage": "all",
+    "count": 393,
+    "ratio_mean": 0.9683083295822144,
+    "ratio_p90": 0.9970975875854492
+  },
+  {
+    "method": "G1_main",
+    "pair_id": "control_points_40_r_t",
+    "stage": "ratio",
+    "count": 19,
+    "ratio_mean": 0.8608344197273254,
+    "ratio_p90": 0.8952983975410461
+  },
+  {
+    "method": "G1_main",
+    "pair_id": "control_points_40_r_t",
+    "stage": "mutual_ratio",
+    "count": 19,
+    "ratio_mean": 0.8608344197273254,
+    "ratio_p90": 0.8952983975410461
+  }
+]
