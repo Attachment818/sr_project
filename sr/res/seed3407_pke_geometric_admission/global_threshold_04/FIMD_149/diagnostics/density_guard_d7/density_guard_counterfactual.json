@@ -1,0 +1,86 @@
+{
+  "audit_type": "read_only_pke_density_core_support_gate",
+  "train_config_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/train.yaml",
+  "checkpoint_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149.pth",
+  "value_map_dir": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/value_maps",
+  "device": "cuda:0",
+  "affine_passes": 1,
+  "grid_size": 8,
+  "low_density_max_peaks": 4,
+  "noncore_boost_multiplier": 2,
+  "min_core_peak_retention": 0.98,
+  "require_core_coverage_non_decrease": true,
+  "eligible_labeled_samples": 256,
+  "gate": {
+    "accepted_images": 239,
+    "rejected_low_core_count": 0,
+    "rejected_core_coverage": 17,
+    "baseline_core_peaks": 53340,
+    "potential_core_peaks": 53280,
+    "guarded_core_peaks": 53306,
+    "baseline_core_cells": 11162,
+    "potential_core_cells": 11146,
+    "guarded_core_cells": 11166,
+    "guarded_saturated_pixels": 7
+  },
+  "baseline_final": {
+    "total": 69756,
+    "by_region": {
+      "vessel_core": 53340,
+      "vessel_edge": 2818,
+      "non_vessel": 13598
+    },
+    "mean_grid_cells_per_image": 49.43359375,
+    "by_region_fraction": {
+      "vessel_core": 0.7646654051264408,
+      "vessel_edge": 0.0403979585985435,
+      "non_vessel": 0.19493663627501576
+    }
+  },
+  "potential_policy_final": {
+    "total": 69957,
+    "by_region": {
+      "vessel_core": 53280,
+      "vessel_edge": 2832,
+      "non_vessel": 13845
+    },
+    "mean_grid_cells_per_image": 49.5390625,
+    "by_region_fraction": {
+      "vessel_core": 0.7616107037179982,
+      "vessel_edge": 0.04048201037780351,
+      "non_vessel": 0.1979072859041983
+    }
+  },
+  "guarded_policy_final": {
+    "total": 69941,
+    "by_region": {
+      "vessel_core": 53306,
+      "vessel_edge": 2832,
+      "non_vessel": 13803
+    },
+    "mean_grid_cells_per_image": 49.53515625,
+    "by_region_fraction": {
+      "vessel_core": 0.7621566749117114,
+      "vessel_edge": 0.040491271214309205,
+      "non_vessel": 0.1973520538739795
+    }
+  },
+  "density": {
+    "baseline": {
+      "occupied_cells_mean_per_image": 49.43359375,
+      "top1_cell_fraction_mean": 0.04494002441386836,
+      "top4_cell_fraction_mean": 0.16260607335240718
+    },
+    "potential": {
+      "occupied_cells_mean_per_image": 49.5390625,
+      "top1_cell_fraction_mean": 0.044791637945805776,
+      "top4_cell_fraction_mean": 0.16200440124857332
+    },
+    "guarded": {
+      "occupied_cells_mean_per_image": 49.53515625,
+      "top1_cell_fraction_mean": 0.04480089478032679,
+      "top4_cell_fraction_mean": 0.16206874530162146
+    }
+  },
+  "safety": "Every value map is cloned. value_map_save is never called; rejected images use the baseline clone."
+}

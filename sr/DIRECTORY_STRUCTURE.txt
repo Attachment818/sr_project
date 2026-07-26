@@ -7474,6 +7474,10 @@ sr/
 │   │   │   ├── FIMD_149/
 │   │   │   │   ├── aligned_images/
 │   │   │   │   ├── diagnostics/
+│   │   │   │   │   ├── density_guard_d7/
+│   │   │   │   │   │   ├── .gitkeep
+│   │   │   │   │   │   ├── audit.yaml
+│   │   │   │   │   │   └── density_guard_counterfactual.json
 │   │   │   │   │   ├── density_policy_d6/
 │   │   │   │   │   │   ├── .gitkeep
 │   │   │   │   │   │   ├── audit.yaml
@@ -7559,6 +7563,7 @@ sr/
 │   │   │   │   │   ├── control_points_68_r_t/
 │   │   │   │   │   ├── control_points_69_r_t/
 │   │   │   │   │   └── control_points_70_r_t/
+│   │   │   │   ├── density_guard_d7.log
 │   │   │   │   ├── density_policy_d6.log
 │   │   │   │   ├── FIMD_point_errors.txt
 │   │   │   │   ├── test.log
@@ -14218,6 +14223,7 @@ sr/
 │   ├── audit_fimd_inlier_geometry.py
 │   ├── audit_fimd_vessel_topology.py
 │   ├── audit_pke_borderline_content.py
+│   ├── audit_pke_density_guard.py
 │   ├── audit_pke_density_policy.py
 │   ├── audit_pke_geometry.py
 │   ├── audit_pke_region_feedback.py
@@ -14230,13 +14236,3 @@ sr/
 ├── test_on_FIMD.py
 ├── test_on_FIRE.py
 └── train.py
-
-2026-07-26 read-only core-support guard addition
-└── res/seed3407_pke_geometric_admission/global_threshold_04/FIMD_149/diagnostics/
-    └── density_guard_d7/
-        ├── audit.yaml
-        └── density_guard_counterfactual.json (generated on server; not committed)
-
-Tool: tools/audit_pke_density_guard.py
-  Applies the D6 non-core density boost only when per-image core peak support
-  remains at least 98% of baseline and core grid coverage does not decrease.
