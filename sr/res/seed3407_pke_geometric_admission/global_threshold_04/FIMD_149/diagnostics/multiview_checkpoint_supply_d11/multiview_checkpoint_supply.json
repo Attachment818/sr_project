@@ -1,0 +1,298 @@
+{
+  "audit_type": "read_only_pke_multiview_checkpoint_supply",
+  "train_config_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/train.yaml",
+  "device": "cuda:1",
+  "seed": 3407,
+  "grid_size": 8,
+  "outer_border_margin": 48,
+  "low_density_max_points_per_cell": 4,
+  "sources": [
+    {
+      "label": "epoch49",
+      "checkpoint_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149_epoch49.pth",
+      "eligible_labeled_samples": 256,
+      "buckets": {
+        "view1_content_pass": {
+          "total": 31795,
+          "by_region": {
+            "vessel_core": 28379,
+            "vessel_edge": 814,
+            "non_vessel": 2602
+          },
+          "outer_border": 267,
+          "inner_peripheral": 3340,
+          "mean_grid_occupied_cells": 32.265625,
+          "mean_top1_cell_fraction": 0.11934183633254714,
+          "mean_top4_cell_fraction": 0.3160844781152668,
+          "low_density_point_fraction": 0.36722755150180847,
+          "by_region_fraction": {
+            "vessel_core": 0.8925617235414374,
+            "vessel_edge": 0.02560150967133197,
+            "non_vessel": 0.0818367667872307
+          },
+          "outer_border_fraction": 0.008397546784085549,
+          "inner_peripheral_fraction": 0.10504796351627614
+        },
+        "view2_content_pass": {
+          "total": 29652,
+          "by_region": {
+            "vessel_core": 26320,
+            "vessel_edge": 780,
+            "non_vessel": 2552
+          },
+          "outer_border": 256,
+          "inner_peripheral": 3016,
+          "mean_grid_occupied_cells": 29.36328125,
+          "mean_top1_cell_fraction": 0.15121744099414594,
+          "mean_top4_cell_fraction": 0.35595946493087416,
+          "low_density_point_fraction": 0.3422028868204506,
+          "by_region_fraction": {
+            "vessel_core": 0.8876298394711992,
+            "vessel_edge": 0.026305139619587213,
+            "non_vessel": 0.08606502090921354
+          },
+          "outer_border_fraction": 0.008633481721300419,
+          "inner_peripheral_fraction": 0.10171320652907055
+        },
+        "stable_both_views": {
+          "total": 16162,
+          "by_region": {
+            "vessel_core": 14499,
+            "vessel_edge": 391,
+            "non_vessel": 1272
+          },
+          "outer_border": 59,
+          "inner_peripheral": 1212,
+          "mean_grid_occupied_cells": 20.3515625,
+          "mean_top1_cell_fraction": 0.20648171298924564,
+          "mean_top4_cell_fraction": 0.4459480886492036,
+          "low_density_point_fraction": 0.4776017819576785,
+          "by_region_fraction": {
+            "vessel_core": 0.8971043187724291,
+            "vessel_edge": 0.02419255042692736,
+            "non_vessel": 0.07870313080064348
+          },
+          "outer_border_fraction": 0.003650538299715382,
+          "inner_peripheral_fraction": 0.07499071897042445
+        },
+        "view1_only": {
+          "total": 15633,
+          "by_region": {
+            "vessel_core": 13880,
+            "vessel_edge": 423,
+            "non_vessel": 1330
+          },
+          "outer_border": 208,
+          "inner_peripheral": 2128,
+          "mean_grid_occupied_cells": 20.76953125,
+          "mean_top1_cell_fraction": 0.1712883222158476,
+          "mean_top4_cell_fraction": 0.41454056998343425,
+          "low_density_point_fraction": 0.5155760250751615,
+          "by_region_fraction": {
+            "vessel_core": 0.8878654129085908,
+            "vessel_edge": 0.027058146229130685,
+            "non_vessel": 0.08507644086227852
+          },
+          "outer_border_fraction": 0.013305187743875136,
+          "inner_peripheral_fraction": 0.13612230537964562
+        }
+      },
+      "rates": {
+        "stable_among_view1_content": 0.5083189180688787,
+        "stable_noncore_among_view1_noncore": 0.4868266978922717
+      }
+    },
+    {
+      "label": "epoch99",
+      "checkpoint_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149_epoch99.pth",
+      "eligible_labeled_samples": 256,
+      "buckets": {
+        "view1_content_pass": {
+          "total": 47444,
+          "by_region": {
+            "vessel_core": 39441,
+            "vessel_edge": 1779,
+            "non_vessel": 6224
+          },
+          "outer_border": 558,
+          "inner_peripheral": 4826,
+          "mean_grid_occupied_cells": 37.1328125,
+          "mean_top1_cell_fraction": 0.09046045518302213,
+          "mean_top4_cell_fraction": 0.2658607329820833,
+          "low_density_point_fraction": 0.2298920832982042,
+          "by_region_fraction": {
+            "vessel_core": 0.8313169210016019,
+            "vessel_edge": 0.037496838377877074,
+            "non_vessel": 0.13118624062052103
+          },
+          "outer_border_fraction": 0.011761234297276789,
+          "inner_peripheral_fraction": 0.10171992243487059
+        },
+        "view2_content_pass": {
+          "total": 43155,
+          "by_region": {
+            "vessel_core": 35640,
+            "vessel_edge": 1634,
+            "non_vessel": 5881
+          },
+          "outer_border": 503,
+          "inner_peripheral": 4242,
+          "mean_grid_occupied_cells": 33.8671875,
+          "mean_top1_cell_fraction": 0.11136487270929833,
+          "mean_top4_cell_fraction": 0.30227432592549525,
+          "low_density_point_fraction": 0.2302630054454872,
+          "by_region_fraction": {
+            "vessel_core": 0.8258602711157456,
+            "vessel_edge": 0.03786351523577801,
+            "non_vessel": 0.13627621364847642
+          },
+          "outer_border_fraction": 0.011655659830842312,
+          "inner_peripheral_fraction": 0.09829683698296837
+        },
+        "stable_both_views": {
+          "total": 27176,
+          "by_region": {
+            "vessel_core": 22921,
+            "vessel_edge": 970,
+            "non_vessel": 3285
+          },
+          "outer_border": 157,
+          "inner_peripheral": 1966,
+          "mean_grid_occupied_cells": 25.27734375,
+          "mean_top1_cell_fraction": 0.16010790719891538,
+          "mean_top4_cell_fraction": 0.3863651420057225,
+          "low_density_point_fraction": 0.30633647335884606,
+          "by_region_fraction": {
+            "vessel_core": 0.843428024727701,
+            "vessel_edge": 0.03569325875772741,
+            "non_vessel": 0.12087871651457167
+          },
+          "outer_border_fraction": 0.0057771563143950546,
+          "inner_peripheral_fraction": 0.07234324403885782
+        },
+        "view1_only": {
+          "total": 20268,
+          "by_region": {
+            "vessel_core": 16520,
+            "vessel_edge": 809,
+            "non_vessel": 2939
+          },
+          "outer_border": 401,
+          "inner_peripheral": 2860,
+          "mean_grid_occupied_cells": 22.8984375,
+          "mean_top1_cell_fraction": 0.1577741247727239,
+          "mean_top4_cell_fraction": 0.39839807249145504,
+          "low_density_point_fraction": 0.40665087823169527,
+          "by_region_fraction": {
+            "vessel_core": 0.8150779553976712,
+            "vessel_edge": 0.03991513716202882,
+            "non_vessel": 0.14500690744029998
+          },
+          "outer_border_fraction": 0.0197848825735149,
+          "inner_peripheral_fraction": 0.14110913755673968
+        }
+      },
+      "rates": {
+        "stable_among_view1_content": 0.5728016187505269,
+        "stable_noncore_among_view1_noncore": 0.5316756216418843
+      }
+    },
+    {
+      "label": "epoch149",
+      "checkpoint_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149.pth",
+      "eligible_labeled_samples": 256,
+      "buckets": {
+        "view1_content_pass": {
+          "total": 61032,
+          "by_region": {
+            "vessel_core": 45880,
+            "vessel_edge": 2523,
+            "non_vessel": 12629
+          },
+          "outer_border": 680,
+          "inner_peripheral": 6081,
+          "mean_grid_occupied_cells": 39.44921875,
+          "mean_top1_cell_fraction": 0.09647558162320999,
+          "mean_top4_cell_fraction": 0.2652099137732816,
+          "low_density_point_fraction": 0.15686852798531917,
+          "by_region_fraction": {
+            "vessel_core": 0.7517367938130817,
+            "vessel_edge": 0.0413389697208022,
+            "non_vessel": 0.20692423646611613
+          },
+          "outer_border_fraction": 0.011141696159391794,
+          "inner_peripheral_fraction": 0.09963625639009044
+        },
+        "view2_content_pass": {
+          "total": 55921,
+          "by_region": {
+            "vessel_core": 41609,
+            "vessel_edge": 2354,
+            "non_vessel": 11958
+          },
+          "outer_border": 662,
+          "inner_peripheral": 5487,
+          "mean_grid_occupied_cells": 36.27734375,
+          "mean_top1_cell_fraction": 0.09649615803434096,
+          "mean_top4_cell_fraction": 0.2664265530591474,
+          "low_density_point_fraction": 0.16124532823089716,
+          "by_region_fraction": {
+            "vessel_core": 0.7440675238282577,
+            "vessel_edge": 0.04209509844244559,
+            "non_vessel": 0.21383737772929667
+          },
+          "outer_border_fraction": 0.011838128788827096,
+          "inner_peripheral_fraction": 0.09812056293700042
+        },
+        "stable_both_views": {
+          "total": 35814,
+          "by_region": {
+            "vessel_core": 27471,
+            "vessel_edge": 1429,
+            "non_vessel": 6914
+          },
+          "outer_border": 203,
+          "inner_peripheral": 2566,
+          "mean_grid_occupied_cells": 27.7890625,
+          "mean_top1_cell_fraction": 0.13171980541016526,
+          "mean_top4_cell_fraction": 0.3341678976439654,
+          "low_density_point_fraction": 0.2242977606522589,
+          "by_region_fraction": {
+            "vessel_core": 0.7670464064332384,
+            "vessel_edge": 0.03990059753169152,
+            "non_vessel": 0.1930529960350701
+          },
+          "outer_border_fraction": 0.005668174456916289,
+          "inner_peripheral_fraction": 0.07164795889875468
+        },
+        "view1_only": {
+          "total": 25218,
+          "by_region": {
+            "vessel_core": 18409,
+            "vessel_edge": 1094,
+            "non_vessel": 5715
+          },
+          "outer_border": 477,
+          "inner_peripheral": 3515,
+          "mean_grid_occupied_cells": 24.921875,
+          "mean_top1_cell_fraction": 0.15424006739799082,
+          "mean_top4_cell_fraction": 0.38622102778737505,
+          "low_density_point_fraction": 0.32349908795304944,
+          "by_region_fraction": {
+            "vessel_core": 0.7299944484098659,
+            "vessel_edge": 0.04338171147592989,
+            "non_vessel": 0.22662384011420414
+          },
+          "outer_border_fraction": 0.01891506067094932,
+          "inner_peripheral_fraction": 0.13938456657942738
+        }
+      },
+      "rates": {
+        "stable_among_view1_content": 0.5868069209594966,
+        "stable_noncore_among_view1_noncore": 0.5506203801478353
+      }
+    }
+  ],
+  "interpretation": "This determines the available supply for a possible ranking-only feedback mechanism. No candidate is filtered or written to a value map.",
+  "safety": "The audit uses eval mode and never calls update_value_map or value_map_save."
+}
