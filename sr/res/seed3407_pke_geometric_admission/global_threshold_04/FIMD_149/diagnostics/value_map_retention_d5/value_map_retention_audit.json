@@ -1,0 +1,109 @@
+{
+  "audit_type": "read_only_pke_value_map_retention",
+  "train_config_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/train.yaml",
+  "checkpoint_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149.pth",
+  "value_map_dir": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/value_maps",
+  "device": "cuda:0",
+  "affine_passes": 3,
+  "grid_size": 8,
+  "eligible_labeled_samples": 768,
+  "metrics": {
+    "content_pass": {
+      "total": 171385,
+      "by_region": {
+        "vessel_core": 127286,
+        "vessel_edge": 7137,
+        "non_vessel": 36962
+      },
+      "mean_grid_cells_per_image": 37.4609375,
+      "by_region_fraction": {
+        "vessel_core": 0.7426904338185956,
+        "vessel_edge": 0.04164308428392216,
+        "non_vessel": 0.21566648189748228
+      }
+    },
+    "content_in_final_empty_grid_cell": {
+      "total": 2123,
+      "by_region": {
+        "vessel_core": 800,
+        "vessel_edge": 113,
+        "non_vessel": 1210
+      },
+      "mean_grid_cells_per_image": 1.66796875,
+      "by_region_fraction": {
+        "vessel_core": 0.3768252472915685,
+        "vessel_edge": 0.05322656617993406,
+        "non_vessel": 0.5699481865284974
+      }
+    },
+    "directly_retained_content": {
+      "total": 60137,
+      "by_region": {
+        "vessel_core": 41813,
+        "vessel_edge": 2623,
+        "non_vessel": 15701
+      },
+      "mean_grid_cells_per_image": 30.639322916666668,
+      "by_region_fraction": {
+        "vessel_core": 0.6952957413904917,
+        "vessel_edge": 0.0436170743469079,
+        "non_vessel": 0.2610871842626004
+      }
+    },
+    "final_before": {
+      "total": 215861,
+      "by_region": {
+        "vessel_core": 157812,
+        "vessel_edge": 8324,
+        "non_vessel": 49725
+      },
+      "mean_grid_cells_per_image": 49.84765625,
+      "by_region_fraction": {
+        "vessel_core": 0.7310815756435854,
+        "vessel_edge": 0.03856185230310246,
+        "non_vessel": 0.2303565720533121
+      }
+    },
+    "final_after": {
+      "total": 207445,
+      "by_region": {
+        "vessel_core": 159122,
+        "vessel_edge": 8314,
+        "non_vessel": 40009
+      },
+      "mean_grid_cells_per_image": 49.25390625,
+      "by_region_fraction": {
+        "vessel_core": 0.7670563281833739,
+        "vessel_edge": 0.04007809298850298,
+        "non_vessel": 0.1928655788281231
+      }
+    },
+    "new_final": {
+      "total": 22372,
+      "by_region": {
+        "vessel_core": 11114,
+        "vessel_edge": 1252,
+        "non_vessel": 10006
+      },
+      "mean_grid_cells_per_image": 19.084635416666668,
+      "by_region_fraction": {
+        "vessel_core": 0.49678169139996425,
+        "vessel_edge": 0.055962810656177364,
+        "non_vessel": 0.4472554979438584
+      }
+    }
+  },
+  "rates": {
+    "content_directly_retained": 0.3508883507891589,
+    "new_final_per_content": 0.13053651136330485,
+    "content_in_final_empty_grid_cell": 0.012387315109256936
+  },
+  "grid_transitions": {
+    "content_cells_mean_per_image": 37.4609375,
+    "before_cells_mean_per_image": 49.84765625,
+    "after_cells_mean_per_image": 49.25390625,
+    "newly_occupied_final_cells_mean_per_image": 1.3125
+  },
+  "safety": "Saved value maps are loaded then cloned; value_map_save is never called.",
+  "interpretation": "This is a terminal-state counterfactual: it measures one new PKE update against the saved epoch-149 maps. Historic per-epoch point origins cannot be reconstructed from uint8 accumulator PNGs."
+}

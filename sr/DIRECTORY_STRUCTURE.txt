@@ -7474,11 +7474,15 @@ sr/
 │   │   │   ├── FIMD_149/
 │   │   │   │   ├── aligned_images/
 │   │   │   │   ├── diagnostics/
-│   │   │   │   │   └── pke_region_feedback_d4/
+│   │   │   │   │   ├── pke_region_feedback_d4/
+│   │   │   │   │   │   ├── .gitkeep
+│   │   │   │   │   │   ├── audit.log
+│   │   │   │   │   │   ├── audit.yaml
+│   │   │   │   │   │   └── pke_region_feedback_audit.json
+│   │   │   │   │   └── value_map_retention_d5/
 │   │   │   │   │       ├── .gitkeep
-│   │   │   │   │       ├── audit.log
 │   │   │   │   │       ├── audit.yaml
-│   │   │   │   │       └── pke_region_feedback_audit.json
+│   │   │   │   │       └── value_map_retention_audit.json
 │   │   │   │   ├── match_images/
 │   │   │   │   ├── paper_figures/
 │   │   │   │   │   ├── control_points_01_r_t/
@@ -7553,7 +7557,8 @@ sr/
 │   │   │   │   │   └── control_points_70_r_t/
 │   │   │   │   ├── FIMD_point_errors.txt
 │   │   │   │   ├── test.log
-│   │   │   │   └── test.yaml
+│   │   │   │   ├── test.yaml
+│   │   │   │   └── value_map_retention_d5.log
 │   │   │   ├── FIRE_149/
 │   │   │   │   ├── aligned_images/
 │   │   │   │   ├── match_images/
@@ -14210,6 +14215,7 @@ sr/
 │   ├── audit_pke_borderline_content.py
 │   ├── audit_pke_geometry.py
 │   ├── audit_pke_region_feedback.py
+│   ├── audit_pke_value_map_retention.py
 │   ├── audit_value_maps.py
 │   └── summarize_pke_diagnostics.py
 ├── predictor.py
@@ -14218,13 +14224,3 @@ sr/
 ├── test_on_FIMD.py
 ├── test_on_FIRE.py
 └── train.py
-
-2026-07-26 read-only diagnostic addition
-└── res/seed3407_pke_geometric_admission/global_threshold_04/FIMD_149/diagnostics/
-    └── value_map_retention_d5/
-        ├── audit.yaml
-        └── value_map_retention_audit.json (generated on server; not committed)
-
-Tool: tools/audit_pke_value_map_retention.py
-  Loads saved value maps, clones them in memory, and measures content-pass
-  points retained by the identical update_value_map + NMS procedure.
