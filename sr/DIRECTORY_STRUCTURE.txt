@@ -1,3 +1,5 @@
+# 工具补充：sr/tools/audit_fimd_inlier_geometry.py（只读最终匹配与第一阶段内点坐标诊断）。
+# 结果目录：G2-v2 和 G3-v3 已完成；G2-v1、G3-v1、G3-v2 为中止目录，不复用。
 sr/
 ├── common/
 │   ├── common_util.py
