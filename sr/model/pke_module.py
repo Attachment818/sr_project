@@ -152,7 +152,6 @@ def multiview_noncore_feedback_bonuses(content_points, candidate_points,
     the eroded vessel core, belongs to a sparse current-PKE grid cell, and is
     not in the unreliable outer image border.  Empty samples are valid.
     """
-    h, w = descriptor_pred.shape[-2:]
     grid_size = int(config.get('pke_multiview_noncore_grid_size', 8))
     border_margin = int(config.get('pke_multiview_noncore_border_margin', 48))
     low_density_max = int(config.get('pke_multiview_noncore_low_density_max', 4))
@@ -173,6 +172,10 @@ def multiview_noncore_feedback_bonuses(content_points, candidate_points,
     if stability_grid_inverse is None or stability_affine_detector_pred is None \
             or stability_affine_descriptor_pred is None or vessel_masks is None:
         return zeros
+    # Candidate coordinates are in detector/input-image pixels, whereas the
+    # descriptor tensor is downsampled by 8.  Geometry mapping, region masks,
+    # borders, and grid occupancy must therefore use detector resolution.
+    h, w = stability_affine_detector_pred.shape[-2:]
 
     stability_points, stability_affine_points = mapping_points(
         stability_grid_inverse, candidate_points, h, w
