@@ -140,10 +140,102 @@ def geometric_filter(affine_detector_pred, points, affine_points, max_num=1024, 
     return geo_points, affine_geo_points
 
 
+def multiview_noncore_feedback_bonuses(content_points, candidate_points,
+                                       descriptor_pred, stability_grid_inverse,
+                                       stability_affine_detector_pred,
+                                       stability_affine_descriptor_pred,
+                                       vessel_masks, config):
+    """Return bounded centre bonuses for ranking-only multiview PKE feedback.
+
+    The primary PKE content points remain untouched.  A point receives a bonus
+    only when it also passes an independently sampled affine view, is outside
+    the eroded vessel core, belongs to a sparse current-PKE grid cell, and is
+    not in the unreliable outer image border.  Empty samples are valid.
+    """
+    h, w = descriptor_pred.shape[-2:]
+    grid_size = int(config.get('pke_multiview_noncore_grid_size', 8))
+    border_margin = int(config.get('pke_multiview_noncore_border_margin', 48))
+    low_density_max = int(config.get('pke_multiview_noncore_low_density_max', 4))
+    max_per_image = int(config.get('pke_multiview_noncore_max_per_image', 8))
+    bonus_value = int(config.get('pke_multiview_noncore_bonus', 0))
+    if grid_size < 2 or border_margin < 0 or low_density_max < 0:
+        raise ValueError('Invalid multiview feedback grid, border, or density setting')
+    if max_per_image < 0 or bonus_value < 0:
+        raise ValueError('Multiview feedback cap and bonus must be non-negative')
+
+    zeros = [
+        torch.zeros((len(points),), dtype=torch.long, device=descriptor_pred.device)
+        if torch.is_tensor(points) else torch.empty(0, dtype=torch.long, device=descriptor_pred.device)
+        for points in content_points
+    ]
+    if bonus_value == 0 or max_per_image == 0:
+        return zeros
+    if stability_grid_inverse is None or stability_affine_detector_pred is None \
+            or stability_affine_descriptor_pred is None or vessel_masks is None:
+        return zeros
+
+    stability_points, stability_affine_points = mapping_points(
+        stability_grid_inverse, candidate_points, h, w
+    )
+    stability_geo, stability_affine_geo = geometric_filter(
+        stability_affine_detector_pred, stability_points, stability_affine_points,
+        geometric_thresh=float(config['geometric_thresh']),
+    )
+    stability_content, _, _ = content_filter(
+        descriptor_pred, stability_affine_descriptor_pred,
+        stability_geo, stability_affine_geo,
+        content_thresh=float(config['content_thresh']), scale=8,
+        mode=config.get('pke_content_mode', 'one_way'),
+        weak_feedback=bool(config.get('pke_content_weak_feedback', False)),
+        strong_feedback_multiplier=int(config.get('pke_content_strong_feedback_multiplier', 1)),
+        weak_feedback_multiplier=int(config.get('pke_content_weak_feedback_multiplier', 1)),
+        return_feedback_weights=True,
+    )
+    cross_kernel = vessel_masks.new_tensor(
+        [[0., 1., 0.], [1., 1., 1.], [0., 1., 0.]]
+    ).view(1, 1, 3, 3)
+    vessel_core = F.conv2d(vessel_masks.float(), cross_kernel, padding=1) >= 5.0
+    bonuses = []
+    for index, points in enumerate(content_points):
+        if not torch.is_tensor(points) or points.numel() == 0:
+            bonuses.append(zeros[index])
+            continue
+        stable_coordinates = {
+            tuple(point) for point in stability_content[index].tolist()
+        } if torch.is_tensor(stability_content[index]) else set()
+        cells = [
+            (min(grid_size - 1, int(y) * grid_size // h),
+             min(grid_size - 1, int(x) * grid_size // w))
+            for x, y in points.tolist()
+        ]
+        cell_counts = {}
+        for cell in cells:
+            cell_counts[cell] = cell_counts.get(cell, 0) + 1
+        point_bonuses = torch.zeros((len(points),), dtype=torch.long, device=points.device)
+        selected = 0
+        for point_index, ((x_raw, y_raw), cell) in enumerate(zip(points.tolist(), cells)):
+            x, y = int(x_raw), int(y_raw)
+            if selected >= max_per_image:
+                break
+            if (x, y) not in stable_coordinates:
+                continue
+            if (x < border_margin or y < border_margin or
+                    x >= w - border_margin or y >= h - border_margin):
+                continue
+            if bool(vessel_core[index, 0, y, x]) or cell_counts[cell] > low_density_max:
+                continue
+            point_bonuses[point_index] = bonus_value
+            selected += 1
+        bonuses.append(point_bonuses)
+    return bonuses
+
+
 def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred,
               affine_descriptor_pred, kernel, loss_cal, label_point_positions,
               value_map, config, PKE_learn=True, return_stage_points=False,
-              vessel_masks=None, relaxed_non_core_thresh=None):
+              vessel_masks=None, relaxed_non_core_thresh=None,
+              stability_grid_inverse=None, stability_affine_detector_pred=None,
+              stability_affine_descriptor_pred=None):
     """
     pke process used for detector
     :param detector_pred: probability map from raw image
@@ -182,11 +274,11 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
 
         # number of learned points
         number_pts = 0
-        points = nms(detector_pred, nms_thresh=nms_thresh, nms_size=nms_size,
-                     detector_label=initial_label, mask=True)
+        candidate_points = nms(detector_pred, nms_thresh=nms_thresh, nms_size=nms_size,
+                               detector_label=initial_label, mask=True)
 
         # geometric matching
-        points, affine_points = mapping_points(grid_inverse, points, h, w)
+        points, affine_points = mapping_points(grid_inverse, candidate_points, h, w)
         geo_points, affine_geo_points = geometric_filter(affine_detector_pred, points, affine_points,
                                                          geometric_thresh=geometric_thresh,
                                                          vessel_masks=vessel_masks,
@@ -201,6 +293,13 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
             weak_feedback_multiplier=weak_feedback_multiplier,
             return_feedback_weights=True,
         )
+        multiview_bonuses = None
+        if bool(config.get('pke_multiview_noncore_feedback_active', False)):
+            multiview_bonuses = multiview_noncore_feedback_bonuses(
+                content_points, candidate_points, descriptor_pred, stability_grid_inverse,
+                stability_affine_detector_pred, stability_affine_descriptor_pred,
+                vessel_masks, config,
+            )
         enhanced_label_pts = []
         value_map_points = []
         for step in range(len(content_points)):
@@ -214,6 +313,7 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
             final_points = update_value_map(
                 value_map[step], content_points[step], config,
                 point_weights=content_feedback_weights[step],
+                point_bonuses=None if multiview_bonuses is None else multiview_bonuses[step],
             )
             value_map_points.append(final_points.detach().clone())
 

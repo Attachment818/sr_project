@@ -3,7 +3,8 @@ import torch
 from common.common_util import simple_nms
 
 
-def update_value_map(value_map, points, value_map_config, point_weights=None):
+def update_value_map(value_map, points, value_map_config, point_weights=None,
+                     point_bonuses=None):
     """
     Update value maps used for recording learned keypoints from PKE,
     and getting the final learned keypoints which are combined of previous learned keypoints.
@@ -12,6 +13,9 @@ def update_value_map(value_map, points, value_map_config, point_weights=None):
     :param value_map_config:
     :param point_weights: optional per-point feedback multipliers.  ``None``
         preserves the historical fixed-increment update exactly.
+    :param point_bonuses: optional bounded integer additions written only at
+        the candidate centre after the historical update.  ``None`` preserves
+        the historical value-map behaviour exactly.
     :return: the final learned keypoints combined of previous learning points
     """
 
@@ -28,6 +32,8 @@ def update_value_map(value_map, points, value_map_config, point_weights=None):
     h, w = value_map[0].shape
     if point_weights is not None and len(point_weights) != len(points):
         raise ValueError('point_weights must have one value per point')
+    if point_bonuses is not None and len(point_bonuses) != len(points):
+        raise ValueError('point_bonuses must have one value per point')
 
     for point_index, (x, y) in enumerate(points):
         y_d = y - area // 2 if y - area // 2 > 0 else 0
@@ -44,6 +50,16 @@ def update_value_map(value_map, points, value_map_config, point_weights=None):
         else:
             tmp[tmp > 0] += value_increase_area * multiplier
             value_map[0, y_d:y_u, x_l:x_r] = tmp
+        # Keep the legacy update intact, then optionally add a small bounded
+        # centre-only bonus.  This lets an experimental ranking signal improve
+        # retention gradually without multiplying all local support values.
+        if point_bonuses is not None:
+            bonus = int(point_bonuses[point_index])
+            if bonus < 0:
+                raise ValueError('point_bonuses must be non-negative')
+            if bonus:
+                centre = value_map[0, y, x].to(torch.int16) + bonus
+                value_map[0, y, x] = centre.clamp(max=255).to(value_map.dtype)
 
     value_map[torch.where(
         value_map == raw_value_map)] -= value_decay  # value decay of positions that don't appear this time

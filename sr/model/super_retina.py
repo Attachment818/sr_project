@@ -2160,6 +2160,37 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
                 raise ValueError(
                     'pke_region_relaxed_threshold must be non-negative and smaller than geometric_thresh'
                 )
+        # Optional G4-style ranking feedback. Defaults keep legacy PKE fully
+        # unchanged: no second affine view exists until explicitly enabled.
+        self.pke_multiview_noncore_feedback_enabled = bool(
+            cfg.get('pke_multiview_noncore_feedback_enabled', False)
+        )
+        self.pke_multiview_noncore_start_epoch = int(
+            cfg.get('pke_multiview_noncore_start_epoch', 10 ** 9)
+        )
+        self.pke_multiview_noncore_bonus = int(
+            cfg.get('pke_multiview_noncore_bonus', 0)
+        )
+        self.pke_multiview_noncore_grid_size = int(
+            cfg.get('pke_multiview_noncore_grid_size', 8)
+        )
+        self.pke_multiview_noncore_border_margin = int(
+            cfg.get('pke_multiview_noncore_border_margin', 48)
+        )
+        self.pke_multiview_noncore_low_density_max = int(
+            cfg.get('pke_multiview_noncore_low_density_max', 4)
+        )
+        self.pke_multiview_noncore_max_per_image = int(
+            cfg.get('pke_multiview_noncore_max_per_image', 8)
+        )
+        if self.pke_multiview_noncore_start_epoch < 0:
+            raise ValueError('pke_multiview_noncore_start_epoch must be non-negative')
+        if (self.pke_multiview_noncore_bonus < 0
+                or self.pke_multiview_noncore_grid_size < 2
+                or self.pke_multiview_noncore_border_margin < 0
+                or self.pke_multiview_noncore_low_density_max < 0
+                or self.pke_multiview_noncore_max_per_image < 0):
+            raise ValueError('Invalid multiview non-core feedback configuration')
         self.last_pke_diagnostics = None
         print(
             f"✅ SuperRetinaWithVesselOnlyMasked 初始化完成，"
@@ -2216,6 +2247,13 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
         ):
             return self.pke_geometric_relaxed_thresh
         return self.pke_geometric_thresh
+
+    def _multiview_noncore_feedback_active(self):
+        return (
+            self.pke_multiview_noncore_feedback_enabled
+            and self.pke_multiview_noncore_bonus > 0
+            and self.current_epoch >= self.pke_multiview_noncore_start_epoch
+        )
 
     def _pke_descriptor_feedback_loss(self, detector_pred, descriptor_pred, grid_inverse,
                                       affine_detector_pred, affine_descriptor_pred, affine_x, learn_index):
@@ -2279,9 +2317,20 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
             with torch.no_grad():
                 affine_x, grid, grid_inverse = affine_images(x, used_for='detector')
                 affine_detector_pred, affine_descriptor_pred = self.network(affine_x)
+                multiview_active = self._multiview_noncore_feedback_active()
+                stability_grid_inverse = None
+                stability_affine_detector_pred = None
+                stability_affine_descriptor_pred = None
+                if multiview_active:
+                    stability_affine_x, _, stability_grid_inverse = affine_images(
+                        x, used_for='detector'
+                    )
+                    stability_affine_detector_pred, stability_affine_descriptor_pred = self.network(
+                        stability_affine_x
+                    )
                 vessel_mask = (
                     self._build_vessel_masks(x)
-                    if self.pke_region_relaxed_threshold is not None else None
+                    if self.pke_region_relaxed_threshold is not None or multiview_active else None
                 )
 
             loss_cal = self.dice
@@ -2291,6 +2340,7 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
                 # to this PKE call and leaves legacy configurations unchanged.
                 pke_config = dict(self.config)
                 pke_config['geometric_thresh'] = self._get_pke_geometric_thresh()
+                pke_config['pke_multiview_noncore_feedback_active'] = multiview_active
                 pke_result = pke_learn(
                     detector_pred[learn_index], descriptor_pred[learn_index],
                     grid_inverse[learn_index], affine_detector_pred[learn_index],
@@ -2300,6 +2350,17 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
                     return_stage_points=self.save_pke_diagnostics,
                     vessel_masks=None if vessel_mask is None else vessel_mask[learn_index],
                     relaxed_non_core_thresh=self.pke_region_relaxed_threshold,
+                    stability_grid_inverse=(
+                        None if stability_grid_inverse is None else stability_grid_inverse[learn_index]
+                    ),
+                    stability_affine_detector_pred=(
+                        None if stability_affine_detector_pred is None
+                        else stability_affine_detector_pred[learn_index]
+                    ),
+                    stability_affine_descriptor_pred=(
+                        None if stability_affine_descriptor_pred is None
+                        else stability_affine_descriptor_pred[learn_index]
+                    ),
                 )
                 if self.save_pke_diagnostics:
                     loss_detector, number_pts, value_map_update, enhanced_label_pts, enhanced_label, pke_stage_points = pke_result

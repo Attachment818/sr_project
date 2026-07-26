@@ -177,6 +177,18 @@ if __name__ == '__main__':
     print(f"  - pke_descriptor_feedback_weight: {train_config.get('pke_descriptor_feedback_weight', 0.0)}")
     print(f"  - pke_descriptor_margin: {train_config.get('pke_descriptor_margin', 0.2)}")
     print(f"  - pke_descriptor_negative_distance: {train_config.get('pke_descriptor_negative_distance', 16.0)}")
+    print(f"  - pke_multiview_noncore_feedback_enabled: "
+          f"{train_config.get('pke_multiview_noncore_feedback_enabled', False)}")
+    print(f"  - pke_multiview_noncore_start_epoch: "
+          f"{train_config.get('pke_multiview_noncore_start_epoch', 10 ** 9)}")
+    print(f"  - pke_multiview_noncore_bonus: "
+          f"{train_config.get('pke_multiview_noncore_bonus', 0)}")
+    print(f"  - pke_multiview_noncore_grid_size: "
+          f"{train_config.get('pke_multiview_noncore_grid_size', 8)}")
+    print(f"  - pke_multiview_noncore_low_density_max: "
+          f"{train_config.get('pke_multiview_noncore_low_density_max', 4)}")
+    print(f"  - pke_multiview_noncore_max_per_image: "
+          f"{train_config.get('pke_multiview_noncore_max_per_image', 8)}")
     print(f"  - descriptor_hard_negative_min_distance: "
           f"{train_config.get('descriptor_hard_negative_min_distance', 0.0)}")
 
