@@ -1,0 +1,15 @@
+AUDIT:
+  dataset: FIMD
+  seed_label: G0_seed3407
+  test_config_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_inference_diagnostics/g0_global_threshold_04/FIMD_149/diagnostics/vessel_topology_d4/test_topology.yaml
+  checkpoint_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149.pth
+  dataset_root: /home/data1/zhangjunhong/sr_project/sr/data/FIMD
+  output_dir: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_inference_diagnostics/g0_global_threshold_04/FIMD_149/diagnostics/vessel_topology_d4
+  pairs:
+    - 35_r_t
+    - 39_r_t
+    - 40_r_t
+  mask_backend: morph
+  mask_threshold: 0.25
+  min_component_pixels: 20
+  proximity_pixels: 8.0
