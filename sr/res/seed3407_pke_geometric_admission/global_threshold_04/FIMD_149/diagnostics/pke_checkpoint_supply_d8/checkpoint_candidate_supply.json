@@ -1,0 +1,224 @@
+{
+  "audit_type": "read_only_pke_checkpoint_candidate_supply",
+  "train_config_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/train.yaml",
+  "device": "cuda:0",
+  "seed": 3407,
+  "affine_passes": 1,
+  "grid_size": 8,
+  "outer_border_margin": 48,
+  "low_density_max_points_per_cell": 4,
+  "sources": [
+    {
+      "label": "epoch49",
+      "checkpoint_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149_epoch49.pth",
+      "eligible_labeled_samples": 256,
+      "stages": {
+        "nms_candidates": {
+          "total": 76272,
+          "by_region": {
+            "vessel_core": 60324,
+            "vessel_edge": 2844,
+            "non_vessel": 13104
+          },
+          "outer_border": 1536,
+          "inner_peripheral": 8641,
+          "mean_grid_occupied_cells": 47.86328125,
+          "mean_top1_cell_fraction": 0.046424703822705034,
+          "mean_top4_cell_fraction": 0.1669946204988939,
+          "low_density_point_fraction": 0.13699653870358716,
+          "by_region_fraction": {
+            "vessel_core": 0.7909062303335431,
+            "vessel_edge": 0.037287602265575835,
+            "non_vessel": 0.17180616740088106
+          },
+          "outer_border_fraction": 0.020138451856513532,
+          "inner_peripheral_fraction": 0.11329190266414936
+        },
+        "geometric_pass": {
+          "total": 56756,
+          "by_region": {
+            "vessel_core": 50939,
+            "vessel_edge": 1402,
+            "non_vessel": 4415
+          },
+          "outer_border": 523,
+          "inner_peripheral": 5630,
+          "mean_grid_occupied_cells": 42.3203125,
+          "mean_top1_cell_fraction": 0.05787408118463696,
+          "mean_top4_cell_fraction": 0.20265495209839907,
+          "low_density_point_fraction": 0.20917612234829797,
+          "by_region_fraction": {
+            "vessel_core": 0.897508633448446,
+            "vessel_edge": 0.02470223412502643,
+            "non_vessel": 0.07778913242652759
+          },
+          "outer_border_fraction": 0.00921488476989217,
+          "inner_peripheral_fraction": 0.09919656071604764
+        },
+        "content_pass": {
+          "total": 32727,
+          "by_region": {
+            "vessel_core": 29005,
+            "vessel_edge": 914,
+            "non_vessel": 2808
+          },
+          "outer_border": 300,
+          "inner_peripheral": 3425,
+          "mean_grid_occupied_cells": 32.078125,
+          "mean_top1_cell_fraction": 0.11659179801036405,
+          "mean_top4_cell_fraction": 0.31877746212812874,
+          "low_density_point_fraction": 0.34720567115837075,
+          "by_region_fraction": {
+            "vessel_core": 0.8862712744828429,
+            "vessel_edge": 0.027928010511198705,
+            "non_vessel": 0.08580071500595839
+          },
+          "outer_border_fraction": 0.009166743056192136,
+          "inner_peripheral_fraction": 0.10465364989152687
+        }
+      }
+    },
+    {
+      "label": "epoch99",
+      "checkpoint_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149_epoch99.pth",
+      "eligible_labeled_samples": 256,
+      "stages": {
+        "nms_candidates": {
+          "total": 90759,
+          "by_region": {
+            "vessel_core": 66420,
+            "vessel_edge": 4145,
+            "non_vessel": 20194
+          },
+          "outer_border": 2219,
+          "inner_peripheral": 10514,
+          "mean_grid_occupied_cells": 49.71875,
+          "mean_top1_cell_fraction": 0.043074477406530996,
+          "mean_top4_cell_fraction": 0.15608431905194164,
+          "low_density_point_fraction": 0.10004517458323692,
+          "by_region_fraction": {
+            "vessel_core": 0.7318282484381714,
+            "vessel_edge": 0.045670401833426987,
+            "non_vessel": 0.2225013497284016
+          },
+          "outer_border_fraction": 0.024449365903106028,
+          "inner_peripheral_fraction": 0.11584526052512699
+        },
+        "geometric_pass": {
+          "total": 72500,
+          "by_region": {
+            "vessel_core": 60333,
+            "vessel_edge": 2630,
+            "non_vessel": 9537
+          },
+          "outer_border": 835,
+          "inner_peripheral": 7099,
+          "mean_grid_occupied_cells": 45.04296875,
+          "mean_top1_cell_fraction": 0.05082283753306615,
+          "mean_top4_cell_fraction": 0.1807943125757098,
+          "low_density_point_fraction": 0.14030344827586208,
+          "by_region_fraction": {
+            "vessel_core": 0.8321793103448276,
+            "vessel_edge": 0.03627586206896552,
+            "non_vessel": 0.1315448275862069
+          },
+          "outer_border_fraction": 0.011517241379310345,
+          "inner_peripheral_fraction": 0.09791724137931035
+        },
+        "content_pass": {
+          "total": 47895,
+          "by_region": {
+            "vessel_core": 39346,
+            "vessel_edge": 1839,
+            "non_vessel": 6710
+          },
+          "outer_border": 582,
+          "inner_peripheral": 4934,
+          "mean_grid_occupied_cells": 36.96875,
+          "mean_top1_cell_fraction": 0.09956279909355352,
+          "mean_top4_cell_fraction": 0.27151079815075024,
+          "low_density_point_fraction": 0.22735149806869193,
+          "by_region_fraction": {
+            "vessel_core": 0.821505376344086,
+            "vessel_edge": 0.03839649232696524,
+            "non_vessel": 0.14009813132894874
+          },
+          "outer_border_fraction": 0.012151581584716567,
+          "inner_peripheral_fraction": 0.10301701639001984
+        }
+      }
+    },
+    {
+      "label": "epoch149",
+      "checkpoint_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149.pth",
+      "eligible_labeled_samples": 256,
+      "stages": {
+        "nms_candidates": {
+          "total": 108633,
+          "by_region": {
+            "vessel_core": 72775,
+            "vessel_edge": 4826,
+            "non_vessel": 31032
+          },
+          "outer_border": 2219,
+          "inner_peripheral": 12308,
+          "mean_grid_occupied_cells": 50.7890625,
+          "mean_top1_cell_fraction": 0.039245302600940515,
+          "mean_top4_cell_fraction": 0.14571833487175875,
+          "low_density_point_fraction": 0.07099131939650015,
+          "by_region_fraction": {
+            "vessel_core": 0.6699161396629016,
+            "vessel_edge": 0.04442480645844265,
+            "non_vessel": 0.28565905387865564
+          },
+          "outer_border_fraction": 0.02042657387718281,
+          "inner_peripheral_fraction": 0.11329890548912393
+        },
+        "geometric_pass": {
+          "total": 90075,
+          "by_region": {
+            "vessel_core": 67644,
+            "vessel_edge": 3689,
+            "non_vessel": 18742
+          },
+          "outer_border": 1017,
+          "inner_peripheral": 8686,
+          "mean_grid_occupied_cells": 46.95703125,
+          "mean_top1_cell_fraction": 0.04543757488719978,
+          "mean_top4_cell_fraction": 0.1648557052906501,
+          "low_density_point_fraction": 0.09316680543991118,
+          "by_region_fraction": {
+            "vessel_core": 0.7509741881765196,
+            "vessel_edge": 0.04095475992228698,
+            "non_vessel": 0.20807105190119346
+          },
+          "outer_border_fraction": 0.011290591174021649,
+          "inner_peripheral_fraction": 0.09643075215098529
+        },
+        "content_pass": {
+          "total": 61183,
+          "by_region": {
+            "vessel_core": 45247,
+            "vessel_edge": 2563,
+            "non_vessel": 13373
+          },
+          "outer_border": 726,
+          "inner_peripheral": 6191,
+          "mean_grid_occupied_cells": 39.1484375,
+          "mean_top1_cell_fraction": 0.09322825401147672,
+          "mean_top4_cell_fraction": 0.2589154366385766,
+          "low_density_point_fraction": 0.15844270467286664,
+          "by_region_fraction": {
+            "vessel_core": 0.7395354918850008,
+            "vessel_edge": 0.04189072127878659,
+            "non_vessel": 0.21857378683621267
+          },
+          "outer_border_fraction": 0.011866041220600494,
+          "inner_peripheral_fraction": 0.10118823856299952
+        }
+      }
+    }
+  ],
+  "limitation": "Historic value-map snapshots were not saved. This measures candidate supply at each saved checkpoint, not historic value-map retention.",
+  "safety": "The audit uses eval mode and never calls update_value_map or value_map_save."
+}
