@@ -1,0 +1,23 @@
+[
+  {
+    "pair_id": "control_points_35_r_t",
+    "final_matches": 16,
+    "first_stage_inliers": 10,
+    "inlier_grid_cells": 3,
+    "inlier_grid_coverage": 0.1875
+  },
+  {
+    "pair_id": "control_points_39_r_t",
+    "final_matches": 17,
+    "first_stage_inliers": 17,
+    "inlier_grid_cells": 5,
+    "inlier_grid_coverage": 0.3125
+  },
+  {
+    "pair_id": "control_points_40_r_t",
+    "final_matches": 14,
+    "first_stage_inliers": 14,
+    "inlier_grid_cells": 5,
+    "inlier_grid_coverage": 0.3125
+  }
+]

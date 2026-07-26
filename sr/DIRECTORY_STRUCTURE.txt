@@ -1,5 +1,3 @@
-# 工具补充：sr/tools/audit_fimd_inlier_geometry.py（只读最终匹配与第一阶段内点坐标诊断）。
-# 结果目录：G2-v2 和 G3-v3 已完成；G2-v1、G3-v1、G3-v2 为中止目录，不复用。
 sr/
 ├── common/
 │   ├── common_util.py
@@ -5729,6 +5727,12 @@ sr/
 │   │   ├── FIMD_149/
 │   │   │   ├── aligned_images/
 │   │   │   ├── diagnostics/
+│   │   │   │   ├── inlier_geometry_g0_g3/
+│   │   │   │   │   ├── G3/
+│   │   │   │   │   │   ├── .gitkeep
+│   │   │   │   │   │   ├── inlier_geometry_summary.json
+│   │   │   │   │   │   └── inlier_match_coordinates.csv
+│   │   │   │   │   └── g3_geometry_audit.log
 │   │   │   │   └── inference_diagnostics.jsonl
 │   │   │   ├── match_images/
 │   │   │   ├── paper_figures/
@@ -6201,6 +6205,13 @@ sr/
 │   │   ├── g0_global_threshold_04/
 │   │   │   ├── FIMD_149/
 │   │   │   │   ├── aligned_images/
+│   │   │   │   ├── diagnostics/
+│   │   │   │   │   └── inlier_geometry_g0_g3/
+│   │   │   │   │       ├── G0/
+│   │   │   │   │       │   ├── .gitkeep
+│   │   │   │   │       │   ├── inlier_geometry_summary.json
+│   │   │   │   │       │   └── inlier_match_coordinates.csv
+│   │   │   │   │       └── g0_geometry_audit.log
 │   │   │   │   ├── match_images/
 │   │   │   │   ├── paper_figures/
 │   │   │   │   │   ├── control_points_01_r_t/
@@ -14180,6 +14191,7 @@ sr/
 ├── tools/
 │   ├── analyze_fimd_pair_diagnostics.py
 │   ├── audit_fimd_descriptor_margin.py
+│   ├── audit_fimd_inlier_geometry.py
 │   ├── audit_pke_borderline_content.py
 │   ├── audit_pke_geometry.py
 │   ├── audit_value_maps.py
