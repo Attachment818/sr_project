@@ -15,6 +15,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import yaml
+from PIL import Image
 from tqdm import tqdm
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -77,6 +78,22 @@ def homography_control_error(homography, query_points, refer_points):
     return float(errors.mean()), float(np.median(errors)), int((errors < 25.0).sum())
 
 
+def raw_query_keypoints(predictor, item):
+    """Return the raw detector keypoints before ratio/IC/outlier filtering."""
+    query_image, refer_image = predictor.image_read(item["query_im_path"], item["refer_im_path"])
+    query_tensor = predictor.trasformer(Image.fromarray(query_image))
+    refer_tensor = predictor.trasformer(Image.fromarray(refer_image))
+    keypoints, _ = predictor.model_run_pair(query_tensor, refer_tensor)
+    query_keypoints = [
+        cv2.KeyPoint(
+            int(point[0] / predictor.model_image_width * predictor.image_width),
+            int(point[1] / predictor.model_image_height * predictor.image_height), 30,
+        )
+        for point in keypoints[0]
+    ]
+    return query_keypoints, query_image
+
+
 def main():
     args = parse_args()
     audit = yaml.safe_load(args.audit_config.read_text(encoding="utf-8"))["AUDIT"]
@@ -112,6 +129,7 @@ def main():
     predict = config["PREDICT"]
     rows, contribution_rows = [], []
     for item in tqdm(items, desc="D9 FIMD matching-chain audit", unit="pair"):
+        raw_query, raw_query_image = raw_query_keypoints(predictor, item)
         match_result = predictor.match_with_consistency_check(
             item["query_im_path"], item["refer_im_path"],
             use_inverse_consistency=predict.get("use_inverse_consistency", True),
@@ -149,7 +167,7 @@ def main():
         )
 
         detected_regions = summarize_keypoints(
-            query_keypoints, query_image, grid_size=grid_size,
+            raw_query, raw_query_image, grid_size=grid_size,
             vessel_backend=predict.get("diagnostic_vessel_backend", "morph"),
             vessel_threshold=float(predict.get("diagnostic_vessel_threshold", 0.25)),
             vessel_dilate=int(predict.get("diagnostic_vessel_dilate", 3)),
@@ -180,6 +198,7 @@ def main():
         row = {
             "pair_id": item["pair_name"], "seed_label": audit.get("seed_label", ""),
             "detected_query": chain["detected_query_keypoints"], "detected_refer": chain["detected_refer_keypoints"],
+            "detected_query_region_count": detected_regions["count"],
             "ratio_matches": chain["ratio_matches"], "inverse_consistency_matches": chain["inverse_consistency_matches"],
             "returned_matches": chain["outlier_filter_matches"], "legacy_lmeds_inliers": int(legacy_mask.sum()),
             "ransac_inliers": int(ransac_mask.sum()),
@@ -197,6 +216,11 @@ def main():
             "ransac_control_points_under25": ransac_control_under25,
             "final_outer_border_matches": int(outer_final), "inlier_outer_border_matches": int(outer_inlier),
         }
+        if row["detected_query_region_count"] != row["detected_query"]:
+            raise RuntimeError(
+                f"Raw detector replay count mismatch for {item['pair_name']}: "
+                f"{row['detected_query_region_count']} vs {row['detected_query']}"
+            )
         for prefix, summary in (("detected", detected_regions), ("final", final_regions), ("inlier", inlier_regions)):
             for key in ("vessel_core_count", "vessel_edge_count", "non_vessel_count", "grid_occupied_cells", "grid_coverage", "grid_entropy"):
                 row[f"{prefix}_{key}"] = summary.get(key, 0)
@@ -219,7 +243,7 @@ def main():
         "test_config_path": str(test_config_path), "checkpoint_path": str(checkpoint_path),
         "dataset_root": str(dataset_root), "device": config["PREDICT"]["device"], "grid_size": grid_size,
         "outer_border_margin": border_margin, "pair_count": len(rows), "pairs": rows,
-        "interpretation": "legacy_lmeds columns reproduce the test helper's first-stage homography estimator; ransac columns are an additional explicit RANSAC replay over the exact returned matches. Neither replaces the full test protocol's optional quadratic or matching-trick result.",
+        "interpretation": "detected region columns are computed from a separate raw detector replay before matching. legacy_lmeds columns reproduce the test helper's first-stage homography estimator; ransac columns are an additional explicit RANSAC replay over the exact returned matches. Neither replaces the full test protocol's optional quadratic or matching-trick result.",
         "safety": "Only new CSV/JSON files are written under output_dir; the checkpoint and existing test outputs are read-only.",
     }
     (output_dir / "matching_chain_summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
