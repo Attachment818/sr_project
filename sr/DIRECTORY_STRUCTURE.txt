@@ -14260,3 +14260,4 @@ G4 training addition (seed3407):
 - res/seed3407_multiview_noncore_feedback_g4_v1/: independent G4 experiment root. It retains all G0 PKE feedback and adds a bounded +1 centre-only value-map bonus from epoch 75 only for independently multiview-stable, non-core, low-density, non-border candidates.
 - The root contains train.yaml plus FIRE_149/test.yaml and FIMD_149/test.yaml. Both tests load only model_149.pth from this same root and retain the G0 inference protocol.
 - tools/smoke_g4_multiview_feedback.py: deterministic no-data/no-write preflight for the G4 optional bonus and per-image cap; run it on the server before starting the long G4 pipeline.
+- res/seed3407_multiview_noncore_feedback_g4_v2/: corrected-preflight successor to v1. Use this independent root for training because v1 contains a retained failed smoke log; the G4 training mechanism and G0 inference protocol are unchanged.

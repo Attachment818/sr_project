@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from model.pke_module import multiview_noncore_feedback_bonuses
+from model import pke_module
 from model.record_module import update_value_map
 
 
@@ -46,7 +46,7 @@ def main():
     )
     candidate_points = [torch.tensor([[8, 8], [20, 20]], dtype=torch.long)]
     content_points = [candidate_points[0].clone()]
-    descriptor = torch.arange(1 * 4 * 4 * 4, dtype=torch.float32).reshape(1, 4, 4, 4)
+    descriptor = torch.zeros((1, 4, 4, 4), dtype=torch.float32)
     detector = torch.ones((1, 1, height, width), dtype=torch.float32)
     vessel_mask = torch.zeros((1, 1, height, width), dtype=torch.float32)
     config = {
@@ -62,10 +62,26 @@ def main():
         'pke_multiview_noncore_max_per_image': 1,
         'pke_multiview_noncore_bonus': 1,
     }
-    bonuses = multiview_noncore_feedback_bonuses(
-        content_points, candidate_points, descriptor, identity, detector,
-        descriptor.clone(), vessel_mask, config,
-    )
+    # The existing content filter is separately exercised by G0/D10.  This
+    # preflight isolates the *new* selector and cap from floating-point
+    # descriptor interpolation details by supplying a deterministic second
+    # view content-pass result.
+    original_content_filter = pke_module.content_filter
+
+    def deterministic_content_filter(_descriptor, _affine_descriptor,
+                                     geo_points, affine_geo_points, **_kwargs):
+        weights = [torch.ones(len(point), dtype=torch.long, device=point.device)
+                   for point in geo_points]
+        return geo_points, affine_geo_points, weights
+
+    pke_module.content_filter = deterministic_content_filter
+    try:
+        bonuses = pke_module.multiview_noncore_feedback_bonuses(
+            content_points, candidate_points, descriptor, identity, detector,
+            descriptor.clone(), vessel_mask, config,
+        )
+    finally:
+        pke_module.content_filter = original_content_filter
     assert len(bonuses) == 1 and bonuses[0].shape == (2,)
     assert int(bonuses[0].sum()) == 1, 'multiview per-image cap was not respected'
     print('G4 multiview feedback smoke test: OK')
