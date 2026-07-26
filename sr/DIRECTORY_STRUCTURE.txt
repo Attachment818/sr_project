@@ -14253,3 +14253,5 @@ Recent diagnostic additions (G0 seed3407, read-only):
 - matching_spatial_support_d9_fix/: corrected raw detector-region audit configuration; results are generated only on the server.
 - multiview_stability_d10/: two-independent-affine stability-ranking audit configuration; results are generated only on the server.
 - tools/audit_pke_multiview_stability.py: D10 implementation. The second affine view is a ranking signal, never a hard PKE filter.
+- multiview_checkpoint_supply_d11/: D11 fixed-seed, epoch-49/99/149 multiview candidate-supply audit configuration; results are generated only on the server.
+- tools/audit_pke_multiview_checkpoint_supply.py: D11 implementation. It compares stable non-core candidate supply across the three saved G0 checkpoints without changing value maps or weights.

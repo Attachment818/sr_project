@@ -58,6 +58,8 @@ def content_pass_for_view(images, detector, descriptor, model, config):
 
 def select_by_coordinates(points, coordinates):
     selected = [point for point in points.tolist() if tuple(point) in coordinates]
+    if not selected:
+        return torch.empty((0, 2), dtype=torch.long)
     return torch.tensor(selected, dtype=torch.long).reshape(-1, 2)
 
 
