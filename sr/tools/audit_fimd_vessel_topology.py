@@ -153,9 +153,18 @@ def main():
         raise FileNotFoundError("Both --config and --checkpoint must be existing files.")
     if not args.dataset_root.is_dir():
         raise FileNotFoundError(f"FIMD dataset root not found: {args.dataset_root}")
-    allowed_placeholders = {".gitkeep", "audit.yaml", "test_topology.yaml"}
-    if any(path.name not in allowed_placeholders for path in args.output_dir.glob("*")):
-        raise FileExistsError(f"Refusing to overwrite non-empty output directory: {args.output_dir}")
+    # Shell redirection creates ``audit.log`` before this Python process starts.
+    # Logs are not diagnostic results and must not trip overwrite protection.
+    # Conversely, every artifact produced below is a CSV, JSON, or image; the
+    # presence of any of those means that this run has already produced results.
+    result_suffixes = {".csv", ".json", ".jpg", ".jpeg", ".png"}
+    existing_results = [
+        path for path in args.output_dir.glob("*")
+        if path.suffix.lower() in result_suffixes
+    ]
+    if existing_results:
+        names = ", ".join(path.name for path in existing_results)
+        raise FileExistsError(f"Refusing to overwrite existing diagnostic result(s): {names}")
     args.output_dir.mkdir(parents=True, exist_ok=True)
     config = yaml.safe_load(args.config.read_text(encoding="utf-8"))
     config["PREDICT"]["model_save_path"] = str(args.checkpoint)
