@@ -1,0 +1,137 @@
+{
+  "audit_type": "read_only_pke_region_feedback",
+  "train_config_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/train.yaml",
+  "checkpoint_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149.pth",
+  "device": "cuda:0",
+  "affine_passes": 5,
+  "grid_size": 8,
+  "image_border_margin": 48,
+  "geometric_threshold": 0.4,
+  "content_threshold": 0.7,
+  "affine_detector_score_histogram": [
+    20681,
+    27013,
+    21837,
+    23401,
+    34984,
+    90142,
+    154873,
+    89974,
+    53873,
+    22223
+  ],
+  "stages": {
+    "mapped_candidates": {
+      "total_points": 539001,
+      "points_by_region": {
+        "vessel_core": 361890,
+        "vessel_edge": 23983,
+        "non_vessel": 153128
+      },
+      "points_by_border": {
+        "image_border": 10801,
+        "image_interior": 528200
+      },
+      "points_by_region_and_border": {
+        "vessel_core": {
+          "image_border": 3850,
+          "image_interior": 358040
+        },
+        "vessel_edge": {
+          "image_border": 818,
+          "image_interior": 23165
+        },
+        "non_vessel": {
+          "image_border": 6133,
+          "image_interior": 146995
+        }
+      },
+      "mean_occupied_grid_cells_per_image": 50.55859375,
+      "points_by_region_fraction": {
+        "vessel_core": 0.6714087728965252,
+        "vessel_edge": 0.04449527922953761,
+        "non_vessel": 0.28409594787393716
+      },
+      "points_by_border_fraction": {
+        "image_border": 0.020038923860994692,
+        "image_interior": 0.9799610761390053
+      }
+    },
+    "geometric_pass": {
+      "total_points": 446069,
+      "points_by_region": {
+        "vessel_core": 335909,
+        "vessel_edge": 18278,
+        "non_vessel": 91882
+      },
+      "points_by_border": {
+        "image_border": 4930,
+        "image_interior": 441139
+      },
+      "points_by_region_and_border": {
+        "vessel_core": {
+          "image_border": 2456,
+          "image_interior": 333453
+        },
+        "vessel_edge": {
+          "image_border": 421,
+          "image_interior": 17857
+        },
+        "non_vessel": {
+          "image_border": 2053,
+          "image_interior": 89829
+        }
+      },
+      "mean_occupied_grid_cells_per_image": 46.6375,
+      "points_by_region_fraction": {
+        "vessel_core": 0.7530426907048012,
+        "vessel_edge": 0.040975723486725145,
+        "non_vessel": 0.2059815858084736
+      },
+      "points_by_border_fraction": {
+        "image_border": 0.01105210180487772,
+        "image_interior": 0.9889478981951223
+      }
+    },
+    "content_pass": {
+      "total_points": 302266,
+      "points_by_region": {
+        "vessel_core": 225221,
+        "vessel_edge": 12699,
+        "non_vessel": 64346
+      },
+      "points_by_border": {
+        "image_border": 3547,
+        "image_interior": 298719
+      },
+      "points_by_region_and_border": {
+        "vessel_core": {
+          "image_border": 1721,
+          "image_interior": 223500
+        },
+        "vessel_edge": {
+          "image_border": 279,
+          "image_interior": 12420
+        },
+        "non_vessel": {
+          "image_border": 1547,
+          "image_interior": 62799
+        }
+      },
+      "mean_occupied_grid_cells_per_image": 38.69765625,
+      "points_by_region_fraction": {
+        "vessel_core": 0.7451086129435662,
+        "vessel_edge": 0.0420126643420034,
+        "non_vessel": 0.21287872271443034
+      },
+      "points_by_border_fraction": {
+        "image_border": 0.011734697253412557,
+        "image_interior": 0.9882653027465874
+      }
+    }
+  },
+  "transition_rates": {
+    "mapped_to_geometric": 0.8275847354643127,
+    "geometric_to_content": 0.6776216235604805
+  }
+}

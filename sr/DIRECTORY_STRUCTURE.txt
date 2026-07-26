@@ -6206,12 +6206,19 @@ sr/
 │   │   │   ├── FIMD_149/
 │   │   │   │   ├── aligned_images/
 │   │   │   │   ├── diagnostics/
-│   │   │   │   │   └── inlier_geometry_g0_g3/
-│   │   │   │   │       ├── G0/
-│   │   │   │   │       │   ├── .gitkeep
-│   │   │   │   │       │   ├── inlier_geometry_summary.json
-│   │   │   │   │       │   └── inlier_match_coordinates.csv
-│   │   │   │   │       └── g0_geometry_audit.log
+│   │   │   │   │   ├── inlier_geometry_g0_g3/
+│   │   │   │   │   │   ├── G0/
+│   │   │   │   │   │   │   ├── .gitkeep
+│   │   │   │   │   │   │   ├── inlier_geometry_summary.json
+│   │   │   │   │   │   │   └── inlier_match_coordinates.csv
+│   │   │   │   │   │   └── g0_geometry_audit.log
+│   │   │   │   │   └── vessel_topology_d4/
+│   │   │   │   │       ├── .gitkeep
+│   │   │   │   │       ├── audit.log
+│   │   │   │   │       ├── audit.yaml
+│   │   │   │   │       ├── test_topology.yaml
+│   │   │   │   │       ├── vessel_topology_points.csv
+│   │   │   │   │       └── vessel_topology_summary.json
 │   │   │   │   ├── match_images/
 │   │   │   │   ├── paper_figures/
 │   │   │   │   │   ├── control_points_01_r_t/
@@ -6287,7 +6294,8 @@ sr/
 │   │   │   │   ├── FIMD_point_errors.txt
 │   │   │   │   ├── inference_diagnostics.jsonl
 │   │   │   │   ├── test.log
-│   │   │   │   └── test.yaml
+│   │   │   │   ├── test.yaml
+│   │   │   │   └── vessel_topology_d4_rerun.log
 │   │   │   └── FIRE_149/
 │   │   │       ├── aligned_images/
 │   │   │       ├── match_images/
@@ -7465,6 +7473,12 @@ sr/
 │   │   │   │   └── value_map_audit.json
 │   │   │   ├── FIMD_149/
 │   │   │   │   ├── aligned_images/
+│   │   │   │   ├── diagnostics/
+│   │   │   │   │   └── pke_region_feedback_d4/
+│   │   │   │   │       ├── .gitkeep
+│   │   │   │   │       ├── audit.log
+│   │   │   │   │       ├── audit.yaml
+│   │   │   │   │       └── pke_region_feedback_audit.json
 │   │   │   │   ├── match_images/
 │   │   │   │   ├── paper_figures/
 │   │   │   │   │   ├── control_points_01_r_t/
@@ -14192,8 +14206,10 @@ sr/
 │   ├── analyze_fimd_pair_diagnostics.py
 │   ├── audit_fimd_descriptor_margin.py
 │   ├── audit_fimd_inlier_geometry.py
+│   ├── audit_fimd_vessel_topology.py
 │   ├── audit_pke_borderline_content.py
 │   ├── audit_pke_geometry.py
+│   ├── audit_pke_region_feedback.py
 │   ├── audit_value_maps.py
 │   └── summarize_pke_diagnostics.py
 ├── predictor.py
@@ -14202,20 +14218,3 @@ sr/
 ├── test_on_FIMD.py
 ├── test_on_FIRE.py
 └── train.py
-
-2026-07-26 diagnostic additions (read-only; no checkpoint or value-map mutation)
-├── tools/
-│   ├── audit_pke_region_feedback.py
-│   │   └── Replays G0 PKE candidate, geometric, and content gates; reports core/edge/non-vessel, image-border, and grid-coverage transitions.
-│   └── audit_fimd_vessel_topology.py
-│       └── Audits detected/ratio/final/inlier FIMD points against a morphology-derived vessel skeleton, endpoint, and junction proxy.
-├── res/seed3407_pke_geometric_admission/global_threshold_04/FIMD_149/diagnostics/
-│   └── pke_region_feedback_d4/
-│       ├── audit.yaml
-│       └── pke_region_feedback_audit.json (generated on server; not committed)
-└── res/seed3407_inference_diagnostics/g0_global_threshold_04/FIMD_149/diagnostics/
-    └── vessel_topology_d4/
-        ├── audit.yaml
-        ├── test_topology.yaml
-        ├── vessel_topology_points.csv (generated on server; not committed)
-        └── vessel_topology_summary.json (generated on server; not committed)

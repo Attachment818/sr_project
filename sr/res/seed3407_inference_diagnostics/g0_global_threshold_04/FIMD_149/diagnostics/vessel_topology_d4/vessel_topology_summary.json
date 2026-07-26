@@ -1,0 +1,421 @@
+{
+  "audit_type": "read_only_fimd_vessel_topology",
+  "config": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_inference_diagnostics/g0_global_threshold_04/FIMD_149/diagnostics/vessel_topology_d4/test_topology.yaml",
+  "checkpoint": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149.pth",
+  "dataset_root": "/home/data1/zhangjunhong/sr_project/sr/data/FIMD",
+  "seed_label": "G0_seed3407",
+  "mask_backend": "morph",
+  "mask_threshold": 0.25,
+  "min_component_pixels": 20,
+  "proximity_pixels": 8.0,
+  "pairs": [
+    {
+      "pair_id": "35_r_t",
+      "ratio_matches": 32,
+      "final_matches": 14,
+      "first_stage_inliers": 14,
+      "query_topology": {
+        "junction_components": 725,
+        "endpoint_components": 871
+      },
+      "refer_topology": {
+        "junction_components": 3812,
+        "endpoint_components": 5195
+      },
+      "stages": {
+        "query_detected": {
+          "total": 263,
+          "counts": {
+            "junction": 118,
+            "endpoint": 10,
+            "vessel_segment": 1,
+            "non_vessel": 134
+          },
+          "fractions": {
+            "junction": 0.44866920152091255,
+            "endpoint": 0.03802281368821293,
+            "vessel_segment": 0.0038022813688212928,
+            "non_vessel": 0.5095057034220533
+          }
+        },
+        "query_ratio": {
+          "total": 32,
+          "counts": {
+            "junction": 16,
+            "endpoint": 0,
+            "vessel_segment": 0,
+            "non_vessel": 16
+          },
+          "fractions": {
+            "junction": 0.5,
+            "endpoint": 0.0,
+            "vessel_segment": 0.0,
+            "non_vessel": 0.5
+          }
+        },
+        "query_final": {
+          "total": 14,
+          "counts": {
+            "junction": 10,
+            "endpoint": 0,
+            "vessel_segment": 0,
+            "non_vessel": 4
+          },
+          "fractions": {
+            "junction": 0.7142857142857143,
+            "endpoint": 0.0,
+            "vessel_segment": 0.0,
+            "non_vessel": 0.2857142857142857
+          }
+        },
+        "query_first_stage_inlier": {
+          "total": 14,
+          "counts": {
+            "junction": 10,
+            "endpoint": 0,
+            "vessel_segment": 0,
+            "non_vessel": 4
+          },
+          "fractions": {
+            "junction": 0.7142857142857143,
+            "endpoint": 0.0,
+            "vessel_segment": 0.0,
+            "non_vessel": 0.2857142857142857
+          }
+        },
+        "refer_detected": {
+          "total": 461,
+          "counts": {
+            "junction": 277,
+            "endpoint": 23,
+            "vessel_segment": 3,
+            "non_vessel": 158
+          },
+          "fractions": {
+            "junction": 0.6008676789587852,
+            "endpoint": 0.049891540130151846,
+            "vessel_segment": 0.006507592190889371,
+            "non_vessel": 0.34273318872017355
+          }
+        },
+        "refer_ratio": {
+          "total": 32,
+          "counts": {
+            "junction": 16,
+            "endpoint": 1,
+            "vessel_segment": 1,
+            "non_vessel": 14
+          },
+          "fractions": {
+            "junction": 0.5,
+            "endpoint": 0.03125,
+            "vessel_segment": 0.03125,
+            "non_vessel": 0.4375
+          }
+        },
+        "refer_final": {
+          "total": 14,
+          "counts": {
+            "junction": 8,
+            "endpoint": 0,
+            "vessel_segment": 0,
+            "non_vessel": 6
+          },
+          "fractions": {
+            "junction": 0.5714285714285714,
+            "endpoint": 0.0,
+            "vessel_segment": 0.0,
+            "non_vessel": 0.42857142857142855
+          }
+        },
+        "refer_first_stage_inlier": {
+          "total": 14,
+          "counts": {
+            "junction": 8,
+            "endpoint": 0,
+            "vessel_segment": 0,
+            "non_vessel": 6
+          },
+          "fractions": {
+            "junction": 0.5714285714285714,
+            "endpoint": 0.0,
+            "vessel_segment": 0.0,
+            "non_vessel": 0.42857142857142855
+          }
+        }
+      }
+    },
+    {
+      "pair_id": "39_r_t",
+      "ratio_matches": 34,
+      "final_matches": 20,
+      "first_stage_inliers": 20,
+      "query_topology": {
+        "junction_components": 3544,
+        "endpoint_components": 5368
+      },
+      "refer_topology": {
+        "junction_components": 3812,
+        "endpoint_components": 5195
+      },
+      "stages": {
+        "query_detected": {
+          "total": 318,
+          "counts": {
+            "junction": 251,
+            "endpoint": 15,
+            "vessel_segment": 2,
+            "non_vessel": 50
+          },
+          "fractions": {
+            "junction": 0.789308176100629,
+            "endpoint": 0.04716981132075472,
+            "vessel_segment": 0.006289308176100629,
+            "non_vessel": 0.15723270440251572
+          }
+        },
+        "query_ratio": {
+          "total": 34,
+          "counts": {
+            "junction": 29,
+            "endpoint": 2,
+            "vessel_segment": 0,
+            "non_vessel": 3
+          },
+          "fractions": {
+            "junction": 0.8529411764705882,
+            "endpoint": 0.058823529411764705,
+            "vessel_segment": 0.0,
+            "non_vessel": 0.08823529411764706
+          }
+        },
+        "query_final": {
+          "total": 20,
+          "counts": {
+            "junction": 17,
+            "endpoint": 1,
+            "vessel_segment": 0,
+            "non_vessel": 2
+          },
+          "fractions": {
+            "junction": 0.85,
+            "endpoint": 0.05,
+            "vessel_segment": 0.0,
+            "non_vessel": 0.1
+          }
+        },
+        "query_first_stage_inlier": {
+          "total": 20,
+          "counts": {
+            "junction": 17,
+            "endpoint": 1,
+            "vessel_segment": 0,
+            "non_vessel": 2
+          },
+          "fractions": {
+            "junction": 0.85,
+            "endpoint": 0.05,
+            "vessel_segment": 0.0,
+            "non_vessel": 0.1
+          }
+        },
+        "refer_detected": {
+          "total": 461,
+          "counts": {
+            "junction": 277,
+            "endpoint": 23,
+            "vessel_segment": 3,
+            "non_vessel": 158
+          },
+          "fractions": {
+            "junction": 0.6008676789587852,
+            "endpoint": 0.049891540130151846,
+            "vessel_segment": 0.006507592190889371,
+            "non_vessel": 0.34273318872017355
+          }
+        },
+        "refer_ratio": {
+          "total": 34,
+          "counts": {
+            "junction": 17,
+            "endpoint": 1,
+            "vessel_segment": 0,
+            "non_vessel": 16
+          },
+          "fractions": {
+            "junction": 0.5,
+            "endpoint": 0.029411764705882353,
+            "vessel_segment": 0.0,
+            "non_vessel": 0.47058823529411764
+          }
+        },
+        "refer_final": {
+          "total": 20,
+          "counts": {
+            "junction": 10,
+            "endpoint": 1,
+            "vessel_segment": 0,
+            "non_vessel": 9
+          },
+          "fractions": {
+            "junction": 0.5,
+            "endpoint": 0.05,
+            "vessel_segment": 0.0,
+            "non_vessel": 0.45
+          }
+        },
+        "refer_first_stage_inlier": {
+          "total": 20,
+          "counts": {
+            "junction": 10,
+            "endpoint": 1,
+            "vessel_segment": 0,
+            "non_vessel": 9
+          },
+          "fractions": {
+            "junction": 0.5,
+            "endpoint": 0.05,
+            "vessel_segment": 0.0,
+            "non_vessel": 0.45
+          }
+        }
+      }
+    },
+    {
+      "pair_id": "40_r_t",
+      "ratio_matches": 24,
+      "final_matches": 11,
+      "first_stage_inliers": 11,
+      "query_topology": {
+        "junction_components": 3563,
+        "endpoint_components": 5406
+      },
+      "refer_topology": {
+        "junction_components": 2576,
+        "endpoint_components": 3309
+      },
+      "stages": {
+        "query_detected": {
+          "total": 320,
+          "counts": {
+            "junction": 259,
+            "endpoint": 13,
+            "vessel_segment": 3,
+            "non_vessel": 45
+          },
+          "fractions": {
+            "junction": 0.809375,
+            "endpoint": 0.040625,
+            "vessel_segment": 0.009375,
+            "non_vessel": 0.140625
+          }
+        },
+        "query_ratio": {
+          "total": 24,
+          "counts": {
+            "junction": 21,
+            "endpoint": 1,
+            "vessel_segment": 0,
+            "non_vessel": 2
+          },
+          "fractions": {
+            "junction": 0.875,
+            "endpoint": 0.041666666666666664,
+            "vessel_segment": 0.0,
+            "non_vessel": 0.08333333333333333
+          }
+        },
+        "query_final": {
+          "total": 11,
+          "counts": {
+            "junction": 10,
+            "endpoint": 1,
+            "vessel_segment": 0,
+            "non_vessel": 0
+          },
+          "fractions": {
+            "junction": 0.9090909090909091,
+            "endpoint": 0.09090909090909091,
+            "vessel_segment": 0.0,
+            "non_vessel": 0.0
+          }
+        },
+        "query_first_stage_inlier": {
+          "total": 11,
+          "counts": {
+            "junction": 10,
+            "endpoint": 1,
+            "vessel_segment": 0,
+            "non_vessel": 0
+          },
+          "fractions": {
+            "junction": 0.9090909090909091,
+            "endpoint": 0.09090909090909091,
+            "vessel_segment": 0.0,
+            "non_vessel": 0.0
+          }
+        },
+        "refer_detected": {
+          "total": 431,
+          "counts": {
+            "junction": 245,
+            "endpoint": 16,
+            "vessel_segment": 1,
+            "non_vessel": 169
+          },
+          "fractions": {
+            "junction": 0.568445475638051,
+            "endpoint": 0.037122969837587005,
+            "vessel_segment": 0.002320185614849188,
+            "non_vessel": 0.39211136890951276
+          }
+        },
+        "refer_ratio": {
+          "total": 24,
+          "counts": {
+            "junction": 18,
+            "endpoint": 1,
+            "vessel_segment": 0,
+            "non_vessel": 5
+          },
+          "fractions": {
+            "junction": 0.75,
+            "endpoint": 0.041666666666666664,
+            "vessel_segment": 0.0,
+            "non_vessel": 0.20833333333333334
+          }
+        },
+        "refer_final": {
+          "total": 11,
+          "counts": {
+            "junction": 10,
+            "endpoint": 0,
+            "vessel_segment": 0,
+            "non_vessel": 1
+          },
+          "fractions": {
+            "junction": 0.9090909090909091,
+            "endpoint": 0.0,
+            "vessel_segment": 0.0,
+            "non_vessel": 0.09090909090909091
+          }
+        },
+        "refer_first_stage_inlier": {
+          "total": 11,
+          "counts": {
+            "junction": 10,
+            "endpoint": 0,
+            "vessel_segment": 0,
+            "non_vessel": 1
+          },
+          "fractions": {
+            "junction": 0.9090909090909091,
+            "endpoint": 0.0,
+            "vessel_segment": 0.0,
+            "non_vessel": 0.09090909090909091
+          }
+        }
+      }
+    }
+  ]
+}

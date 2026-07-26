@@ -1,0 +1,7 @@
+nohup: ignoring input
+Traceback (most recent call last):
+  File "tools/audit_fimd_vessel_topology.py", line 236, in <module>
+    main()
+  File "tools/audit_fimd_vessel_topology.py", line 158, in main
+    raise FileExistsError(f"Refusing to overwrite non-empty output directory: {args.output_dir}")
+FileExistsError: Refusing to overwrite non-empty output directory: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_inference_diagnostics/g0_global_threshold_04/FIMD_149/diagnostics/vessel_topology_d4
