@@ -1,0 +1,32 @@
+Traceback (most recent call last):
+  File "test_on_FIRE.py", line 14, in <module>
+    from common.inference_diagnostics import write_jsonl
+  File "/home/data1/zhangjunhong/sr_project/sr/common/inference_diagnostics.py", line 13, in <module>
+    from common.vessel_mask_util import compute_vessel_mask
+  File "/home/data1/zhangjunhong/sr_project/sr/common/vessel_mask_util.py", line 5, in <module>
+    import torch
+  File "/home/data1/zhangjunhong/anaconda3/envs/sr/lib/python3.8/site-packages/torch/__init__.py", line 2143, in <module>
+    from . import _meta_registrations
+  File "/home/data1/zhangjunhong/anaconda3/envs/sr/lib/python3.8/site-packages/torch/_meta_registrations.py", line 9, in <module>
+    from torch._decomp import (
+  File "/home/data1/zhangjunhong/anaconda3/envs/sr/lib/python3.8/site-packages/torch/_decomp/__init__.py", line 246, in <module>
+    import torch._refs
+  File "/home/data1/zhangjunhong/anaconda3/envs/sr/lib/python3.8/site-packages/torch/_refs/__init__.py", line 538, in <module>
+    def acosh(a):
+  File "/home/data1/zhangjunhong/anaconda3/envs/sr/lib/python3.8/site-packages/torch/_refs/__init__.py", line 479, in inner
+    register_decomposition(aten_op)(_ref)
+  File "/home/data1/zhangjunhong/anaconda3/envs/sr/lib/python3.8/site-packages/torch/_decomp/__init__.py", line 187, in decomposition_decorator
+    pytree.tree_map_(register, aten_op)
+  File "/home/data1/zhangjunhong/anaconda3/envs/sr/lib/python3.8/site-packages/torch/utils/_pytree.py", line 981, in tree_map_
+    tuple(map(func, *flat_args))  # consume and exhaust the iterable
+  File "/home/data1/zhangjunhong/anaconda3/envs/sr/lib/python3.8/site-packages/torch/_decomp/__init__.py", line 184, in register
+    _add_op_to_registry(registry, op, fn)
+  File "/home/data1/zhangjunhong/anaconda3/envs/sr/lib/python3.8/site-packages/torch/_decomp/__init__.py", line 52, in _add_op_to_registry
+    overloads.append(getattr(op, ol))
+  File "/home/data1/zhangjunhong/anaconda3/envs/sr/lib/python3.8/site-packages/torch/_ops.py", line 1032, in __getattr__
+    if not _has_script_object_arg(schema)
+  File "/home/data1/zhangjunhong/anaconda3/envs/sr/lib/python3.8/site-packages/torch/_ops.py", line 953, in _has_script_object_arg
+    return any(isinstance(arg.type, torch.ClassType) for arg in schema.arguments)
+  File "/home/data1/zhangjunhong/anaconda3/envs/sr/lib/python3.8/site-packages/torch/_ops.py", line 953, in <genexpr>
+    return any(isinstance(arg.type, torch.ClassType) for arg in schema.arguments)
+KeyboardInterrupt

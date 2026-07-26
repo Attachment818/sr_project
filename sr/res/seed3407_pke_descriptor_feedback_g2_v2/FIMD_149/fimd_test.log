@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "test_on_FIMD.py", line 3, in <module>
+    import numpy as np
+  File "/home/data1/zhangjunhong/anaconda3/envs/sr/lib/python3.8/site-packages/numpy/__init__.py", line 141, in <module>
+    from . import core
+  File "/home/data1/zhangjunhong/anaconda3/envs/sr/lib/python3.8/site-packages/numpy/core/__init__.py", line 23, in <module>
+    from . import multiarray
+  File "/home/data1/zhangjunhong/anaconda3/envs/sr/lib/python3.8/site-packages/numpy/core/multiarray.py", line 10, in <module>
+    from . import overrides
+  File "/home/data1/zhangjunhong/anaconda3/envs/sr/lib/python3.8/site-packages/numpy/core/overrides.py", line 8, in <module>
+    from numpy.compat._inspect import getargspec
+  File "<frozen importlib._bootstrap>", line 991, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 975, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 671, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 779, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 856, in get_code
+KeyboardInterrupt
