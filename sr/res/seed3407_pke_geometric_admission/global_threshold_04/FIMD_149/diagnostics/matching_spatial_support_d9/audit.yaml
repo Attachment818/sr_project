@@ -1,0 +1,11 @@
+# D9: G0 FIMD inference-chain and first-stage spatial-support audit.
+AUDIT:
+  test_config_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/FIMD_149/test.yaml
+  checkpoint_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149.pth
+  dataset_root: /home/data1/zhangjunhong/sr_project/sr/data/FIMD
+  output_dir: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/FIMD_149/diagnostics/matching_spatial_support_d9
+  seed_label: G0_seed3407_epoch149
+  device: cuda:1
+  grid_size: 8
+  outer_border_margin: 48
+  pairs: []
