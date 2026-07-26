@@ -1,0 +1,73 @@
+{
+  "audit_type": "read_only_pke_density_policy_counterfactual",
+  "train_config_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/train.yaml",
+  "checkpoint_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149.pth",
+  "value_map_dir": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/value_maps",
+  "device": "cuda:0",
+  "affine_passes": 1,
+  "grid_size": 8,
+  "low_density_max_peaks": 4,
+  "noncore_boost_multiplier": 2,
+  "eligible_labeled_samples": 256,
+  "policy": "All G0 content-pass points remain. Core weight stays one; non-core points in cells with at most low_density_max_peaks existing final peaks receive the configured integer multiplier.",
+  "selected_noncore_content": {
+    "total": 4914,
+    "by_region": {
+      "vessel_core": 0,
+      "vessel_edge": 610,
+      "non_vessel": 4304
+    },
+    "mean_grid_cells_per_image": 10.01953125,
+    "by_region_fraction": {
+      "vessel_core": 0.0,
+      "vessel_edge": 0.12413512413512413,
+      "non_vessel": 0.8758648758648758
+    }
+  },
+  "baseline_final": {
+    "total": 69756,
+    "by_region": {
+      "vessel_core": 53340,
+      "vessel_edge": 2818,
+      "non_vessel": 13598
+    },
+    "mean_grid_cells_per_image": 49.43359375,
+    "by_region_fraction": {
+      "vessel_core": 0.7646654051264408,
+      "vessel_edge": 0.0403979585985435,
+      "non_vessel": 0.19493663627501576
+    }
+  },
+  "policy_final": {
+    "total": 69957,
+    "by_region": {
+      "vessel_core": 53280,
+      "vessel_edge": 2832,
+      "non_vessel": 13845
+    },
+    "mean_grid_cells_per_image": 49.5390625,
+    "by_region_fraction": {
+      "vessel_core": 0.7616107037179982,
+      "vessel_edge": 0.04048201037780351,
+      "non_vessel": 0.1979072859041983
+    }
+  },
+  "baseline_to_policy_changes": {
+    "policy_new_vs_baseline": 659,
+    "policy_removed_vs_baseline": 458,
+    "core_baseline_peaks": 53340,
+    "core_baseline_peaks_retained": 53047,
+    "baseline_saturated_pixels": 7,
+    "policy_saturated_pixels": 7,
+    "core_baseline_peak_retention": 0.9945069366329209
+  },
+  "density": {
+    "baseline_occupied_cells_mean_per_image": 49.43359375,
+    "policy_occupied_cells_mean_per_image": 49.5390625,
+    "baseline_top1_cell_fraction_mean": 0.04494002441386836,
+    "policy_top1_cell_fraction_mean": 0.044791637945805776,
+    "baseline_top4_cell_fraction_mean": 0.16260607335240718,
+    "policy_top4_cell_fraction_mean": 0.16200440124857332
+  },
+  "safety": "Baseline and policy maps are independent clones. value_map_save is never called."
+}
