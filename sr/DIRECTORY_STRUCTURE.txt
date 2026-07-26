@@ -14230,3 +14230,13 @@ sr/
 ├── test_on_FIMD.py
 ├── test_on_FIRE.py
 └── train.py
+
+2026-07-26 read-only core-support guard addition
+└── res/seed3407_pke_geometric_admission/global_threshold_04/FIMD_149/diagnostics/
+    └── density_guard_d7/
+        ├── audit.yaml
+        └── density_guard_counterfactual.json (generated on server; not committed)
+
+Tool: tools/audit_pke_density_guard.py
+  Applies the D6 non-core density boost only when per-image core peak support
+  remains at least 98% of baseline and core grid coverage does not decrease.
