@@ -15,6 +15,7 @@ from model.super_retina import (
     SuperRetinaWithVesselOnly,
     SuperRetinaWithVesselOnlyMasked,
     SuperRetinaWithDecoupledMultiScaleDescriptor,
+    SuperRetinaWithResidualMultiScaleDescriptor,
 )
 import torch.optim as optim
 import yaml
@@ -131,6 +132,10 @@ if __name__ == '__main__':
         model = SuperRetinaWithDecoupledMultiScaleDescriptor(
             train_config, device=device
         )
+    elif model_variant == 'vessel_masked_residual_multiscale':
+        model = SuperRetinaWithResidualMultiScaleDescriptor(
+            train_config, device=device
+        )
     else:
         raise ValueError(f"Unknown model_variant: {model_variant}")
 
@@ -200,6 +205,8 @@ if __name__ == '__main__':
           f"{train_config.get('descriptor_hard_negative_mode', 'legacy')}")
     print(f"  - descriptor_hard_negative_chunk_size: "
           f"{train_config.get('descriptor_hard_negative_chunk_size', 256)}")
+    print(f"  - descriptor_multiscale_gate_init: "
+          f"{train_config.get('descriptor_multiscale_gate_init', 0.1)}")
     print(f"  - log_descriptor_supervision_stats: "
           f"{train_config.get('log_descriptor_supervision_stats', False)}")
     print(f"  - checkpoint_save_epochs: "

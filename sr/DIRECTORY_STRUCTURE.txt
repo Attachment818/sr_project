@@ -5260,6 +5260,12 @@ sr/
 │   │           ├── inference_diagnostics.jsonl
 │   │           ├── test.log
 │   │           └── test.yaml
+│   ├── seed3407_decoupled_multiscale_g6_legacy_v1/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
+│   │   └── train.yaml
 │   ├── seed3407_decoupled_multiscale_g6_v1/
 │   │   ├── FIMD_149/
 │   │   │   ├── aligned_images/
@@ -8908,6 +8914,12 @@ sr/
 │   │       ├── seed3407_region_relaxed_noncore_04_ep149_epoch99.pth
 │   │       ├── train.log
 │   │       └── train.yaml
+│   ├── seed3407_residual_multiscale_g7_v1/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
+│   │   └── train.yaml
 │   ├── seed3407_structure_prior_audits/
 │   │   ├── descriptor_supervision_d16/
 │   │   │   ├── audit.yaml

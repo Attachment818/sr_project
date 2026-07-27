@@ -1,4 +1,4 @@
-"""Smoke tests for G5 chunked negatives and the G6 feature split."""
+"""Smoke tests for G5 negatives and the G6/G7 descriptor architectures."""
 
 import argparse
 import sys
@@ -15,6 +15,7 @@ if str(ROOT) not in sys.path:
 from model.super_retina import (
     SuperRetina,
     SuperRetinaWithDecoupledMultiScaleDescriptor,
+    SuperRetinaWithResidualMultiScaleDescriptor,
     chunked_hard_negative_indices,
 )
 import model.super_retina as super_retina_module
@@ -142,15 +143,59 @@ def check_g6_structure_and_gradients():
     restored.load_state_dict(state, strict=True)
 
 
+def check_g7_residual_structure_and_gradients():
+    config = minimal_config()
+    config['descriptor_hard_negative_mode'] = 'legacy'
+    config['descriptor_multiscale_gate_init'] = 0.1
+    model = SuperRetinaWithResidualMultiScaleDescriptor(config, device='cpu')
+    model.eval()
+    image = torch.randn(1, 1, 64, 64)
+    detector, descriptor = model.network(image)
+    assert detector.shape == (1, 1, 64, 64)
+    assert descriptor.shape[1] == 256
+    assert torch.isfinite(detector).all() and torch.isfinite(descriptor).all()
+    assert hasattr(model, 'convDa'), 'G7 must retain the G0 convDa path'
+    observed_gate = torch.sigmoid(
+        model.descriptor_multiscale_gate_logit
+    ).item()
+    assert abs(observed_gate - 0.1) < 1e-6
+
+    residual_parameters = [
+        parameter for name, parameter in model.named_parameters()
+        if name.startswith('descriptor_residual_')
+    ]
+    detector_to_residual = torch.autograd.grad(
+        detector.sum(), residual_parameters, allow_unused=True, retain_graph=True
+    )
+    descriptor_to_residual = torch.autograd.grad(
+        descriptor.sum(), residual_parameters, allow_unused=True
+    )
+    assert all(gradient is None for gradient in detector_to_residual)
+    assert all(gradient is not None for gradient in descriptor_to_residual)
+
+    state = model.state_dict()
+    restored = SuperRetinaWithResidualMultiScaleDescriptor(config, device='cpu')
+    restored.load_state_dict(state, strict=True)
+
+
 def check_cuda_memory(config_path):
     source = yaml.safe_load(Path(config_path).read_text(encoding='utf-8'))
     config = {**source['MODEL'], **source['PKE'], **source['DATASET'], **source['VALUE_MAP']}
-    if config['model_variant'] != 'vessel_masked_decoupled_multiscale':
-        raise ValueError('CUDA preflight currently targets the G6 model variant')
+    model_classes = {
+        'vessel_masked_decoupled_multiscale':
+            SuperRetinaWithDecoupledMultiScaleDescriptor,
+        'vessel_masked_residual_multiscale':
+            SuperRetinaWithResidualMultiScaleDescriptor,
+    }
+    model_variant = config['model_variant']
+    if model_variant not in model_classes:
+        raise ValueError(
+            f'CUDA preflight does not support model variant: {model_variant}'
+        )
     device = torch.device(config['device'])
     if not torch.cuda.is_available() or device.type != 'cuda':
         raise RuntimeError(f'Configured CUDA device is unavailable: {device}')
-    model = SuperRetinaWithDecoupledMultiScaleDescriptor(config, device=device)
+    model = model_classes[model_variant](config, device=device)
     model.train()
     batch_size = int(config['batch_size'])
     height = int(config['model_image_height'])
@@ -172,7 +217,8 @@ def check_cuda_memory(config_path):
     assert auxiliary_detector.shape == detector.shape
     assert auxiliary_descriptor.shape == descriptor.shape
     print(
-        f'G6 CUDA preflight passed: device={device}, batch={batch_size}, '
+        f'CUDA preflight passed: variant={model_variant}, device={device}, '
+        f'batch={batch_size}, '
         f'image={height}x{width}, peak_allocated={peak_gib:.2f} GiB'
     )
 
@@ -184,7 +230,8 @@ def main():
     check_chunked_equivalence()
     check_over_limit_descriptor_loss()
     check_g6_structure_and_gradients()
-    print('G5/G6 CPU smoke tests passed')
+    check_g7_residual_structure_and_gradients()
+    print('G5/G6/G7 CPU smoke tests passed')
     if args.cuda_config is not None:
         check_cuda_memory(args.cuda_config)
 

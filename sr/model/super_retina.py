@@ -1,3 +1,4 @@
+import math
 import random
 import sys
 import time
@@ -2616,6 +2617,100 @@ class SuperRetinaWithDecoupledMultiScaleDescriptor(SuperRetinaWithVesselOnlyMask
 
         cPa = self.upsample(detector_conv4)
         cPa = torch.cat([cPa, detector_conv3], dim=1)
+        cPa = self.dconv_up3(cPa)
+        cPa = self.upsample(cPa)
+        cPa = torch.cat([cPa, conv2], dim=1)
+        cPa = self.dconv_up2(cPa)
+        cPa = self.upsample(cPa)
+        cPa = torch.cat([cPa, conv1], dim=1)
+        cPa = self.dconv_up1(cPa)
+        semi = torch.sigmoid(self.conv_last(cPa))
+
+        if return_cPa:
+            return semi, desc, cPa
+        return semi, desc
+
+
+class SuperRetinaWithResidualMultiScaleDescriptor(SuperRetinaWithVesselOnlyMasked):
+    """G7: preserve the G0 descriptor path and add gated multi-scale residual detail.
+
+    Unlike G6, the complete shared conv1-conv4 encoder and legacy convDa descriptor
+    path remain intact. Features from conv2 and conv3 are projected to the conv4
+    resolution, fused, and added to convDa through a learnable scalar gate. This
+    makes the initial architecture close to G0 while allowing training to use
+    shallow and mid-level retinal detail when it is beneficial.
+    """
+
+    def __init__(self, config=None, device='cpu', n_class=1):
+        super().__init__(config=config, device=device, n_class=n_class)
+        c2, c3, descriptor_channels = 64, 128, 256
+        gate_init = 0.1
+        if config is not None:
+            gate_init = float(config.get('descriptor_multiscale_gate_init', 0.1))
+        if not 0.0 < gate_init < 1.0:
+            raise ValueError(
+                'descriptor_multiscale_gate_init must be strictly between 0 and 1'
+            )
+
+        self.descriptor_residual_shallow = nn.Sequential(
+            nn.Conv2d(c2, c2, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(c2, c2, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(inplace=True),
+        )
+        self.descriptor_residual_mid = nn.Sequential(
+            nn.Conv2d(c3, c3, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(inplace=True),
+        )
+        self.descriptor_residual_fusion = nn.Sequential(
+            nn.Conv2d(c2 + c3, descriptor_channels, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+        )
+        gate_logit = math.log(gate_init / (1.0 - gate_init))
+        self.descriptor_multiscale_gate_logit = nn.Parameter(
+            torch.tensor(gate_logit, dtype=torch.float32)
+        )
+        self.to(device)
+        print(
+            '✅ SuperRetinaWithResidualMultiScaleDescriptor 初始化完成，'
+            f'G0描述子主路径保留，多尺度残差=conv2/3，初始门控={gate_init:.4f}'
+        )
+
+    def network(self, x, return_cPa=False):
+        x = self.relu(self.conv1a(x))
+        conv1 = self.relu(self.conv1b(x))
+        x = self.pool(conv1)
+
+        x = self.relu(self.conv2a(x))
+        conv2 = self.relu(self.conv2b(x))
+        x = self.pool(conv2)
+
+        x = self.relu(self.conv3a(x))
+        conv3 = self.relu(self.conv3b(x))
+        x = self.pool(conv3)
+
+        x = self.relu(self.conv4a(x))
+        conv4 = self.relu(self.conv4b(x))
+
+        descriptor_main = self.relu(self.convDa(conv4))
+        descriptor_residual = self.descriptor_residual_fusion(torch.cat(
+            [
+                self.descriptor_residual_shallow(conv2),
+                self.descriptor_residual_mid(conv3),
+            ],
+            dim=1,
+        ))
+        descriptor_gate = torch.sigmoid(self.descriptor_multiscale_gate_logit)
+        cDb = self.relu(self.convDb(
+            descriptor_main + descriptor_gate * descriptor_residual
+        ))
+        desc = self.convDc(cDb)
+        descriptor_norm = torch.norm(desc, p=2, dim=1)
+        desc = desc.div(torch.unsqueeze(descriptor_norm, 1))
+        desc = self.trans_conv(desc)
+
+        cPa = self.upsample(conv4)
+        cPa = torch.cat([cPa, conv3], dim=1)
         cPa = self.dconv_up3(cPa)
         cPa = self.upsample(cPa)
         cPa = torch.cat([cPa, conv2], dim=1)

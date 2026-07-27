@@ -9,7 +9,7 @@ from scipy.ndimage import map_coordinates
 from common.common_util import pre_processing, simple_nms, remove_borders, \
     sample_keypoint_desc, remove_keypoints_by_mask
 from common.inference_diagnostics import summarize_keypoints
-from model.super_retina import SuperRetina, SuperRetinaFPN, SuperRetinaWithSelfAttention, SuperRetinaWithMultiScaleDescriptor, SuperRetinaWithASPP, SuperRetinaWithoutPKE, SuperRetinaWithoutPKEWithAttention,SuperRetinaWithPerceptualLoss,SuperRetinaWithVesselRegularization,SuperRetinaWithVesselOnly,SuperRetinaWithVesselOnlyMasked,SuperRetinaWithDecoupledMultiScaleDescriptor
+from model.super_retina import SuperRetina, SuperRetinaFPN, SuperRetinaWithSelfAttention, SuperRetinaWithMultiScaleDescriptor, SuperRetinaWithASPP, SuperRetinaWithoutPKE, SuperRetinaWithoutPKEWithAttention,SuperRetinaWithPerceptualLoss,SuperRetinaWithVesselRegularization,SuperRetinaWithVesselOnly,SuperRetinaWithVesselOnlyMasked,SuperRetinaWithDecoupledMultiScaleDescriptor,SuperRetinaWithResidualMultiScaleDescriptor
 from model.super_retina_attention import SuperRetinaWithAttention
 
 from PIL import Image
@@ -205,6 +205,18 @@ class Predictor:
             print(
                 '✅ Loaded G6 decoupled multi-scale descriptor model '
                 '(shared conv1-conv2; descriptor-specific conv3-conv4)'
+            )
+        elif model_type == 'vessel_masked_residual_multiscale':
+            model = SuperRetinaWithResidualMultiScaleDescriptor(
+                config=None,
+                device=device,
+            )
+            model.load_pretrained_weights(
+                model_save_path, device=device, strict=False
+            )
+            print(
+                '✅ Loaded G7 residual multi-scale descriptor model '
+                '(G0 main descriptor path; gated conv2-conv3 residual)'
             )
         else:
             # 使用原始模型（默认，保持向后兼容），并兼容带 FPN/注意力的权重文件
