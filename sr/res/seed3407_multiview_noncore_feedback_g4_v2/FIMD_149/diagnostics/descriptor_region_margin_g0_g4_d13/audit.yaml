@@ -1,0 +1,16 @@
+# D13: read-only regional descriptor-margin audit on the G4-regressed FIMD pairs.
+AUDIT:
+  dataset_root: /home/data1/zhangjunhong/sr_project/sr/data/FIMD
+  output_dir: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_multiview_noncore_feedback_g4_v2/FIMD_149/diagnostics/descriptor_region_margin_g0_g4_d13
+  device: cuda:1
+  pairs: [35_r_t, 39_r_t, 40_r_t, 43_r_t]
+  vessel_mask_backend: morph
+  vessel_mask_threshold: 0.25
+  vessel_mask_dilate: 3
+  sources:
+    - label: G0_seed3407
+      test_config_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/FIMD_149/test.yaml
+      checkpoint_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149.pth
+    - label: G4_seed3407
+      test_config_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_multiview_noncore_feedback_g4_v2/FIMD_149/test.yaml
+      checkpoint_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_multiview_noncore_feedback_g4_v2/model_149.pth
