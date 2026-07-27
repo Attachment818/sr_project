@@ -7216,6 +7216,11 @@ sr/
 │   │   ├── FIMD_149/
 │   │   │   ├── aligned_images/
 │   │   │   ├── diagnostics/
+│   │   │   │   ├── descriptor_region_margin_g0_g4_d13/
+│   │   │   │   │   ├── audit.yaml
+│   │   │   │   │   ├── d13_pipeline.log
+│   │   │   │   │   ├── descriptor_region_margin.csv
+│   │   │   │   │   └── descriptor_region_margin.json
 │   │   │   │   └── matching_chain_g0_g4_d12/
 │   │   │   │       ├── comparison/
 │   │   │   │       │   ├── g0_g4_matching_chain_comparison.csv
@@ -14490,6 +14495,7 @@ sr/
 ├── tools/
 │   ├── analyze_fimd_pair_diagnostics.py
 │   ├── audit_fimd_descriptor_margin.py
+│   ├── audit_fimd_descriptor_region_margin.py
 │   ├── audit_fimd_inlier_geometry.py
 │   ├── audit_fimd_matching_spatial_support.py
 │   ├── audit_fimd_vessel_topology.py
@@ -14512,7 +14518,3 @@ sr/
 ├── test_on_FIMD.py
 ├── test_on_FIRE.py
 └── train.py
-
-Recent D13 diagnostic addition:
-- res/seed3407_multiview_noncore_feedback_g4_v2/FIMD_149/diagnostics/descriptor_region_margin_g0_g4_d13/: read-only G0/G4 descriptor-margin audit configuration for FIMD cp35/cp39/cp40/cp43; generated CSV/JSON and log are stored here.
-- tools/audit_fimd_descriptor_region_margin.py: computes per-region (vessel core, vessel edge, non-vessel) nearest-neighbour ratio, reciprocal-ratio pass and descriptor-distance statistics with progress bars.
