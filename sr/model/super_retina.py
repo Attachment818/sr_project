@@ -166,6 +166,35 @@ class SuperRetina(nn.Module):
                                affine_detector_pred=affine_detector_pred,
                                return_valid_keypoints=True)
 
+        # Read-only audits can inspect why descriptor supervision is accepted or
+        # skipped. The flag is absent during normal training, so legacy behavior
+        # and return values remain unchanged.
+        if getattr(self, '_capture_descriptor_supervision_audit', False):
+            sample_counts = [int(item.shape[1]) for item in affine_descriptors]
+            over_limit_indices = [
+                index for index, count in enumerate(sample_counts) if count > 1000
+            ]
+            nonempty_indices = [
+                index for index, count in enumerate(sample_counts) if count > 0
+            ]
+            if over_limit_indices:
+                exit_reason = 'over_limit_batch_abort'
+                participating_indices = []
+            elif nonempty_indices:
+                exit_reason = 'trained'
+                participating_indices = nonempty_indices
+            else:
+                exit_reason = 'all_images_empty'
+                participating_indices = []
+            self._descriptor_supervision_audit = {
+                'sample_counts': sample_counts,
+                'over_limit_indices': over_limit_indices,
+                'nonempty_indices': nonempty_indices,
+                'participating_indices': participating_indices,
+                'exit_reason': exit_reason,
+                'sample_limit': 1000,
+            }
+
         # descriptors_tmp = []
         # affine_descriptor_tmp = []
         # for i in range(len(descriptors)):

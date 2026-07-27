@@ -1,0 +1,12 @@
+# D16: read-only audit of G0 descriptor-supervision admission and skipped batches.
+AUDIT:
+  output_dir: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_structure_prior_audits/descriptor_supervision_d16
+  train_config_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/train.yaml
+  checkpoint_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149.pth
+  value_map_dir: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/value_maps
+  device: cuda:1
+  seed: 3407
+  epoch: 149
+  batch_size: 2
+  num_batches: 64
+  num_workers: 0
