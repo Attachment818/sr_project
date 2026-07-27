@@ -8449,7 +8449,12 @@ sr/
 │   │       └── train.yaml
 │   ├── seed3407_structure_prior_audits/
 │   │   ├── descriptor_supervision_d16/
-│   │   │   └── audit.yaml
+│   │   │   ├── audit.yaml
+│   │   │   ├── d16_pipeline.log
+│   │   │   ├── descriptor_supervision_per_batch.csv
+│   │   │   ├── descriptor_supervision_per_image.csv
+│   │   │   ├── descriptor_supervision_report.md
+│   │   │   └── descriptor_supervision_summary.json
 │   │   ├── gradient_conflict_d15/
 │   │   │   ├── audit.yaml
 │   │   │   ├── d15_pipeline.log
@@ -14515,8 +14520,8 @@ sr/
 │   └── shared_ep45_perceptual_branch.pth
 ├── tools/
 │   ├── analyze_fimd_pair_diagnostics.py
-│   ├── audit_detector_descriptor_gradients.py
 │   ├── audit_descriptor_supervision.py
+│   ├── audit_detector_descriptor_gradients.py
 │   ├── audit_fimd_descriptor_margin.py
 │   ├── audit_fimd_descriptor_region_margin.py
 │   ├── audit_fimd_inlier_geometry.py

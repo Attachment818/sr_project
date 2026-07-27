@@ -1,0 +1,36 @@
+{
+  "audit_type": "g0_descriptor_supervision_effective_rate",
+  "checkpoint": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149.pth",
+  "device": "cuda:1",
+  "batches": 64,
+  "images": 128,
+  "sample_limit": 1000,
+  "batch_exit_reason_counts": {
+    "trained": 61,
+    "over_limit_batch_abort": 3
+  },
+  "batch_skip_fraction": 0.046875,
+  "over_limit_image_count": 3,
+  "empty_image_count": 0,
+  "correspondences": {
+    "total": 82631,
+    "used": 77403,
+    "discarded": 5228,
+    "effective_fraction": 0.9367307669034624,
+    "per_image_mean": 645.5546875,
+    "per_image_median": 628.5,
+    "per_image_maximum": 1032,
+    "per_image_p90": 874.5,
+    "per_image_p95": 920.5999999999999,
+    "per_image_p99": 1008.3000000000001
+  },
+  "interpretation": {
+    "over_limit_batch_abort": "At least one image exceeded 1000 correspondences, so the current code discarded descriptor supervision for the entire batch.",
+    "all_images_empty": "No valid descriptor correspondence was sampled in the batch.",
+    "trained": "All non-empty images contributed to the descriptor loss."
+  },
+  "limitations": [
+    "This replays G0 epoch-149 training batches and does not alter the checkpoint.",
+    "The audit measures supervision admission, not descriptor quality or test AUC."
+  ]
+}
