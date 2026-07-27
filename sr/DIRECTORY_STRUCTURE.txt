@@ -7221,6 +7221,8 @@ sr/
 │   │   │   │   │   ├── d13_pipeline.log
 │   │   │   │   │   ├── descriptor_region_margin.csv
 │   │   │   │   │   └── descriptor_region_margin.json
+│   │   │   │   ├── region_consistency_chain_g0_g4_d13_fix/
+│   │   │   │   │   └── audit.yaml
 │   │   │   │   └── matching_chain_g0_g4_d12/
 │   │   │   │       ├── comparison/
 │   │   │   │       │   ├── g0_g4_matching_chain_comparison.csv
@@ -14496,6 +14498,7 @@ sr/
 │   ├── analyze_fimd_pair_diagnostics.py
 │   ├── audit_fimd_descriptor_margin.py
 │   ├── audit_fimd_descriptor_region_margin.py
+│   ├── audit_fimd_region_consistency_chain.py
 │   ├── audit_fimd_inlier_geometry.py
 │   ├── audit_fimd_matching_spatial_support.py
 │   ├── audit_fimd_vessel_topology.py
