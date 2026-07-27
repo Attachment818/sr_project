@@ -8200,6 +8200,8 @@ sr/
 │   │   │   │   │   │   ├── matching_chain_summary.csv
 │   │   │   │   │   │   ├── matching_chain_summary.json
 │   │   │   │   │   │   └── matching_region_contributions.csv
+│   │   │   │   │   ├── selected_chain_g0_g5_g6_d17/
+│   │   │   │   │   │   └── audit.yaml
 │   │   │   │   │   ├── multiview_checkpoint_supply_d11/
 │   │   │   │   │   │   ├── audit.yaml
 │   │   │   │   │   │   ├── d11_multiview_checkpoint_supply.log
@@ -8301,6 +8303,9 @@ sr/
 │   │   │   │   └── value_map_retention_d5.log
 │   │   │   ├── FIRE_149/
 │   │   │   │   ├── aligned_images/
+│   │   │   │   ├── diagnostics/
+│   │   │   │   │   └── selected_chain_g0_g5_g6_d18/
+│   │   │   │   │       └── audit.yaml
 │   │   │   │   ├── match_images/
 │   │   │   │   ├── paper_figures/
 │   │   │   │   │   ├── control_points_A01_1_2/
@@ -14988,6 +14993,7 @@ sr/
 │   ├── audit_pke_multiview_stability.py
 │   ├── audit_pke_region_feedback.py
 │   ├── audit_pke_value_map_retention.py
+│   ├── audit_selected_matching_chain.py
 │   ├── audit_value_maps.py
 │   ├── compare_fimd_matching_chain.py
 │   ├── smoke_g4_multiview_feedback.py
