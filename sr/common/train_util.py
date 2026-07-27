@@ -211,6 +211,11 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
             num_learned_pts = 0
             num_input_with_label = 0
             num_input_descriptor = 0
+            descriptor_supervision_batches = 0
+            descriptor_supervision_skipped_batches = 0
+            descriptor_supervision_over_limit_images = 0
+            descriptor_supervision_total_correspondences = 0
+            descriptor_supervision_used_correspondences = 0
 
             for images, input_with_label, keypoint_positions, label_names \
                     in tqdm(dataloaders[phase]):
@@ -228,6 +233,26 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
                     loss, number_pts_one, print_loss_detector_one, print_loss_descriptor_one, enhanced_label_pts, \
                     enhanced_label, detector_pred, loss_detector_num, loss_descriptor_num \
                     = model(images, keypoint_positions, value_maps, learn_index)
+                    descriptor_stats = getattr(
+                        model, '_descriptor_supervision_audit', None
+                    )
+                    if (
+                        train_config.get('log_descriptor_supervision_stats', False)
+                        and descriptor_stats is not None
+                    ):
+                        descriptor_supervision_batches += 1
+                        counts = descriptor_stats['sample_counts']
+                        participating = descriptor_stats['participating_indices']
+                        descriptor_supervision_total_correspondences += sum(counts)
+                        descriptor_supervision_used_correspondences += sum(
+                            counts[index] for index in participating
+                        )
+                        descriptor_supervision_over_limit_images += len(
+                            descriptor_stats['over_limit_indices']
+                        )
+                        descriptor_supervision_skipped_batches += int(
+                            descriptor_stats['exit_reason'] != 'trained'
+                        )
                     if save_pke_diagnostics and getattr(model, 'last_pke_diagnostics', None) is not None:
                         for local_index, diagnostic in enumerate(model.last_pke_diagnostics):
                             batch_index = int(learn_index[0][local_index])
@@ -292,6 +317,23 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
                                                                                     num_input_with_label,
                                                                                     num_learned_pts / num_input_with_label),
                   'descriptor_loss: {} of {} nums'.format(print_descriptor_loss, num_input_descriptor))
+            if (
+                train_config.get('log_descriptor_supervision_stats', False)
+                and descriptor_supervision_batches > 0
+            ):
+                effective = (
+                    descriptor_supervision_used_correspondences
+                    / max(1, descriptor_supervision_total_correspondences)
+                )
+                print(
+                    'descriptor supervision: '
+                    f'batches={descriptor_supervision_batches}, '
+                    f'skipped_batches={descriptor_supervision_skipped_batches}, '
+                    f'over_limit_images={descriptor_supervision_over_limit_images}, '
+                    f'total_correspondences={descriptor_supervision_total_correspondences}, '
+                    f'used_correspondences={descriptor_supervision_used_correspondences}, '
+                    f'effective_fraction={effective:.6f}'
+                )
 
             for s, (name, _) in enumerate(show_names):
                 if not epoch % pke_show_epoch == 0:

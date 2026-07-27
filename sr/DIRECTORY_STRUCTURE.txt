@@ -5260,6 +5260,18 @@ sr/
 │   │           ├── inference_diagnostics.jsonl
 │   │           ├── test.log
 │   │           └── test.yaml
+│   ├── seed3407_decoupled_multiscale_g6_v1/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
+│   │   └── train.yaml
+│   ├── seed3407_descriptor_chunked_g5_v1/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
+│   │   └── train.yaml
 │   ├── seed3407_descriptor_consistency_g1_d1/
 │   │   ├── g1_hard_audit.yaml
 │   │   ├── g1_hard_pke_feedback_audit.json
@@ -14541,6 +14553,7 @@ sr/
 │   ├── audit_value_maps.py
 │   ├── compare_fimd_matching_chain.py
 │   ├── smoke_g4_multiview_feedback.py
+│   ├── smoke_g5_g6.py
 │   └── summarize_pke_diagnostics.py
 ├── predictor.py
 ├── requirements.txt

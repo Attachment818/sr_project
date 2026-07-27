@@ -14,6 +14,7 @@ from model.super_retina import (
     SuperRetinaWithVesselRegularization,
     SuperRetinaWithVesselOnly,
     SuperRetinaWithVesselOnlyMasked,
+    SuperRetinaWithDecoupledMultiScaleDescriptor,
 )
 import torch.optim as optim
 import yaml
@@ -126,6 +127,10 @@ if __name__ == '__main__':
         model = SuperRetinaWithVesselOnly(train_config, device=device)
     elif model_variant == 'vessel_only_masked':
         model = SuperRetinaWithVesselOnlyMasked(train_config, device=device)
+    elif model_variant == 'vessel_masked_decoupled_multiscale':
+        model = SuperRetinaWithDecoupledMultiScaleDescriptor(
+            train_config, device=device
+        )
     else:
         raise ValueError(f"Unknown model_variant: {model_variant}")
 
@@ -191,6 +196,12 @@ if __name__ == '__main__':
           f"{train_config.get('pke_multiview_noncore_max_per_image', 8)}")
     print(f"  - descriptor_hard_negative_min_distance: "
           f"{train_config.get('descriptor_hard_negative_min_distance', 0.0)}")
+    print(f"  - descriptor_hard_negative_mode: "
+          f"{train_config.get('descriptor_hard_negative_mode', 'legacy')}")
+    print(f"  - descriptor_hard_negative_chunk_size: "
+          f"{train_config.get('descriptor_hard_negative_chunk_size', 256)}")
+    print(f"  - log_descriptor_supervision_stats: "
+          f"{train_config.get('log_descriptor_supervision_stats', False)}")
 
     model = train_model(
         model,

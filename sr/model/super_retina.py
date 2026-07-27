@@ -35,6 +35,49 @@ def double_conv(in_channels, out_channels):
     )
 
 
+def chunked_hard_negative_indices(descriptor, affine_descriptor, keypoints=None,
+                                  min_negative_distance=0.0, chunk_size=256):
+    """Find the same nearest non-corresponding descriptors with bounded memory.
+
+    Args:
+        descriptor: [D, N] anchor descriptors.
+        affine_descriptor: [D, N] candidate descriptors.
+        keypoints: optional [N, 2] coordinates for spatial exclusion.
+    """
+    if descriptor.ndim != 2 or affine_descriptor.ndim != 2:
+        raise ValueError('descriptor inputs must have shape [D, N]')
+    if descriptor.shape != affine_descriptor.shape:
+        raise ValueError('anchor and affine descriptor shapes must match')
+    if chunk_size <= 0:
+        raise ValueError('descriptor hard-negative chunk size must be positive')
+    n = descriptor.shape[1]
+    if n == 0:
+        return torch.empty(0, dtype=torch.long, device=descriptor.device)
+    if min_negative_distance > 0:
+        if keypoints is None or keypoints.shape != (n, 2):
+            raise RuntimeError(
+                'Descriptor hard-negative spatial coordinates must align with '
+                'the sampled descriptor matrix'
+            )
+
+    selected = []
+    for start in range(0, n, chunk_size):
+        end = min(start + chunk_size, n)
+        distances = torch.norm(
+            descriptor[:, start:end, None] - affine_descriptor[:, None, :], dim=0
+        )
+        local_rows = torch.arange(end - start, device=distances.device)
+        global_rows = torch.arange(start, end, device=distances.device)
+        distances[local_rows, global_rows] = distances.max() + 1
+        if min_negative_distance > 0:
+            spatial = torch.cdist(
+                keypoints[start:end].float(), keypoints.float()
+            )
+            distances[spatial < min_negative_distance] = distances.max() + 1
+        selected.append(distances.argmin(dim=1))
+    return torch.cat(selected, dim=0)
+
+
 class SuperRetina(nn.Module):
     def __init__(self, config=None, device='cpu', n_class=1):
         super().__init__()
@@ -74,6 +117,9 @@ class SuperRetina(nn.Module):
 
         if config is not None:
             self.config = config
+            self._capture_descriptor_supervision_audit = bool(
+                config.get('log_descriptor_supervision_stats', False)
+            )
 
             self.nms_size = config['nms_size']
             self.nms_thresh = config['nms_thresh']
@@ -171,13 +217,16 @@ class SuperRetina(nn.Module):
         # and return values remain unchanged.
         if getattr(self, '_capture_descriptor_supervision_audit', False):
             sample_counts = [int(item.shape[1]) for item in affine_descriptors]
+            hard_negative_mode = self.config.get(
+                'descriptor_hard_negative_mode', 'legacy'
+            )
             over_limit_indices = [
                 index for index, count in enumerate(sample_counts) if count > 1000
             ]
             nonempty_indices = [
                 index for index, count in enumerate(sample_counts) if count > 0
             ]
-            if over_limit_indices:
+            if over_limit_indices and hard_negative_mode == 'legacy':
                 exit_reason = 'over_limit_batch_abort'
                 participating_indices = []
             elif nonempty_indices:
@@ -193,6 +242,7 @@ class SuperRetina(nn.Module):
                 'participating_indices': participating_indices,
                 'exit_reason': exit_reason,
                 'sample_limit': 1000,
+                'hard_negative_mode': hard_negative_mode,
             }
 
         # descriptors_tmp = []
@@ -215,7 +265,14 @@ class SuperRetina(nn.Module):
             affine_descriptor = affine_descriptors[i]
 
             n = affine_descriptors[i].shape[1]
-            if n > 1000:  # avoid OOM
+            hard_negative_mode = self.config.get(
+                'descriptor_hard_negative_mode', 'legacy'
+            )
+            if hard_negative_mode not in {'legacy', 'chunked'}:
+                raise ValueError(
+                    f'Unknown descriptor_hard_negative_mode: {hard_negative_mode}'
+                )
+            if hard_negative_mode == 'legacy' and n > 1000:  # historical OOM guard
                 return torch.tensor(0., requires_grad=True).to(descriptor_pred), False
 
             descriptor = descriptor.view(D, -1, 1)
@@ -236,18 +293,27 @@ class SuperRetina(nn.Module):
 
             # hard
             with torch.no_grad():
-                dis = torch.norm(descriptor - affine_descriptor, dim=0)
-                dis[ar, ar] = dis.max() + 1
                 min_negative_distance = float(self.config.get('descriptor_hard_negative_min_distance', 0.0))
-                if min_negative_distance > 0:
-                    spatial = torch.cdist(keypoints[i].float(), keypoints[i].float())
-                    if spatial.shape != dis.shape:
-                        raise RuntimeError(
-                            'Descriptor hard-negative spatial coordinates must align with '
-                            'the sampled descriptor matrix'
-                        )
-                    dis[spatial < min_negative_distance] = dis.max() + 1
-                neg_index1 = dis.argmin(axis=1)
+                if hard_negative_mode == 'chunked':
+                    neg_index1 = chunked_hard_negative_indices(
+                        descriptors[i], affine_descriptors[i], keypoints=keypoints[i],
+                        min_negative_distance=min_negative_distance,
+                        chunk_size=int(self.config.get(
+                            'descriptor_hard_negative_chunk_size', 256
+                        )),
+                    )
+                else:
+                    dis = torch.norm(descriptor - affine_descriptor, dim=0)
+                    dis[ar, ar] = dis.max() + 1
+                    if min_negative_distance > 0:
+                        spatial = torch.cdist(keypoints[i].float(), keypoints[i].float())
+                        if spatial.shape != dis.shape:
+                            raise RuntimeError(
+                                'Descriptor hard-negative spatial coordinates must align with '
+                                'the sampled descriptor matrix'
+                            )
+                        dis[spatial < min_negative_distance] = dis.max() + 1
+                    neg_index1 = dis.argmin(axis=1)
 
             positive.append(affine_descriptor[:, 0, :].permute(1, 0))
             anchor.append(descriptor[:, :, 0].permute(1, 0))
@@ -2474,3 +2540,91 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
             f"✅ Loaded SuperRetinaWithVesselOnlyMasked from {model_path} "
             f"(matched {len(filtered_dict)}/{len(pretrained_dict)} tensors)"
         )
+
+
+class SuperRetinaWithDecoupledMultiScaleDescriptor(SuperRetinaWithVesselOnlyMasked):
+    """G6: G0 detector with a deep-decoupled, multi-scale descriptor encoder.
+
+    conv1-conv2 remain shared. The detector keeps the historical conv3-conv4
+    path, while the descriptor owns independent conv3-conv4 layers and fuses
+    shared shallow detail, descriptor mid-level, and descriptor deep features.
+    """
+
+    def __init__(self, config=None, device='cpu', n_class=1):
+        super().__init__(config=config, device=device, n_class=n_class)
+        c2, c3, c4, descriptor_channels = 64, 128, 128, 256
+
+        self.descriptor_conv3a = nn.Conv2d(c2, c3, kernel_size=3, padding=1)
+        self.descriptor_conv3b = nn.Conv2d(c3, c3, kernel_size=3, padding=1)
+        self.descriptor_conv4a = nn.Conv2d(c3, c4, kernel_size=3, padding=1)
+        self.descriptor_conv4b = nn.Conv2d(c4, c4, kernel_size=3, padding=1)
+
+        self.descriptor_shallow_projection = nn.Sequential(
+            nn.Conv2d(c2, c2, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(c2, c2, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(inplace=True),
+        )
+        self.descriptor_mid_projection = nn.Sequential(
+            nn.Conv2d(c3, c3, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(inplace=True),
+        )
+        self.descriptor_multiscale_fusion = nn.Sequential(
+            nn.Conv2d(c2 + c3 + c4, descriptor_channels, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+        )
+        # G6 replaces the legacy single-scale convDa path entirely.
+        del self.convDa
+        self.to(device)
+        print(
+            '✅ SuperRetinaWithDecoupledMultiScaleDescriptor 初始化完成，'
+            '共享层=conv1-conv2，独立描述子层=conv3-conv4，多尺度融合=conv2/3/4'
+        )
+
+    def network(self, x, return_cPa=False):
+        x = self.relu(self.conv1a(x))
+        conv1 = self.relu(self.conv1b(x))
+        x = self.pool(conv1)
+
+        x = self.relu(self.conv2a(x))
+        conv2 = self.relu(self.conv2b(x))
+        shared_after_conv2 = self.pool(conv2)
+
+        # Detector-specific deep encoder; this is the historical G0 path.
+        detector_x = self.relu(self.conv3a(shared_after_conv2))
+        detector_conv3 = self.relu(self.conv3b(detector_x))
+        detector_x = self.pool(detector_conv3)
+        detector_x = self.relu(self.conv4a(detector_x))
+        detector_conv4 = self.relu(self.conv4b(detector_x))
+
+        # Descriptor-specific deep encoder.
+        descriptor_x = self.relu(self.descriptor_conv3a(shared_after_conv2))
+        descriptor_conv3 = self.relu(self.descriptor_conv3b(descriptor_x))
+        descriptor_x = self.pool(descriptor_conv3)
+        descriptor_x = self.relu(self.descriptor_conv4a(descriptor_x))
+        descriptor_conv4 = self.relu(self.descriptor_conv4b(descriptor_x))
+
+        descriptor_shallow = self.descriptor_shallow_projection(conv2)
+        descriptor_mid = self.descriptor_mid_projection(descriptor_conv3)
+        descriptor_fused = self.descriptor_multiscale_fusion(torch.cat(
+            [descriptor_shallow, descriptor_mid, descriptor_conv4], dim=1
+        ))
+        cDb = self.relu(self.convDb(descriptor_fused))
+        desc = self.convDc(cDb)
+        desc = F.normalize(desc, p=2, dim=1)
+        desc = self.trans_conv(desc)
+
+        cPa = self.upsample(detector_conv4)
+        cPa = torch.cat([cPa, detector_conv3], dim=1)
+        cPa = self.dconv_up3(cPa)
+        cPa = self.upsample(cPa)
+        cPa = torch.cat([cPa, conv2], dim=1)
+        cPa = self.dconv_up2(cPa)
+        cPa = self.upsample(cPa)
+        cPa = torch.cat([cPa, conv1], dim=1)
+        cPa = self.dconv_up1(cPa)
+        semi = torch.sigmoid(self.conv_last(cPa))
+
+        if return_cPa:
+            return semi, desc, cPa
+        return semi, desc
