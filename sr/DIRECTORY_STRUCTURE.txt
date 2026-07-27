@@ -7221,20 +7221,23 @@ sr/
 │   │   │   │   │   ├── d13_pipeline.log
 │   │   │   │   │   ├── descriptor_region_margin.csv
 │   │   │   │   │   └── descriptor_region_margin.json
-│   │   │   │   ├── region_consistency_chain_g0_g4_d13_fix/
-│   │   │   │   │   └── audit.yaml
-│   │   │   │   └── matching_chain_g0_g4_d12/
-│   │   │   │       ├── comparison/
-│   │   │   │       │   ├── g0_g4_matching_chain_comparison.csv
-│   │   │   │       │   ├── g0_g4_matching_chain_comparison.json
-│   │   │   │       │   └── g0_g4_matching_chain_report.md
-│   │   │   │       ├── G4/
-│   │   │   │       │   ├── matching_chain_summary.csv
-│   │   │   │       │   ├── matching_chain_summary.json
-│   │   │   │       │   └── matching_region_contributions.csv
-│   │   │   │       ├── audit_g4.yaml
-│   │   │   │       ├── compare.yaml
-│   │   │   │       └── d12_pipeline.log
+│   │   │   │   ├── matching_chain_g0_g4_d12/
+│   │   │   │   │   ├── comparison/
+│   │   │   │   │   │   ├── g0_g4_matching_chain_comparison.csv
+│   │   │   │   │   │   ├── g0_g4_matching_chain_comparison.json
+│   │   │   │   │   │   └── g0_g4_matching_chain_report.md
+│   │   │   │   │   ├── G4/
+│   │   │   │   │   │   ├── matching_chain_summary.csv
+│   │   │   │   │   │   ├── matching_chain_summary.json
+│   │   │   │   │   │   └── matching_region_contributions.csv
+│   │   │   │   │   ├── audit_g4.yaml
+│   │   │   │   │   ├── compare.yaml
+│   │   │   │   │   └── d12_pipeline.log
+│   │   │   │   └── region_consistency_chain_g0_g4_d13_fix/
+│   │   │   │       ├── audit.yaml
+│   │   │   │       ├── d13_fix_pipeline.log
+│   │   │   │       ├── region_consistency_chain.csv
+│   │   │   │       └── region_consistency_chain.json
 │   │   │   ├── match_images/
 │   │   │   ├── paper_figures/
 │   │   │   │   ├── control_points_01_r_t/
@@ -14498,9 +14501,9 @@ sr/
 │   ├── analyze_fimd_pair_diagnostics.py
 │   ├── audit_fimd_descriptor_margin.py
 │   ├── audit_fimd_descriptor_region_margin.py
-│   ├── audit_fimd_region_consistency_chain.py
 │   ├── audit_fimd_inlier_geometry.py
 │   ├── audit_fimd_matching_spatial_support.py
+│   ├── audit_fimd_region_consistency_chain.py
 │   ├── audit_fimd_vessel_topology.py
 │   ├── audit_pke_borderline_content.py
 │   ├── audit_pke_checkpoint_supply.py
