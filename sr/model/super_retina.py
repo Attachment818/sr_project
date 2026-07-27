@@ -2412,6 +2412,12 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
             if self.PKE_learn and len(learn_index[0]) != 0:
                 value_map[learn_index] = value_map_update
 
+            # Read-only diagnostics may inspect the two live graphs separately.
+            # The attribute is absent by default, so every historical training and
+            # inference path keeps the exact same return value and gradient behavior.
+            if getattr(self, '_capture_gradient_audit_losses', False):
+                self._gradient_audit_losses = (loss_detector, loss_descriptor)
+
             loss = loss_detector + loss_descriptor
 
             return loss, number_pts, loss_detector.cpu().data.sum(), \

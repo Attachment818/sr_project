@@ -1,0 +1,58 @@
+# D14: pseudo-vessel mask stability audit without vessel ground-truth claims.
+AUDIT:
+  output_dir: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_structure_prior_audits/mask_credibility_d14
+  seed: 3407
+  resize: [768, 768]
+  junction_radius: 5.0
+  baseline_mask:
+    threshold: 0.25
+    blackhat_kernel: 15
+    dilate_kernel: 3
+  mask_variants:
+    - name: threshold_015
+      threshold: 0.15
+      blackhat_kernel: 15
+      dilate_kernel: 3
+    - name: threshold_035
+      threshold: 0.35
+      blackhat_kernel: 15
+      dilate_kernel: 3
+    - name: kernel_09
+      threshold: 0.25
+      blackhat_kernel: 9
+      dilate_kernel: 3
+    - name: kernel_21
+      threshold: 0.25
+      blackhat_kernel: 21
+      dilate_kernel: 3
+  affine_transforms:
+    - name: rotate_minus10_translate
+      angle: -10.0
+      scale: 1.0
+      dx: -16.0
+      dy: 12.0
+    - name: rotate_plus10_translate
+      angle: 10.0
+      scale: 1.0
+      dx: 16.0
+      dy: -12.0
+    - name: scale_095
+      angle: 0.0
+      scale: 0.95
+      dx: 0.0
+      dy: 0.0
+    - name: scale_105
+      angle: 0.0
+      scale: 1.05
+      dx: 0.0
+      dy: 0.0
+  datasets:
+    - name: Lab4
+      root: /home/data1/zhangjunhong/sr_project/sr/data/Lab4/ImageData
+      max_images: 24
+    - name: FIRE
+      root: /home/data1/zhangjunhong/sr_project/sr/data/FIRE/Images
+      max_images: 24
+    - name: FIMD
+      root: /home/data1/zhangjunhong/sr_project/sr/data/FIMD
+      max_images: 24

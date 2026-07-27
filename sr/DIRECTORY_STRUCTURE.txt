@@ -8447,6 +8447,11 @@ sr/
 │   │       ├── seed3407_region_relaxed_noncore_04_ep149_epoch99.pth
 │   │       ├── train.log
 │   │       └── train.yaml
+│   ├── seed3407_structure_prior_audits/
+│   │   ├── gradient_conflict_d15/
+│   │   │   └── audit.yaml
+│   │   └── mask_credibility_d14/
+│   │       └── audit.yaml
 │   ├── seed3407_tg0_midstage_only_04/
 │   │   ├── FIMD_149/
 │   │   │   ├── aligned_images/
@@ -14499,12 +14504,14 @@ sr/
 │   └── shared_ep45_perceptual_branch.pth
 ├── tools/
 │   ├── analyze_fimd_pair_diagnostics.py
+│   ├── audit_detector_descriptor_gradients.py
 │   ├── audit_fimd_descriptor_margin.py
 │   ├── audit_fimd_descriptor_region_margin.py
 │   ├── audit_fimd_inlier_geometry.py
 │   ├── audit_fimd_matching_spatial_support.py
 │   ├── audit_fimd_region_consistency_chain.py
 │   ├── audit_fimd_vessel_topology.py
+│   ├── audit_mask_credibility.py
 │   ├── audit_pke_borderline_content.py
 │   ├── audit_pke_checkpoint_supply.py
 │   ├── audit_pke_density_guard.py
