@@ -1,0 +1,151 @@
+{
+  "audit_type": "selected_exact_matching_chain",
+  "dataset": "FIMD",
+  "dataset_root": "/home/data1/zhangjunhong/sr_project/sr/data/FIMD",
+  "device": "cuda:0",
+  "grid_size": 8,
+  "pairs": [
+    "39_r_t",
+    "40_r_t"
+  ],
+  "sources": [
+    {
+      "label": "G0",
+      "test_config_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/FIMD_149/test.yaml",
+      "checkpoint_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149.pth"
+    },
+    {
+      "label": "G5",
+      "test_config_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_descriptor_chunked_g5_v1/FIMD_149/test.yaml",
+      "checkpoint_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_descriptor_chunked_g5_v1/model_149.pth"
+    },
+    {
+      "label": "G6",
+      "test_config_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_decoupled_multiscale_g6_v1/FIMD_149/test.yaml",
+      "checkpoint_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_decoupled_multiscale_g6_v1/model_149.pth"
+    }
+  ],
+  "rows": [
+    {
+      "dataset": "FIMD",
+      "method": "G0",
+      "pair_id": "39_r_t",
+      "detected_query": 318,
+      "detected_refer": 461,
+      "ratio_matches": 34,
+      "bidirectional_matches": 26,
+      "returned_after_outlier": 20,
+      "ransac_inliers": 20,
+      "ransac_inlier_rate": 1.0,
+      "match_grid_cells": 10,
+      "match_grid_coverage": 0.15625,
+      "match_hull_fraction": 0.1532880506615798,
+      "inlier_grid_cells": 10,
+      "inlier_grid_coverage": 0.15625,
+      "inlier_hull_fraction": 0.1532880506615798,
+      "mean_returned_match_distance": 0.9661805927753448
+    },
+    {
+      "dataset": "FIMD",
+      "method": "G0",
+      "pair_id": "40_r_t",
+      "detected_query": 320,
+      "detected_refer": 431,
+      "ratio_matches": 24,
+      "bidirectional_matches": 18,
+      "returned_after_outlier": 11,
+      "ransac_inliers": 11,
+      "ransac_inlier_rate": 1.0,
+      "match_grid_cells": 7,
+      "match_grid_coverage": 0.109375,
+      "match_hull_fraction": 0.034019271369170094,
+      "inlier_grid_cells": 7,
+      "inlier_grid_coverage": 0.109375,
+      "inlier_hull_fraction": 0.034019271369170094,
+      "mean_returned_match_distance": 1.0006158947944641
+    },
+    {
+      "dataset": "FIMD",
+      "method": "G5",
+      "pair_id": "39_r_t",
+      "detected_query": 317,
+      "detected_refer": 476,
+      "ratio_matches": 39,
+      "bidirectional_matches": 27,
+      "returned_after_outlier": 15,
+      "ransac_inliers": 13,
+      "ransac_inlier_rate": 0.8666666666666667,
+      "match_grid_cells": 8,
+      "match_grid_coverage": 0.125,
+      "match_hull_fraction": 0.14797076385316643,
+      "inlier_grid_cells": 7,
+      "inlier_grid_coverage": 0.109375,
+      "inlier_hull_fraction": 0.1326554328489369,
+      "mean_returned_match_distance": 1.000580577055613
+    },
+    {
+      "dataset": "FIMD",
+      "method": "G5",
+      "pair_id": "40_r_t",
+      "detected_query": 315,
+      "detected_refer": 434,
+      "ratio_matches": 19,
+      "bidirectional_matches": 12,
+      "returned_after_outlier": 10,
+      "ransac_inliers": 8,
+      "ransac_inlier_rate": 0.8,
+      "match_grid_cells": 9,
+      "match_grid_coverage": 0.140625,
+      "match_hull_fraction": 0.15612240387088477,
+      "inlier_grid_cells": 7,
+      "inlier_grid_coverage": 0.109375,
+      "inlier_hull_fraction": 0.14679929073073844,
+      "mean_returned_match_distance": 1.0122090935707093
+    },
+    {
+      "dataset": "FIMD",
+      "method": "G6",
+      "pair_id": "39_r_t",
+      "detected_query": 317,
+      "detected_refer": 450,
+      "ratio_matches": 17,
+      "bidirectional_matches": 14,
+      "returned_after_outlier": 9,
+      "ransac_inliers": 9,
+      "ransac_inlier_rate": 1.0,
+      "match_grid_cells": 6,
+      "match_grid_coverage": 0.09375,
+      "match_hull_fraction": 0.16833043981481483,
+      "inlier_grid_cells": 6,
+      "inlier_grid_coverage": 0.09375,
+      "inlier_hull_fraction": 0.16833043981481483,
+      "mean_returned_match_distance": 0.9702423413594564
+    },
+    {
+      "dataset": "FIMD",
+      "method": "G6",
+      "pair_id": "40_r_t",
+      "detected_query": 311,
+      "detected_refer": 430,
+      "ratio_matches": 33,
+      "bidirectional_matches": 27,
+      "returned_after_outlier": 14,
+      "ransac_inliers": 12,
+      "ransac_inlier_rate": 0.8571428571428571,
+      "match_grid_cells": 7,
+      "match_grid_coverage": 0.109375,
+      "match_hull_fraction": 0.08349140517832647,
+      "inlier_grid_cells": 5,
+      "inlier_grid_coverage": 0.078125,
+      "inlier_hull_fraction": 0.02540379765374943,
+      "mean_returned_match_distance": 0.9951984328883035
+    }
+  ],
+  "stage_definition": {
+    "ratio_matches": "Forward BFMatcher ratio test from Predictor.",
+    "bidirectional_matches": "Predictor inverse consistency: both directions satisfy ratio and the return index is identical or within ICCL.",
+    "returned_after_outlier": "Exact matches returned by Predictor after configured outlier filtering.",
+    "ransac_inliers": "Explicit cv2.RANSAC replay over the exact returned matches."
+  },
+  "safety": "Only the two declared files in the new output directory are written; checkpoints and existing test results are read-only."
+}

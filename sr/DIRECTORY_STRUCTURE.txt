@@ -8200,8 +8200,6 @@ sr/
 │   │   │   │   │   │   ├── matching_chain_summary.csv
 │   │   │   │   │   │   ├── matching_chain_summary.json
 │   │   │   │   │   │   └── matching_region_contributions.csv
-│   │   │   │   │   ├── selected_chain_g0_g5_g6_d17/
-│   │   │   │   │   │   └── audit.yaml
 │   │   │   │   │   ├── multiview_checkpoint_supply_d11/
 │   │   │   │   │   │   ├── audit.yaml
 │   │   │   │   │   │   ├── d11_multiview_checkpoint_supply.log
@@ -8219,6 +8217,11 @@ sr/
 │   │   │   │   │   │   ├── audit.log
 │   │   │   │   │   │   ├── audit.yaml
 │   │   │   │   │   │   └── pke_region_feedback_audit.json
+│   │   │   │   │   ├── selected_chain_g0_g5_g6_d17/
+│   │   │   │   │   │   ├── audit.yaml
+│   │   │   │   │   │   ├── d17_selected_chain.log
+│   │   │   │   │   │   ├── selected_matching_chain.csv
+│   │   │   │   │   │   └── selected_matching_chain.json
 │   │   │   │   │   └── value_map_retention_d5/
 │   │   │   │   │       ├── .gitkeep
 │   │   │   │   │       ├── audit.yaml
@@ -8305,7 +8308,10 @@ sr/
 │   │   │   │   ├── aligned_images/
 │   │   │   │   ├── diagnostics/
 │   │   │   │   │   └── selected_chain_g0_g5_g6_d18/
-│   │   │   │   │       └── audit.yaml
+│   │   │   │   │       ├── audit.yaml
+│   │   │   │   │       ├── d18_selected_chain.log
+│   │   │   │   │       ├── selected_matching_chain.csv
+│   │   │   │   │       └── selected_matching_chain.json
 │   │   │   │   ├── match_images/
 │   │   │   │   ├── paper_figures/
 │   │   │   │   │   ├── control_points_A01_1_2/
