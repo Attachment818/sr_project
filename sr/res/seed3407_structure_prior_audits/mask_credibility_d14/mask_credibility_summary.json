@@ -1,0 +1,52 @@
+{
+  "scope": "stability_only_no_vessel_ground_truth",
+  "datasets": {
+    "FIMD": {
+      "photometric": {
+        "rows": 120,
+        "mask_iou_mean": 0.8889340685213524,
+        "skeleton_f1_mean": 0.9460788027336678,
+        "junction_repeatability_mean": 0.8330978717470577
+      },
+      "affine": {
+        "rows": 96,
+        "mask_iou_mean": 0.8474700961588688,
+        "skeleton_f1_mean": 0.9490891316339806,
+        "junction_repeatability_mean": 0.7409543691891362
+      }
+    },
+    "FIRE": {
+      "photometric": {
+        "rows": 120,
+        "mask_iou_mean": 0.8879079093455194,
+        "skeleton_f1_mean": 0.9448892418312863,
+        "junction_repeatability_mean": 0.8326194022537879
+      },
+      "affine": {
+        "rows": 96,
+        "mask_iou_mean": 0.8225615395918852,
+        "skeleton_f1_mean": 0.9334730206502746,
+        "junction_repeatability_mean": 0.7300961260088479
+      }
+    },
+    "Lab4": {
+      "photometric": {
+        "rows": 120,
+        "mask_iou_mean": 0.8418822748041506,
+        "skeleton_f1_mean": 0.9163185518018352,
+        "junction_repeatability_mean": 0.8037083579648804
+      },
+      "affine": {
+        "rows": 96,
+        "mask_iou_mean": 0.6984125609619262,
+        "skeleton_f1_mean": 0.8486985724135573,
+        "junction_repeatability_mean": 0.6840754807221524
+      }
+    }
+  },
+  "limitations": [
+    "No pixel-level vessel ground truth is available in the configured datasets.",
+    "The audit measures parameter and perturbation stability, not medical segmentation accuracy.",
+    "Stable pseudo-junctions may still be anatomically false and can only justify soft supervision."
+  ]
+}

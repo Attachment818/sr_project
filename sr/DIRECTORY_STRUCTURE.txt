@@ -8449,9 +8449,18 @@ sr/
 │   │       └── train.yaml
 │   ├── seed3407_structure_prior_audits/
 │   │   ├── gradient_conflict_d15/
-│   │   │   └── audit.yaml
+│   │   │   ├── audit.yaml
+│   │   │   ├── d15_pipeline.log
+│   │   │   ├── gradient_conflict_per_batch.csv
+│   │   │   ├── gradient_conflict_report.md
+│   │   │   └── gradient_conflict_summary.json
 │   │   └── mask_credibility_d14/
-│   │       └── audit.yaml
+│   │       ├── audit.yaml
+│   │       ├── d14_pipeline.log
+│   │       ├── mask_credibility_report.md
+│   │       ├── mask_credibility_summary.json
+│   │       ├── mask_stability_per_image.csv
+│   │       └── mask_variant_sensitivity.csv
 │   ├── seed3407_tg0_midstage_only_04/
 │   │   ├── FIMD_149/
 │   │   │   ├── aligned_images/
