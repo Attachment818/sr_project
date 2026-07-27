@@ -1,0 +1,6 @@
+# D12b: compare existing G0 D9-fix against the new G4 replay; no GPU required.
+AUDIT:
+  source_a_csv: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/FIMD_149/diagnostics/matching_spatial_support_d9_fix/matching_chain_summary.csv
+  source_b_csv: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_multiview_noncore_feedback_g4_v2/FIMD_149/diagnostics/matching_chain_g0_g4_d12/G4/matching_chain_summary.csv
+  output_dir: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_multiview_noncore_feedback_g4_v2/FIMD_149/diagnostics/matching_chain_g0_g4_d12/comparison
+  focus_pairs: [35_r_t, 39_r_t, 40_r_t, 43_r_t]

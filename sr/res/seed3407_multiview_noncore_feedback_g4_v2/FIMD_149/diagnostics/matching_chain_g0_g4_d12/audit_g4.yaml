@@ -1,0 +1,11 @@
+# D12a: read-only full FIMD matching-chain replay for G4 epoch 149.
+AUDIT:
+  test_config_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_multiview_noncore_feedback_g4_v2/FIMD_149/test.yaml
+  checkpoint_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_multiview_noncore_feedback_g4_v2/model_149.pth
+  dataset_root: /home/data1/zhangjunhong/sr_project/sr/data/FIMD
+  output_dir: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_multiview_noncore_feedback_g4_v2/FIMD_149/diagnostics/matching_chain_g0_g4_d12/G4
+  seed_label: G4_seed3407_epoch149
+  device: cuda:1
+  grid_size: 8
+  outer_border_margin: 48
+  pairs: []
