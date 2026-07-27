@@ -122,6 +122,30 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
     value_map_save_dir = train_config['value_map_save_dir']
     resume_value_map = train_config.get('resume_value_map', False)
     extra_save_epochs = set(train_config.get('extra_save_epochs', []))
+    checkpoint_save_epochs_raw = train_config.get('checkpoint_save_epochs')
+    checkpoint_path_template = train_config.get('checkpoint_path_template')
+    checkpoint_save_epochs = (
+        None if checkpoint_save_epochs_raw is None
+        else set(int(epoch) for epoch in checkpoint_save_epochs_raw)
+    )
+    if (checkpoint_save_epochs is None) != (checkpoint_path_template is None):
+        raise ValueError(
+            'checkpoint_save_epochs and checkpoint_path_template must be configured together'
+        )
+    if checkpoint_save_epochs is not None:
+        final_epoch = num_epochs - 1
+        if final_epoch not in checkpoint_save_epochs:
+            raise ValueError('checkpoint_save_epochs must include the final epoch')
+        expected_final_path = checkpoint_path_template.format(epoch=final_epoch)
+        if os.path.abspath(expected_final_path) != os.path.abspath(model_save_path):
+            raise ValueError(
+                'model_save_path must equal checkpoint_path_template at the final epoch'
+            )
+        if len({
+            checkpoint_path_template.format(epoch=epoch)
+            for epoch in checkpoint_save_epochs
+        }) != len(checkpoint_save_epochs):
+            raise ValueError('checkpoint_path_template must produce a unique path per epoch')
     save_pke_diagnostics = bool(train_config.get('save_pke_diagnostics', False))
     pke_diagnostics_path = train_config.get(
         'pke_diagnostics_path',
@@ -136,6 +160,26 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
         raise ValueError(f'start_epoch ({start_epoch}) must be smaller than num_epochs ({num_epochs})')
     if resume_value_map and not is_value_map_save:
         raise ValueError('resume_value_map=True requires is_value_map_save=True; in-memory value_map cannot be resumed across runs')
+
+    if (
+        train_config.get('refuse_existing_experiment_outputs', False)
+        and start_epoch == 0
+    ):
+        checkpoint_paths = (
+            [model_save_path] if checkpoint_save_epochs is None
+            else [
+                checkpoint_path_template.format(epoch=epoch)
+                for epoch in checkpoint_save_epochs
+            ]
+        )
+        occupied = [path for path in checkpoint_paths if os.path.exists(path)]
+        if os.path.isdir(value_map_save_dir) and os.listdir(value_map_save_dir):
+            occupied.append(value_map_save_dir)
+        if occupied:
+            raise FileExistsError(
+                'Refusing to overwrite existing experiment output(s): '
+                + ', '.join(occupied)
+            )
 
     model_save_dir = os.path.dirname(model_save_path)
     if model_save_dir:
@@ -184,9 +228,17 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
             enhanced_kp_shows = []
             show_names = []
             if 'val' in phase:
-                should_save = (epoch % model_save_epoch == 0) or (epoch in extra_save_epochs)
+                if checkpoint_save_epochs is not None:
+                    should_save = epoch in checkpoint_save_epochs
+                else:
+                    should_save = (
+                        epoch % model_save_epoch == 0
+                        or epoch in extra_save_epochs
+                    )
                 if should_save:
-                    if epoch in extra_save_epochs:
+                    if checkpoint_save_epochs is not None:
+                        save_path = checkpoint_path_template.format(epoch=epoch)
+                    elif epoch in extra_save_epochs:
                         base_dir = os.path.dirname(model_save_path)
                         base_name = os.path.splitext(os.path.basename(model_save_path))[0]
                         ext = os.path.splitext(model_save_path)[1] or '.pth'

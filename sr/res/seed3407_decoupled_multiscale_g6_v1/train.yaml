@@ -14,7 +14,9 @@ MODEL:
   resume_optimizer: false
   model_save_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_decoupled_multiscale_g6_v1/model_149.pth
   model_save_epoch: 1
-  extra_save_epochs: [49, 99]
+  checkpoint_save_epochs: [49, 99, 149]
+  checkpoint_path_template: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_decoupled_multiscale_g6_v1/model_{epoch}.pth
+  refuse_existing_experiment_outputs: true
   vessel_weight: 0.3
   vessel_schedule_mode: constant
   vessel_stage1_epochs: 50

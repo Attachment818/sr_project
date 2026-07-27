@@ -202,6 +202,12 @@ if __name__ == '__main__':
           f"{train_config.get('descriptor_hard_negative_chunk_size', 256)}")
     print(f"  - log_descriptor_supervision_stats: "
           f"{train_config.get('log_descriptor_supervision_stats', False)}")
+    print(f"  - checkpoint_save_epochs: "
+          f"{train_config.get('checkpoint_save_epochs')}")
+    print(f"  - checkpoint_path_template: "
+          f"{train_config.get('checkpoint_path_template')}")
+    print(f"  - refuse_existing_experiment_outputs: "
+          f"{train_config.get('refuse_existing_experiment_outputs', False)}")
 
     model = train_model(
         model,
