@@ -7215,6 +7215,19 @@ sr/
 │   ├── seed3407_multiview_noncore_feedback_g4_v2/
 │   │   ├── FIMD_149/
 │   │   │   ├── aligned_images/
+│   │   │   ├── diagnostics/
+│   │   │   │   └── matching_chain_g0_g4_d12/
+│   │   │   │       ├── comparison/
+│   │   │   │       │   ├── g0_g4_matching_chain_comparison.csv
+│   │   │   │       │   ├── g0_g4_matching_chain_comparison.json
+│   │   │   │       │   └── g0_g4_matching_chain_report.md
+│   │   │   │       ├── G4/
+│   │   │   │       │   ├── matching_chain_summary.csv
+│   │   │   │       │   ├── matching_chain_summary.json
+│   │   │   │       │   └── matching_region_contributions.csv
+│   │   │   │       ├── audit_g4.yaml
+│   │   │   │       ├── compare.yaml
+│   │   │   │       └── d12_pipeline.log
 │   │   │   ├── match_images/
 │   │   │   ├── paper_figures/
 │   │   │   │   ├── control_points_01_r_t/
@@ -14490,6 +14503,7 @@ sr/
 │   ├── audit_pke_region_feedback.py
 │   ├── audit_pke_value_map_retention.py
 │   ├── audit_value_maps.py
+│   ├── compare_fimd_matching_chain.py
 │   ├── smoke_g4_multiview_feedback.py
 │   └── summarize_pke_diagnostics.py
 ├── predictor.py
@@ -14498,7 +14512,3 @@ sr/
 ├── test_on_FIMD.py
 ├── test_on_FIRE.py
 └── train.py
-
-Recent G4 diagnostic additions:
-- res/seed3407_multiview_noncore_feedback_g4_v2/FIMD_149/diagnostics/matching_chain_g0_g4_d12/: D12 read-only G4 full matching-chain replay and automatic comparison against the retained G0 D9-fix CSV. Results are generated only on the server.
-- tools/compare_fimd_matching_chain.py: reads two matching-chain CSV files and writes pairwise/aggregate G0-versus-G4 deltas without loading a model or changing test outputs.
