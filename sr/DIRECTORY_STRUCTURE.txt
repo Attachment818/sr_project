@@ -1,3 +1,8 @@
+# 2026-07-28 新增只读小型审计（结果生成后继续补充输出文件）：
+# sr/res/seed3407_residual_multiscale_g7_v1/diagnostics/checkpoint_gate_d19/audit.yaml
+# sr/res/seed3407_residual_multiscale_g7_v1/FIMD_149/diagnostics/selected_chain_g0_g7_d20/audit.yaml
+# sr/res/seed3407_residual_multiscale_g7_v1/FIRE_149/diagnostics/selected_chain_g0_g7_d21/audit.yaml
+
 sr/
 ├── common/
 │   ├── common_util.py

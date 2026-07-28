@@ -1,0 +1,7 @@
+# D19：只读提取 G7 epoch149 多尺度残差门控。
+AUDIT:
+  checkpoint_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_residual_multiscale_g7_v1/model_149.pth
+  output_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_residual_multiscale_g7_v1/diagnostics/checkpoint_gate_d19/checkpoint_scalars.json
+  parameters:
+    - parameter_name: descriptor_multiscale_gate_logit
+      transform: sigmoid
