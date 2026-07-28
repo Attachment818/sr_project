@@ -77,6 +77,18 @@ def check_dense_descriptor():
     assert summary['valid_pairs_per_call'] > 0
     assert summary['occupied_cells_per_call'] > 0
 
+    g10 = SuperRetinaWithResidualMultiScaleDescriptor(
+        minimal_config(descriptor_multiscale_gate_init=0.1),
+        device='cpu',
+    )
+    g10.eval()
+    probe = torch.rand(1, 1, 64, 64)
+    _, full_descriptor = g10.network(probe)
+    descriptor_only = g10.network(probe, descriptor_only=True)
+    assert torch.equal(full_descriptor, descriptor_only), (
+        'descriptor-only forward must be numerically identical'
+    )
+
 
 class ToyConflictModel(nn.Module):
     def __init__(self):
@@ -120,31 +132,38 @@ def check_cuda(config_path):
     )
     model = model_class(config, device=device)
     model.train()
+    model.nms_thresh = 2.0
+    model.PKE_learn = False
+    model._capture_gradient_audit_losses = (
+        config.get('shared_gradient_mode', 'standard') == 'pcgrad'
+    )
     batch_size = int(config['batch_size'])
     height = int(config['model_image_height'])
     width = int(config['model_image_width'])
     image = torch.rand(batch_size, 1, height, width, device=device)
     torch.cuda.reset_peak_memory_stats(device)
-    detector, descriptor = model.network(image)
-    _, affine_descriptor = model.network(image)
-    if config.get('dense_descriptor_weight', 0) > 0:
-        loss = (
-            detector.mean()
-            + descriptor.square().mean()
-            + model._balanced_dense_descriptor_loss(
-                image, descriptor, affine_descriptor,
-                identity_grid(batch_size, height, width, device),
-            )
-        )
-        loss.backward()
-    else:
-        detector_loss = detector.mean()
-        descriptor_loss = descriptor.square().mean()
+    labels = torch.zeros(
+        batch_size, 1, height, width, device=device
+    )
+    for y in range(96, height, 192):
+        for x in range(96, width, 192):
+            labels[:, 0, y, x] = 1
+    value_maps = torch.zeros_like(labels, dtype=torch.uint8)
+    learn_index = (torch.arange(batch_size, device=device),)
+    output = model(image, labels, value_maps, learn_index)
+    loss = output[0]
+    if config.get('shared_gradient_mode', 'standard') == 'pcgrad':
         stats = conflict_projected_backward(
-            model, detector_loss, descriptor_loss
+            model, *model._gradient_audit_losses
         )
-        assert all(torch.isfinite(torch.tensor(value)) for value in stats.values())
+        assert all(
+            torch.isfinite(torch.tensor(value))
+            for value in stats.values()
+        )
+    else:
+        loss.backward()
     peak_gib = torch.cuda.max_memory_allocated(device) / (1024 ** 3)
+    assert torch.isfinite(loss)
     assert all(
         parameter.grad is None or torch.isfinite(parameter.grad).all()
         for parameter in model.parameters()

@@ -2706,7 +2706,17 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
             detector_pred_copy = detector_pred.clone().detach()
 
             affine_x_for_desc, grid_for_desc, grid_inverse_for_desc = affine_images(x, used_for='descriptor')
-            _, affine_descriptor_pred_for_desc = self.network(affine_x_for_desc)
+            if (
+                self.dense_descriptor_weight > 0
+                and getattr(self, '_supports_descriptor_only_forward', False)
+            ):
+                affine_descriptor_pred_for_desc = self.network(
+                    affine_x_for_desc, descriptor_only=True
+                )
+            else:
+                _, affine_descriptor_pred_for_desc = self.network(
+                    affine_x_for_desc
+                )
             loss_descriptor, descriptor_train_flag = self.descriptor_loss(
                 detector_pred_copy, label_point_positions,
                 descriptor_pred, affine_descriptor_pred_for_desc, grid_inverse_for_desc)
@@ -2909,6 +2919,7 @@ class SuperRetinaWithResidualMultiScaleDescriptor(SuperRetinaWithVesselOnlyMaske
                 'descriptor_gate_stats_max_calls must be positive'
             )
         self.reset_descriptor_gate_epoch_stats()
+        self._supports_descriptor_only_forward = True
         self.to(device)
         print(
             '✅ SuperRetinaWithResidualMultiScaleDescriptor 初始化完成，'
@@ -3020,7 +3031,7 @@ class SuperRetinaWithResidualMultiScaleDescriptor(SuperRetinaWithVesselOnlyMaske
         gate = torch.sigmoid(self.descriptor_multiscale_gate_logit)
         return gate, None
 
-    def network(self, x, return_cPa=False):
+    def network(self, x, return_cPa=False, descriptor_only=False):
         x = self.relu(self.conv1a(x))
         conv1 = self.relu(self.conv1b(x))
         x = self.pool(conv1)
@@ -3060,6 +3071,8 @@ class SuperRetinaWithResidualMultiScaleDescriptor(SuperRetinaWithVesselOnlyMaske
         descriptor_norm = torch.norm(desc, p=2, dim=1)
         desc = desc.div(torch.unsqueeze(descriptor_norm, 1))
         desc = self.trans_conv(desc)
+        if descriptor_only:
+            return desc
 
         cPa = self.upsample(conv4)
         cPa = torch.cat([cPa, conv3], dim=1)
