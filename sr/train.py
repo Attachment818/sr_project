@@ -16,6 +16,8 @@ from model.super_retina import (
     SuperRetinaWithVesselOnlyMasked,
     SuperRetinaWithDecoupledMultiScaleDescriptor,
     SuperRetinaWithResidualMultiScaleDescriptor,
+    SuperRetinaWithSpatialGatedMultiScaleDescriptor,
+    SuperRetinaWithAgreementGatedMultiScaleDescriptor,
 )
 import torch.optim as optim
 import yaml
@@ -136,6 +138,14 @@ if __name__ == '__main__':
         model = SuperRetinaWithResidualMultiScaleDescriptor(
             train_config, device=device
         )
+    elif model_variant == 'vessel_masked_spatial_gated_multiscale':
+        model = SuperRetinaWithSpatialGatedMultiScaleDescriptor(
+            train_config, device=device
+        )
+    elif model_variant == 'vessel_masked_agreement_gated_multiscale':
+        model = SuperRetinaWithAgreementGatedMultiScaleDescriptor(
+            train_config, device=device
+        )
     else:
         raise ValueError(f"Unknown model_variant: {model_variant}")
 
@@ -207,6 +217,18 @@ if __name__ == '__main__':
           f"{train_config.get('descriptor_hard_negative_chunk_size', 256)}")
     print(f"  - descriptor_multiscale_gate_init: "
           f"{train_config.get('descriptor_multiscale_gate_init', 0.1)}")
+    print(f"  - descriptor_gate_max: "
+          f"{train_config.get('descriptor_gate_max', 0.2)}")
+    print(f"  - descriptor_spatial_gate_hidden_channels: "
+          f"{train_config.get('descriptor_spatial_gate_hidden_channels', 32)}")
+    print(f"  - descriptor_agreement_center_init: "
+          f"{train_config.get('descriptor_agreement_center_init', 0.0)}")
+    print(f"  - descriptor_agreement_scale_init: "
+          f"{train_config.get('descriptor_agreement_scale_init', 2.0)}")
+    print(f"  - log_descriptor_gate_stats: "
+          f"{train_config.get('log_descriptor_gate_stats', False)}")
+    print(f"  - descriptor_gate_stats_max_calls: "
+          f"{train_config.get('descriptor_gate_stats_max_calls', 64)}")
     print(f"  - log_descriptor_supervision_stats: "
           f"{train_config.get('log_descriptor_supervision_stats', False)}")
     print(f"  - checkpoint_save_epochs: "

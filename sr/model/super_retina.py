@@ -2670,11 +2670,129 @@ class SuperRetinaWithResidualMultiScaleDescriptor(SuperRetinaWithVesselOnlyMaske
         self.descriptor_multiscale_gate_logit = nn.Parameter(
             torch.tensor(gate_logit, dtype=torch.float32)
         )
+        self.log_descriptor_gate_stats = bool(
+            config.get('log_descriptor_gate_stats', False)
+            if config is not None else False
+        )
+        self.descriptor_gate_stats_max_calls = int(
+            config.get('descriptor_gate_stats_max_calls', 64)
+            if config is not None else 64
+        )
+        if self.descriptor_gate_stats_max_calls <= 0:
+            raise ValueError(
+                'descriptor_gate_stats_max_calls must be positive'
+            )
+        self.reset_descriptor_gate_epoch_stats()
         self.to(device)
         print(
             '✅ SuperRetinaWithResidualMultiScaleDescriptor 初始化完成，'
             f'G0描述子主路径保留，多尺度残差=conv2/3，初始门控={gate_init:.4f}'
         )
+
+    def reset_descriptor_gate_epoch_stats(self):
+        self._descriptor_gate_epoch_stats = {
+            'calls': 0,
+            'gate_mean': 0.0,
+            'gate_std': 0.0,
+            'gate_p10': 0.0,
+            'gate_p50': 0.0,
+            'gate_p90': 0.0,
+            'near_upper_fraction': 0.0,
+            'main_norm': 0.0,
+            'residual_norm': 0.0,
+            'injection_ratio': 0.0,
+            'agreement_mean': 0.0,
+            'negative_agreement_fraction': 0.0,
+            'agreement_calls': 0,
+        }
+
+    def descriptor_gate_epoch_summary(self):
+        stats = self._descriptor_gate_epoch_stats
+        calls = max(1, stats['calls'])
+        summary = {
+            key: stats[key] / calls
+            for key in (
+                'gate_mean', 'gate_std', 'gate_p10', 'gate_p50', 'gate_p90',
+                'near_upper_fraction', 'main_norm', 'residual_norm',
+                'injection_ratio',
+            )
+        }
+        summary['sampled_calls'] = float(stats['calls'])
+        agreement_calls = stats['agreement_calls']
+        if agreement_calls:
+            summary.update({
+                'agreement_mean':
+                    stats['agreement_mean'] / agreement_calls,
+                'negative_agreement_fraction':
+                    stats['negative_agreement_fraction'] / agreement_calls,
+            })
+        return summary
+
+    def _record_descriptor_gate_stats(
+        self, gate, descriptor_main, descriptor_residual, agreement=None
+    ):
+        if not self.training or not self.log_descriptor_gate_stats:
+            return
+        if (
+            self._descriptor_gate_epoch_stats['calls']
+            >= self.descriptor_gate_stats_max_calls
+        ):
+            return
+        with torch.no_grad():
+            flat = gate.detach().reshape(-1)
+            stride = max(1, flat.numel() // 1024)
+            sample = flat[::stride][:1024].float()
+            quantiles = torch.quantile(
+                sample, torch.tensor(
+                    [0.1, 0.5, 0.9], device=sample.device
+                )
+            )
+            gate_upper = float(getattr(self, 'descriptor_gate_max', 1.0))
+            main_norm = torch.norm(
+                descriptor_main.detach(), p=2, dim=1
+            )
+            residual_norm = torch.norm(
+                descriptor_residual.detach(), p=2, dim=1
+            )
+            injected_norm = torch.norm(
+                gate.detach() * descriptor_residual.detach(), p=2, dim=1
+            )
+            stats = self._descriptor_gate_epoch_stats
+            stats['calls'] += 1
+            stats['gate_mean'] += float(sample.mean().item())
+            stats['gate_std'] += float(sample.std(unbiased=False).item())
+            stats['gate_p10'] += float(quantiles[0].item())
+            stats['gate_p50'] += float(quantiles[1].item())
+            stats['gate_p90'] += float(quantiles[2].item())
+            stats['near_upper_fraction'] += float(
+                (sample >= 0.9 * gate_upper).float().mean().item()
+            )
+            stats['main_norm'] += float(main_norm.mean().item())
+            stats['residual_norm'] += float(residual_norm.mean().item())
+            stats['injection_ratio'] += float(
+                (injected_norm / main_norm.clamp_min(1e-6)).mean().item()
+            )
+            if agreement is not None:
+                agreement_sample = agreement.detach().reshape(-1)
+                agreement_stride = max(
+                    1, agreement_sample.numel() // 1024
+                )
+                agreement_sample = agreement_sample[
+                    ::agreement_stride
+                ][:1024].float()
+                stats['agreement_calls'] += 1
+                stats['agreement_mean'] += float(
+                    agreement_sample.mean().item()
+                )
+                stats['negative_agreement_fraction'] += float(
+                    (agreement_sample < 0).float().mean().item()
+                )
+
+    def _descriptor_gate(
+        self, descriptor_main, descriptor_residual
+    ):
+        gate = torch.sigmoid(self.descriptor_multiscale_gate_logit)
+        return gate, None
 
     def network(self, x, return_cPa=False):
         x = self.relu(self.conv1a(x))
@@ -2700,7 +2818,15 @@ class SuperRetinaWithResidualMultiScaleDescriptor(SuperRetinaWithVesselOnlyMaske
             ],
             dim=1,
         ))
-        descriptor_gate = torch.sigmoid(self.descriptor_multiscale_gate_logit)
+        descriptor_gate, descriptor_agreement = self._descriptor_gate(
+            descriptor_main, descriptor_residual
+        )
+        self._record_descriptor_gate_stats(
+            descriptor_gate,
+            descriptor_main,
+            descriptor_residual,
+            descriptor_agreement,
+        )
         cDb = self.relu(self.convDb(
             descriptor_main + descriptor_gate * descriptor_residual
         ))
@@ -2723,3 +2849,117 @@ class SuperRetinaWithResidualMultiScaleDescriptor(SuperRetinaWithVesselOnlyMaske
         if return_cPa:
             return semi, desc, cPa
         return semi, desc
+
+
+class SuperRetinaWithSpatialGatedMultiScaleDescriptor(
+    SuperRetinaWithResidualMultiScaleDescriptor
+):
+    """G8: G7 with a bounded, learned spatial gate."""
+
+    def __init__(self, config=None, device='cpu', n_class=1):
+        super().__init__(config=config, device=device, n_class=n_class)
+        cfg = config or {}
+        self.descriptor_gate_max = float(
+            cfg.get('descriptor_gate_max', 0.2)
+        )
+        gate_init = float(
+            cfg.get('descriptor_multiscale_gate_init', 0.1)
+        )
+        hidden_channels = int(
+            cfg.get('descriptor_spatial_gate_hidden_channels', 32)
+        )
+        if not 0.0 < gate_init < self.descriptor_gate_max:
+            raise ValueError(
+                'descriptor_multiscale_gate_init must be between 0 and '
+                'descriptor_gate_max'
+            )
+        if hidden_channels <= 0:
+            raise ValueError(
+                'descriptor_spatial_gate_hidden_channels must be positive'
+            )
+        del self.descriptor_multiscale_gate_logit
+        self.descriptor_spatial_gate = nn.Sequential(
+            nn.Conv2d(512, hidden_channels, kernel_size=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(hidden_channels, 1, kernel_size=1),
+        )
+        final_layer = self.descriptor_spatial_gate[-1]
+        nn.init.zeros_(final_layer.weight)
+        initial_probability = gate_init / self.descriptor_gate_max
+        nn.init.constant_(
+            final_layer.bias,
+            math.log(initial_probability / (1.0 - initial_probability)),
+        )
+        self.to(device)
+        print(
+            '✅ SuperRetinaWithSpatialGatedMultiScaleDescriptor 初始化完成，'
+            f'空间门控上限={self.descriptor_gate_max:.4f}，'
+            f'初始门控={gate_init:.4f}，隐藏通道={hidden_channels}'
+        )
+
+    def _descriptor_gate(
+        self, descriptor_main, descriptor_residual
+    ):
+        logits = self.descriptor_spatial_gate(torch.cat(
+            [descriptor_main, descriptor_residual], dim=1
+        ))
+        return self.descriptor_gate_max * torch.sigmoid(logits), None
+
+
+class SuperRetinaWithAgreementGatedMultiScaleDescriptor(
+    SuperRetinaWithResidualMultiScaleDescriptor
+):
+    """G9: G7 with a bounded gate driven by local main/residual agreement."""
+
+    def __init__(self, config=None, device='cpu', n_class=1):
+        super().__init__(config=config, device=device, n_class=n_class)
+        cfg = config or {}
+        self.descriptor_gate_max = float(
+            cfg.get('descriptor_gate_max', 0.2)
+        )
+        center_init = float(
+            cfg.get('descriptor_agreement_center_init', 0.0)
+        )
+        scale_init = float(
+            cfg.get('descriptor_agreement_scale_init', 2.0)
+        )
+        if self.descriptor_gate_max <= 0:
+            raise ValueError('descriptor_gate_max must be positive')
+        if scale_init <= 0:
+            raise ValueError(
+                'descriptor_agreement_scale_init must be positive'
+            )
+        del self.descriptor_multiscale_gate_logit
+        self.descriptor_agreement_center = nn.Parameter(
+            torch.tensor(center_init, dtype=torch.float32)
+        )
+        self.descriptor_agreement_scale_raw = nn.Parameter(
+            torch.tensor(
+                math.log(math.expm1(scale_init)), dtype=torch.float32
+            )
+        )
+        self.to(device)
+        print(
+            '✅ SuperRetinaWithAgreementGatedMultiScaleDescriptor 初始化完成，'
+            f'门控上限={self.descriptor_gate_max:.4f}，'
+            f'agreement中心={center_init:.4f}，尺度={scale_init:.4f}'
+        )
+
+    def _descriptor_gate(
+        self, descriptor_main, descriptor_residual
+    ):
+        main_centered = descriptor_main.detach() - descriptor_main.detach().mean(
+            dim=1, keepdim=True
+        )
+        residual_centered = descriptor_residual - descriptor_residual.mean(
+            dim=1, keepdim=True
+        )
+        agreement = F.cosine_similarity(
+            main_centered, residual_centered, dim=1, eps=1e-6
+        ).unsqueeze(1)
+        scale = F.softplus(self.descriptor_agreement_scale_raw)
+        logits = scale * (
+            agreement - self.descriptor_agreement_center
+        )
+        gate = self.descriptor_gate_max * torch.sigmoid(logits)
+        return gate, agreement

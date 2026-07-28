@@ -16,6 +16,8 @@ from model.super_retina import (
     SuperRetina,
     SuperRetinaWithDecoupledMultiScaleDescriptor,
     SuperRetinaWithResidualMultiScaleDescriptor,
+    SuperRetinaWithSpatialGatedMultiScaleDescriptor,
+    SuperRetinaWithAgreementGatedMultiScaleDescriptor,
     chunked_hard_negative_indices,
 )
 import model.super_retina as super_retina_module
@@ -178,6 +180,78 @@ def check_g7_residual_structure_and_gradients():
     restored.load_state_dict(state, strict=True)
 
 
+def check_g8_g9_gates():
+    config = minimal_config()
+    config.update({
+        'descriptor_hard_negative_mode': 'legacy',
+        'descriptor_multiscale_gate_init': 0.1,
+        'descriptor_gate_max': 0.2,
+        'descriptor_spatial_gate_hidden_channels': 8,
+        'descriptor_agreement_center_init': 0.0,
+        'descriptor_agreement_scale_init': 2.0,
+        'log_descriptor_gate_stats': True,
+    })
+    main = torch.rand(2, 256, 8, 8, requires_grad=True)
+    residual = torch.rand(2, 256, 8, 8, requires_grad=True)
+
+    g8 = SuperRetinaWithSpatialGatedMultiScaleDescriptor(
+        config, device='cpu'
+    )
+    gate8, agreement8 = g8._descriptor_gate(main, residual)
+    assert agreement8 is None
+    assert gate8.shape == (2, 1, 8, 8)
+    assert torch.allclose(gate8, torch.full_like(gate8, 0.1))
+    assert float(gate8.min()) > 0 and float(gate8.max()) < 0.2
+    gate8.sum().backward(retain_graph=True)
+    assert all(
+        parameter.grad is not None
+        for parameter in g8.descriptor_spatial_gate[-1].parameters()
+    )
+    g8.load_state_dict(g8.state_dict(), strict=True)
+
+    g9 = SuperRetinaWithAgreementGatedMultiScaleDescriptor(
+        config, device='cpu'
+    )
+    gate9, agreement9 = g9._descriptor_gate(main, residual)
+    assert gate9.shape == (2, 1, 8, 8)
+    assert agreement9.shape == gate9.shape
+    assert float(gate9.min()) > 0 and float(gate9.max()) < 0.2
+    gate9.sum().backward()
+    assert g9.descriptor_agreement_center.grad is not None
+    assert g9.descriptor_agreement_scale_raw.grad is not None
+    g9.load_state_dict(g9.state_dict(), strict=True)
+
+    for model in (g8, g9):
+        model.train()
+        model.reset_descriptor_gate_epoch_stats()
+        detector, descriptor = model.network(torch.randn(1, 1, 64, 64))
+        gate_parameters = (
+            list(model.descriptor_spatial_gate.parameters())
+            if isinstance(
+                model, SuperRetinaWithSpatialGatedMultiScaleDescriptor
+            )
+            else [
+                model.descriptor_agreement_center,
+                model.descriptor_agreement_scale_raw,
+            ]
+        )
+        detector_to_gate = torch.autograd.grad(
+            detector.sum(), gate_parameters, allow_unused=True,
+            retain_graph=True,
+        )
+        descriptor_to_gate = torch.autograd.grad(
+            descriptor.sum(), gate_parameters, allow_unused=True
+        )
+        summary = model.descriptor_gate_epoch_summary()
+        assert detector.shape == (1, 1, 64, 64)
+        assert descriptor.shape[1] == 256
+        assert all(gradient is None for gradient in detector_to_gate)
+        assert all(gradient is not None for gradient in descriptor_to_gate)
+        assert 0 < summary['gate_mean'] < 0.2
+        assert summary['injection_ratio'] >= 0
+    assert 'agreement_mean' in g9.descriptor_gate_epoch_summary()
+
+
 def check_cuda_memory(config_path):
     source = yaml.safe_load(Path(config_path).read_text(encoding='utf-8'))
     config = {**source['MODEL'], **source['PKE'], **source['DATASET'], **source['VALUE_MAP']}
@@ -186,6 +260,10 @@ def check_cuda_memory(config_path):
             SuperRetinaWithDecoupledMultiScaleDescriptor,
         'vessel_masked_residual_multiscale':
             SuperRetinaWithResidualMultiScaleDescriptor,
+        'vessel_masked_spatial_gated_multiscale':
+            SuperRetinaWithSpatialGatedMultiScaleDescriptor,
+        'vessel_masked_agreement_gated_multiscale':
+            SuperRetinaWithAgreementGatedMultiScaleDescriptor,
     }
     model_variant = config['model_variant']
     if model_variant not in model_classes:
@@ -231,7 +309,8 @@ def main():
     check_over_limit_descriptor_loss()
     check_g6_structure_and_gradients()
     check_g7_residual_structure_and_gradients()
-    print('G5/G6/G7 CPU smoke tests passed')
+    check_g8_g9_gates()
+    print('G5/G6/G7/G8/G9 CPU smoke tests passed')
     if args.cuda_config is not None:
         check_cuda_memory(args.cuda_config)
 

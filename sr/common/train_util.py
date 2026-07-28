@@ -214,6 +214,8 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
     for epoch in range(start_epoch, num_epochs):
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
         model.current_epoch = epoch
+        if hasattr(model, 'reset_descriptor_gate_epoch_stats'):
+            model.reset_descriptor_gate_epoch_stats()
         # Each epoch may have some phases
         phases = list(dataloaders.keys())
         model.PKE_learn = True
@@ -385,6 +387,19 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
                     f'total_correspondences={descriptor_supervision_total_correspondences}, '
                     f'used_correspondences={descriptor_supervision_used_correspondences}, '
                     f'effective_fraction={effective:.6f}'
+                )
+            if (
+                phase == 'train'
+                and train_config.get('log_descriptor_gate_stats', False)
+                and hasattr(model, 'descriptor_gate_epoch_summary')
+            ):
+                gate_stats = model.descriptor_gate_epoch_summary()
+                print(
+                    'descriptor gate: '
+                    + ', '.join(
+                        f'{key}={value:.6f}'
+                        for key, value in gate_stats.items()
+                    )
                 )
 
             for s, (name, _) in enumerate(show_names):

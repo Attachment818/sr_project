@@ -1,3 +1,7 @@
+# 2026-07-28 新增 G8/G9 训练与测试目录（各实验只保存 epoch149）：
+# sr/res/seed3407_spatial_gate_g8_v1/{train.yaml,FIRE_149/test.yaml,FIMD_149/test.yaml}
+# sr/res/seed3407_agreement_gate_g9_v1/{train.yaml,FIRE_149/test.yaml,FIMD_149/test.yaml}
+
 sr/
 ├── common/
 │   ├── common_util.py
