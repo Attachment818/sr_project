@@ -130,6 +130,8 @@ if __name__ == '__main__':
         model = SuperRetinaWithVesselOnly(train_config, device=device)
     elif model_variant == 'vessel_only_masked':
         model = SuperRetinaWithVesselOnlyMasked(train_config, device=device)
+    elif model_variant == 'vessel_masked_pcgrad':
+        model = SuperRetinaWithVesselOnlyMasked(train_config, device=device)
     elif model_variant == 'vessel_masked_decoupled_multiscale':
         model = SuperRetinaWithDecoupledMultiScaleDescriptor(
             train_config, device=device
@@ -227,6 +229,18 @@ if __name__ == '__main__':
           f"{train_config.get('descriptor_agreement_scale_init', 2.0)}")
     print(f"  - log_descriptor_gate_stats: "
           f"{train_config.get('log_descriptor_gate_stats', False)}")
+    print(f"  - shared_gradient_mode: "
+          f"{train_config.get('shared_gradient_mode', 'standard')}")
+    print(f"  - dense_descriptor_weight: "
+          f"{train_config.get('dense_descriptor_weight', 0.0)}")
+    print(f"  - dense_descriptor_ramp_epochs: "
+          f"{train_config.get('dense_descriptor_ramp_epochs', 10)}")
+    print(f"  - dense_descriptor_grid_size: "
+          f"{train_config.get('dense_descriptor_grid_size', 8)}")
+    print(f"  - dense_descriptor_structure_per_cell: "
+          f"{train_config.get('dense_descriptor_structure_per_cell', 1)}")
+    print(f"  - dense_descriptor_uniform_per_cell: "
+          f"{train_config.get('dense_descriptor_uniform_per_cell', 1)}")
     print(f"  - descriptor_gate_stats_max_calls: "
           f"{train_config.get('descriptor_gate_stats_max_calls', 64)}")
     print(f"  - log_descriptor_supervision_stats: "

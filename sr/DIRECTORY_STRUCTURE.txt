@@ -1,3 +1,7 @@
+# 2026-07-28: G10/G11 additions
+# tools/smoke_g10_g11.py
+# res/seed3407_balanced_dense_descriptor_g10_v1/{train.yaml,FIRE_149/test.yaml,FIMD_149/test.yaml}
+# res/seed3407_pcgrad_shared_g11_v1/{train.yaml,FIRE_149/test.yaml,FIMD_149/test.yaml}
 sr/
 ├── common/
 │   ├── common_util.py

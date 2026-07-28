@@ -2237,6 +2237,38 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
         self.pke_descriptor_negative_distance = float(
             cfg.get('pke_descriptor_negative_distance', 16.0)
         )
+        # G10: detector-independent descriptor supervision from the known
+        # training affine. A zero weight preserves every historical run.
+        self.dense_descriptor_weight = float(
+            cfg.get('dense_descriptor_weight', 0.0)
+        )
+        self.dense_descriptor_ramp_epochs = int(
+            cfg.get('dense_descriptor_ramp_epochs', 10)
+        )
+        self.dense_descriptor_grid_size = int(
+            cfg.get('dense_descriptor_grid_size', 8)
+        )
+        self.dense_descriptor_structure_per_cell = int(
+            cfg.get('dense_descriptor_structure_per_cell', 1)
+        )
+        self.dense_descriptor_uniform_per_cell = int(
+            cfg.get('dense_descriptor_uniform_per_cell', 1)
+        )
+        self.dense_descriptor_border_margin = int(
+            cfg.get('dense_descriptor_border_margin', 16)
+        )
+        self.dense_descriptor_valid_intensity = float(
+            cfg.get('dense_descriptor_valid_intensity', 0.03)
+        )
+        self.dense_descriptor_min_negative_distance = float(
+            cfg.get('dense_descriptor_min_negative_distance', 16.0)
+        )
+        self.dense_descriptor_margin = float(
+            cfg.get('dense_descriptor_margin', 0.2)
+        )
+        self.log_dense_descriptor_stats = bool(
+            cfg.get('log_dense_descriptor_stats', False)
+        )
         if self.pke_content_mode not in {'one_way', 'bidirectional'}:
             raise ValueError(f'Unknown pke_content_mode: {self.pke_content_mode}')
         if (self.pke_content_strong_feedback_multiplier < 1
@@ -2244,6 +2276,24 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
             raise ValueError('PKE content feedback multipliers must be at least 1')
         if self.pke_descriptor_feedback_weight < 0 or self.pke_descriptor_margin < 0:
             raise ValueError('PKE descriptor feedback weight and margin must be non-negative')
+        if self.dense_descriptor_weight < 0:
+            raise ValueError('dense_descriptor_weight must be non-negative')
+        if self.dense_descriptor_weight > 0 and (
+            self.dense_descriptor_ramp_epochs < 1
+            or self.dense_descriptor_grid_size < 1
+            or self.dense_descriptor_structure_per_cell < 0
+            or self.dense_descriptor_uniform_per_cell < 0
+            or (
+                self.dense_descriptor_structure_per_cell
+                + self.dense_descriptor_uniform_per_cell
+            ) < 1
+            or self.dense_descriptor_border_margin < 0
+            or not 0 <= self.dense_descriptor_valid_intensity <= 1
+            or self.dense_descriptor_min_negative_distance < 0
+            or self.dense_descriptor_margin < 0
+        ):
+            raise ValueError('Invalid balanced dense descriptor configuration')
+        self.reset_dense_descriptor_epoch_stats()
         self.save_pke_diagnostics = bool(cfg.get('save_pke_diagnostics', False))
         self.pke_diagnostic_grid_size = int(cfg.get('pke_diagnostic_grid_size', 8))
         relaxed_threshold = cfg.get('pke_region_relaxed_threshold')
@@ -2350,6 +2400,167 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
             and self.pke_multiview_noncore_bonus > 0
             and self.current_epoch >= self.pke_multiview_noncore_start_epoch
         )
+
+    def reset_dense_descriptor_epoch_stats(self):
+        self._dense_descriptor_epoch_stats = {
+            'calls': 0,
+            'sampled_points': 0,
+            'valid_pairs': 0,
+            'occupied_cells': 0,
+            'positive_distance': 0.0,
+            'negative_distance': 0.0,
+            'loss': 0.0,
+        }
+
+    def dense_descriptor_epoch_summary(self):
+        stats = self._dense_descriptor_epoch_stats
+        calls = max(1, stats['calls'])
+        pairs = max(1, stats['valid_pairs'])
+        return {
+            'calls': float(stats['calls']),
+            'sampled_points_per_call': stats['sampled_points'] / calls,
+            'valid_pairs_per_call': stats['valid_pairs'] / calls,
+            'occupied_cells_per_call': stats['occupied_cells'] / calls,
+            'positive_distance': stats['positive_distance'] / pairs,
+            'negative_distance': stats['negative_distance'] / pairs,
+            'loss': stats['loss'] / calls,
+        }
+
+    def _balanced_dense_descriptor_loss(
+            self, images, descriptor_pred, affine_descriptor_pred,
+            grid_inverse):
+        """Grid-balanced affine correspondences independent of detector output."""
+        if self.dense_descriptor_weight <= 0:
+            return descriptor_pred.sum() * 0
+        batch_size, _, height, width = images.shape
+        grid_size = self.dense_descriptor_grid_size
+        if height % grid_size or width % grid_size:
+            raise ValueError(
+                'dense_descriptor_grid_size must divide image height and width'
+            )
+        cell_height = height // grid_size
+        cell_width = width // grid_size
+        per_cell = (
+            self.dense_descriptor_structure_per_cell
+            + self.dense_descriptor_uniform_per_cell
+        )
+        with torch.no_grad():
+            gray = images.mean(dim=1, keepdim=True)
+            sobel_x = gray.new_tensor(
+                [[[-1., 0., 1.], [-2., 0., 2.], [-1., 0., 1.]]]
+            ).unsqueeze(0)
+            sobel_y = sobel_x.transpose(-1, -2)
+            gradient = (
+                F.conv2d(gray, sobel_x, padding=1).square()
+                + F.conv2d(gray, sobel_y, padding=1).square()
+            ).sqrt().squeeze(1)
+            valid = gray.squeeze(1) >= self.dense_descriptor_valid_intensity
+            margin = self.dense_descriptor_border_margin
+            if margin:
+                valid[:, :margin] = False
+                valid[:, -margin:] = False
+                valid[:, :, :margin] = False
+                valid[:, :, -margin:] = False
+            # [B, grid_y, grid_x, cell_y, cell_x] -> [B, cells, pixels]
+            gradient_cells = gradient.reshape(
+                batch_size, grid_size, cell_height, grid_size, cell_width
+            ).permute(0, 1, 3, 2, 4).reshape(
+                batch_size, grid_size * grid_size, -1
+            )
+            valid_cells = valid.reshape(
+                batch_size, grid_size, cell_height, grid_size, cell_width
+            ).permute(0, 1, 3, 2, 4).reshape_as(gradient_cells)
+            chosen = torch.zeros_like(valid_cells)
+            selected_parts = []
+            if self.dense_descriptor_structure_per_cell:
+                scores = gradient_cells.masked_fill(~valid_cells, float('-inf'))
+                structure = scores.topk(
+                    self.dense_descriptor_structure_per_cell, dim=-1
+                ).indices
+                selected_parts.append(structure)
+                chosen.scatter_(-1, structure, True)
+            if self.dense_descriptor_uniform_per_cell:
+                uniform_scores = torch.rand_like(gradient_cells).masked_fill(
+                    ~valid_cells | chosen, float('-inf')
+                )
+                uniform = uniform_scores.topk(
+                    self.dense_descriptor_uniform_per_cell, dim=-1
+                ).indices
+                selected_parts.append(uniform)
+            selected = torch.cat(selected_parts, dim=-1)
+
+        losses = []
+        stats = self._dense_descriptor_epoch_stats
+        for batch_index in range(batch_size):
+            cell_ids = torch.arange(
+                grid_size * grid_size, device=images.device
+            )[:, None].expand(-1, per_cell).reshape(-1)
+            local_ids = selected[batch_index].reshape(-1)
+            ys = (
+                torch.div(cell_ids, grid_size, rounding_mode='floor')
+                * cell_height
+                + torch.div(local_ids, cell_width, rounding_mode='floor')
+            )
+            xs = cell_ids.remainder(grid_size) * cell_width + local_ids.remainder(
+                cell_width
+            )
+            source_valid = valid[batch_index, ys, xs]
+            mapped = grid_inverse[batch_index, ys, xs]
+            mapped_valid = (mapped.abs() < 1).all(dim=1)
+            keep = source_valid & mapped_valid
+            if keep.sum() < 2:
+                continue
+            xs, ys, mapped = xs[keep], ys[keep], mapped[keep]
+            source_points = torch.stack((xs, ys), dim=1).float()
+            affine_points = torch.stack((
+                (mapped[:, 0] + 1) * 0.5 * (width - 1),
+                (mapped[:, 1] + 1) * 0.5 * (height - 1),
+            ), dim=1)
+            anchor = sample_keypoint_desc(
+                source_points[None],
+                descriptor_pred[batch_index:batch_index + 1], s=8
+            )[0].T
+            positive = sample_keypoint_desc(
+                affine_points[None],
+                affine_descriptor_pred[batch_index:batch_index + 1], s=8
+            )[0].T
+            distances = torch.cdist(anchor, positive)
+            spatial = torch.cdist(
+                source_points, source_points
+            ) >= self.dense_descriptor_min_negative_distance
+            negative = distances.masked_fill(~spatial, float('inf')).min(
+                dim=1
+            ).values
+            positive_distance = distances.diag()
+            pair_valid = torch.isfinite(negative)
+            if not pair_valid.any():
+                continue
+            image_loss = F.relu(
+                positive_distance[pair_valid] - negative[pair_valid]
+                + self.dense_descriptor_margin
+            ).mean()
+            losses.append(image_loss)
+            if self.log_dense_descriptor_stats:
+                valid_count = int(pair_valid.sum().item())
+                stats['sampled_points'] += int(keep.sum().item())
+                stats['valid_pairs'] += valid_count
+                stats['occupied_cells'] += int(
+                    torch.unique(cell_ids[keep]).numel()
+                )
+                stats['positive_distance'] += float(
+                    positive_distance[pair_valid].sum().detach().item()
+                )
+                stats['negative_distance'] += float(
+                    negative[pair_valid].sum().detach().item()
+                )
+        result = (
+            torch.stack(losses).mean()
+            if losses else descriptor_pred.sum() * 0
+        )
+        if self.log_dense_descriptor_stats:
+            stats['calls'] += 1
+            stats['loss'] += float(result.detach().item())
+        return result
 
     def _pke_descriptor_feedback_loss(self, detector_pred, descriptor_pred, grid_inverse,
                                       affine_detector_pred, affine_descriptor_pred, affine_x, learn_index):
@@ -2499,6 +2710,21 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
             loss_descriptor, descriptor_train_flag = self.descriptor_loss(
                 detector_pred_copy, label_point_positions,
                 descriptor_pred, affine_descriptor_pred_for_desc, grid_inverse_for_desc)
+            dense_descriptor_loss = self._balanced_dense_descriptor_loss(
+                x, descriptor_pred, affine_descriptor_pred_for_desc,
+                grid_inverse_for_desc,
+            )
+            dense_ramp = min(
+                1.0,
+                (self.current_epoch + 1)
+                / float(max(1, self.dense_descriptor_ramp_epochs)),
+            )
+            loss_descriptor = (
+                loss_descriptor
+                + self.dense_descriptor_weight
+                * dense_ramp
+                * dense_descriptor_loss
+            )
             pke_descriptor_loss = self._pke_descriptor_feedback_loss(
                 detector_pred, descriptor_pred, grid_inverse, affine_detector_pred,
                 affine_descriptor_pred, affine_x, learn_index,

@@ -112,6 +112,137 @@ def value_map_save(save_dir, names, input_with_label, value_maps, value_maps_run
                 cv2.imwrite(path, vp)
 
 
+def conflict_projected_backward(model, detector_loss, descriptor_loss):
+    """Apply symmetric PCGrad to shared encoder parameters and set ``.grad``."""
+    named_parameters = [
+        (name, parameter) for name, parameter in model.named_parameters()
+        if parameter.requires_grad
+    ]
+    parameters = [parameter for _, parameter in named_parameters]
+    detector_gradients = torch.autograd.grad(
+        detector_loss, parameters, retain_graph=True, allow_unused=True
+    )
+    descriptor_gradients = torch.autograd.grad(
+        descriptor_loss, parameters, allow_unused=True
+    )
+    shared_prefixes = (
+        'conv1a.', 'conv1b.', 'conv2a.', 'conv2b.',
+        'conv3a.', 'conv3b.', 'conv4a.', 'conv4b.',
+        'network.conv1a.', 'network.conv1b.',
+        'network.conv2a.', 'network.conv2b.',
+        'network.conv3a.', 'network.conv3b.',
+        'network.conv4a.', 'network.conv4b.',
+    )
+    shared_indices = [
+        index for index, (name, _) in enumerate(named_parameters)
+        if name.startswith(shared_prefixes)
+    ]
+    shared_pairs = [
+        (detector_gradients[index], descriptor_gradients[index])
+        for index in shared_indices
+        if detector_gradients[index] is not None
+        and descriptor_gradients[index] is not None
+    ]
+    dot = sum(
+        (detector_gradient * descriptor_gradient).sum()
+        for detector_gradient, descriptor_gradient in shared_pairs
+    ) if shared_pairs else detector_loss.new_tensor(0.0)
+    detector_norm_sq = sum(
+        detector_gradient.square().sum()
+        for detector_gradient, _ in shared_pairs
+    ) if shared_pairs else detector_loss.new_tensor(0.0)
+    descriptor_norm_sq = sum(
+        descriptor_gradient.square().sum()
+        for _, descriptor_gradient in shared_pairs
+    ) if shared_pairs else detector_loss.new_tensor(0.0)
+    denominator = (
+        detector_norm_sq.sqrt() * descriptor_norm_sq.sqrt()
+    ).clamp_min(1e-12)
+    cosine_before = dot / denominator
+    conflict = bool(dot.detach().item() < 0)
+    projected_detector = {}
+    projected_descriptor = {}
+    if conflict and shared_pairs:
+        for index in shared_indices:
+            detector_gradient = detector_gradients[index]
+            descriptor_gradient = descriptor_gradients[index]
+            if detector_gradient is None or descriptor_gradient is None:
+                continue
+            projected_detector[index] = (
+                detector_gradient
+                - dot / descriptor_norm_sq.clamp_min(1e-12)
+                * descriptor_gradient
+            )
+            projected_descriptor[index] = (
+                descriptor_gradient
+                - dot / detector_norm_sq.clamp_min(1e-12)
+                * detector_gradient
+            )
+
+    projected_pairs = []
+    removed_norm_sq = detector_loss.new_tensor(0.0)
+    original_norm_sq = detector_loss.new_tensor(0.0)
+    for index, (_, parameter) in enumerate(named_parameters):
+        detector_gradient = detector_gradients[index]
+        descriptor_gradient = descriptor_gradients[index]
+        if index in projected_detector:
+            detector_projected = projected_detector[index]
+            descriptor_projected = projected_descriptor[index]
+            combined = detector_projected + descriptor_projected
+            projected_pairs.append(
+                (detector_projected, descriptor_projected)
+            )
+            removed_norm_sq = removed_norm_sq + (
+                detector_projected - detector_gradient
+            ).square().sum() + (
+                descriptor_projected - descriptor_gradient
+            ).square().sum()
+            original_norm_sq = original_norm_sq + (
+                detector_gradient.square().sum()
+                + descriptor_gradient.square().sum()
+            )
+        elif detector_gradient is None:
+            combined = descriptor_gradient
+        elif descriptor_gradient is None:
+            combined = detector_gradient
+        else:
+            combined = detector_gradient + descriptor_gradient
+        parameter.grad = None if combined is None else combined.detach()
+
+    if projected_pairs:
+        projected_dot = sum(
+            (detector_gradient * descriptor_gradient).sum()
+            for detector_gradient, descriptor_gradient in projected_pairs
+        )
+        projected_detector_norm = sum(
+            detector_gradient.square().sum()
+            for detector_gradient, _ in projected_pairs
+        ).sqrt()
+        projected_descriptor_norm = sum(
+            descriptor_gradient.square().sum()
+            for _, descriptor_gradient in projected_pairs
+        ).sqrt()
+        cosine_after = projected_dot / (
+            projected_detector_norm * projected_descriptor_norm
+        ).clamp_min(1e-12)
+    else:
+        cosine_after = cosine_before
+    removed_fraction = (
+        removed_norm_sq.sqrt() / original_norm_sq.sqrt().clamp_min(1e-12)
+        if conflict else detector_loss.new_tensor(0.0)
+    )
+    return {
+        'conflict': float(conflict),
+        'cosine_before': float(cosine_before.detach().item()),
+        'cosine_after': float(cosine_after.detach().item()),
+        'detector_grad_norm': float(detector_norm_sq.sqrt().detach().item()),
+        'descriptor_grad_norm': float(
+            descriptor_norm_sq.sqrt().detach().item()
+        ),
+        'removed_fraction': float(removed_fraction.detach().item()),
+    }
+
+
 def train_model(model, optimizer, dataloaders, device, num_epochs, train_config, start_epoch=0):
     model_save_path = train_config['model_save_path']
     model_save_epoch = train_config['model_save_epoch']
@@ -121,6 +252,16 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
     is_value_map_save = train_config['is_value_map_save']
     value_map_save_dir = train_config['value_map_save_dir']
     resume_value_map = train_config.get('resume_value_map', False)
+    shared_gradient_mode = train_config.get(
+        'shared_gradient_mode', 'standard'
+    )
+    if shared_gradient_mode not in {'standard', 'pcgrad'}:
+        raise ValueError(
+            f'Unknown shared_gradient_mode: {shared_gradient_mode}'
+        )
+    model._capture_gradient_audit_losses = (
+        shared_gradient_mode == 'pcgrad'
+    )
     extra_save_epochs = set(train_config.get('extra_save_epochs', []))
     checkpoint_save_epochs_raw = train_config.get('checkpoint_save_epochs')
     checkpoint_path_template = train_config.get('checkpoint_path_template')
@@ -216,6 +357,8 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
         model.current_epoch = epoch
         if hasattr(model, 'reset_descriptor_gate_epoch_stats'):
             model.reset_descriptor_gate_epoch_stats()
+        if hasattr(model, 'reset_dense_descriptor_epoch_stats'):
+            model.reset_dense_descriptor_epoch_stats()
         # Each epoch may have some phases
         phases = list(dataloaders.keys())
         model.PKE_learn = True
@@ -270,6 +413,15 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
             descriptor_supervision_over_limit_images = 0
             descriptor_supervision_total_correspondences = 0
             descriptor_supervision_used_correspondences = 0
+            pcgrad_stats = {
+                'batches': 0,
+                'conflicts': 0.0,
+                'cosine_before': 0.0,
+                'cosine_after': 0.0,
+                'detector_grad_norm': 0.0,
+                'descriptor_grad_norm': 0.0,
+                'removed_fraction': 0.0,
+            }
 
             for images, input_with_label, keypoint_positions, label_names \
                     in tqdm(dataloaders[phase]):
@@ -343,7 +495,27 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
                 num_learned_pts += number_pts_one
 
                 if 'train' in phase:
-                    loss.backward()
+                    if shared_gradient_mode == 'pcgrad':
+                        component_losses = getattr(
+                            model, '_gradient_audit_losses', None
+                        )
+                        if component_losses is None:
+                            raise RuntimeError(
+                                'PCGrad requires live detector and descriptor losses'
+                            )
+                        batch_pcgrad = conflict_projected_backward(
+                            model, *component_losses
+                        )
+                        pcgrad_stats['batches'] += 1
+                        pcgrad_stats['conflicts'] += batch_pcgrad['conflict']
+                        for key in (
+                            'cosine_before', 'cosine_after',
+                            'detector_grad_norm', 'descriptor_grad_norm',
+                            'removed_fraction',
+                        ):
+                            pcgrad_stats[key] += batch_pcgrad[key]
+                    else:
+                        loss.backward()
                     optimizer.step()
                     # 定期清理显存，避免碎片化
                     if torch.cuda.is_available():
@@ -399,6 +571,32 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
                     + ', '.join(
                         f'{key}={value:.6f}'
                         for key, value in gate_stats.items()
+                    )
+                )
+            if phase == 'train' and pcgrad_stats['batches']:
+                pcgrad_batches = pcgrad_stats['batches']
+                print(
+                    'pcgrad: '
+                    f'batches={pcgrad_batches}, '
+                    f'conflict_fraction='
+                    f"{pcgrad_stats['conflicts'] / pcgrad_batches:.6f}, "
+                    f"cosine_before={pcgrad_stats['cosine_before'] / pcgrad_batches:.6f}, "
+                    f"cosine_after={pcgrad_stats['cosine_after'] / pcgrad_batches:.6f}, "
+                    f"detector_grad_norm={pcgrad_stats['detector_grad_norm'] / pcgrad_batches:.6f}, "
+                    f"descriptor_grad_norm={pcgrad_stats['descriptor_grad_norm'] / pcgrad_batches:.6f}, "
+                    f"removed_fraction={pcgrad_stats['removed_fraction'] / pcgrad_batches:.6f}"
+                )
+            if (
+                phase == 'train'
+                and train_config.get('log_dense_descriptor_stats', False)
+                and hasattr(model, 'dense_descriptor_epoch_summary')
+            ):
+                dense_stats = model.dense_descriptor_epoch_summary()
+                print(
+                    'balanced dense descriptor: '
+                    + ', '.join(
+                        f'{key}={value:.6f}'
+                        for key, value in dense_stats.items()
                     )
                 )
 
