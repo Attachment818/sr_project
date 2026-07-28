@@ -1,3 +1,7 @@
+# 2026-07-28 additions:
+# res/seed3407_detector_multiscale_g13_v1/
+# res/seed3408_residual_multiscale_g7_v1/
+# res/seed3409_residual_multiscale_g7_v1/
 sr/
 ├── common/
 │   ├── common_util.py

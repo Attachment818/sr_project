@@ -2706,10 +2706,7 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
             detector_pred_copy = detector_pred.clone().detach()
 
             affine_x_for_desc, grid_for_desc, grid_inverse_for_desc = affine_images(x, used_for='descriptor')
-            if (
-                self.dense_descriptor_weight > 0
-                and getattr(self, '_supports_descriptor_only_forward', False)
-            ):
+            if getattr(self, '_supports_descriptor_only_forward', False):
                 affine_descriptor_pred_for_desc = self.network(
                     affine_x_for_desc, descriptor_only=True
                 )
@@ -3085,6 +3082,181 @@ class SuperRetinaWithResidualMultiScaleDescriptor(SuperRetinaWithVesselOnlyMaske
         cPa = self.dconv_up1(cPa)
         semi = torch.sigmoid(self.conv_last(cPa))
 
+        if return_cPa:
+            return semi, desc, cPa
+        return semi, desc
+
+
+class SuperRetinaWithMultiScaleDetectorResidual(
+    SuperRetinaWithVesselOnlyMasked
+):
+    """G13: preserve G0 and add a bounded multi-scale detector-logit residual."""
+
+    def __init__(self, config=None, device='cpu', n_class=1):
+        super().__init__(config=config, device=device, n_class=n_class)
+        cfg = config or {}
+        gate_init = float(cfg.get('detector_multiscale_gate_init', 0.05))
+        self.detector_multiscale_gate_max = float(
+            cfg.get('detector_multiscale_gate_max', 0.15)
+        )
+        hidden_channels = int(
+            cfg.get('detector_multiscale_hidden_channels', 32)
+        )
+        if not 0 < gate_init < self.detector_multiscale_gate_max <= 1:
+            raise ValueError(
+                'detector_multiscale_gate_init must be positive and smaller '
+                'than detector_multiscale_gate_max <= 1'
+            )
+        if hidden_channels <= 0:
+            raise ValueError(
+                'detector_multiscale_hidden_channels must be positive'
+            )
+        self.detector_residual_conv2 = nn.Sequential(
+            nn.Conv2d(64, hidden_channels, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+        )
+        self.detector_residual_conv3 = nn.Sequential(
+            nn.Conv2d(128, hidden_channels, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+        )
+        self.detector_residual_fusion = nn.Sequential(
+            nn.Conv2d(
+                hidden_channels * 2, hidden_channels,
+                kernel_size=3, padding=1,
+            ),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(hidden_channels, 1, kernel_size=1),
+        )
+        # Exact G0 detector at initialization. The fusion output learns first,
+        # then gradients begin reaching the shallow/mid-level projections.
+        nn.init.zeros_(self.detector_residual_fusion[-1].weight)
+        nn.init.zeros_(self.detector_residual_fusion[-1].bias)
+        gate_fraction = gate_init / self.detector_multiscale_gate_max
+        gate_logit = math.log(gate_fraction / (1.0 - gate_fraction))
+        self.detector_multiscale_gate_logit = nn.Parameter(
+            torch.tensor(gate_logit, dtype=torch.float32)
+        )
+        self.log_detector_residual_stats = bool(
+            cfg.get('log_detector_residual_stats', False)
+        )
+        self.detector_residual_stats_max_calls = int(
+            cfg.get('detector_residual_stats_max_calls', 64)
+        )
+        if self.detector_residual_stats_max_calls <= 0:
+            raise ValueError(
+                'detector_residual_stats_max_calls must be positive'
+            )
+        self.reset_detector_residual_epoch_stats()
+        self._supports_descriptor_only_forward = True
+        self.to(device)
+        print(
+            'SuperRetinaWithMultiScaleDetectorResidual initialized: '
+            f'gate_init={gate_init:.4f}, '
+            f'gate_max={self.detector_multiscale_gate_max:.4f}, '
+            f'hidden_channels={hidden_channels}'
+        )
+
+    def reset_detector_residual_epoch_stats(self):
+        self._detector_residual_epoch_stats = {
+            'calls': 0,
+            'gate': 0.0,
+            'main_logit_norm': 0.0,
+            'residual_logit_norm': 0.0,
+            'injection_ratio': 0.0,
+        }
+
+    def detector_residual_epoch_summary(self):
+        stats = self._detector_residual_epoch_stats
+        calls = max(1, stats['calls'])
+        return {
+            'sampled_calls': float(stats['calls']),
+            'gate': stats['gate'] / calls,
+            'main_logit_norm': stats['main_logit_norm'] / calls,
+            'residual_logit_norm':
+                stats['residual_logit_norm'] / calls,
+            'injection_ratio': stats['injection_ratio'] / calls,
+        }
+
+    def _record_detector_residual_stats(
+            self, main_logits, residual_logits, gate):
+        if not self.training or not self.log_detector_residual_stats:
+            return
+        stats = self._detector_residual_epoch_stats
+        if stats['calls'] >= self.detector_residual_stats_max_calls:
+            return
+        with torch.no_grad():
+            main_norm = main_logits.detach().flatten(1).norm(dim=1).mean()
+            residual_norm = (
+                gate.detach() * residual_logits.detach()
+            ).flatten(1).norm(dim=1).mean()
+            stats['calls'] += 1
+            stats['gate'] += float(gate.detach().item())
+            stats['main_logit_norm'] += float(main_norm.item())
+            stats['residual_logit_norm'] += float(residual_norm.item())
+            stats['injection_ratio'] += float(
+                (residual_norm / main_norm.clamp_min(1e-6)).item()
+            )
+
+    def network(self, x, return_cPa=False, descriptor_only=False):
+        x = self.relu(self.conv1a(x))
+        conv1 = self.relu(self.conv1b(x))
+        x = self.pool(conv1)
+
+        x = self.relu(self.conv2a(x))
+        conv2 = self.relu(self.conv2b(x))
+        x = self.pool(conv2)
+
+        x = self.relu(self.conv3a(x))
+        conv3 = self.relu(self.conv3b(x))
+        x = self.pool(conv3)
+
+        x = self.relu(self.conv4a(x))
+        conv4 = self.relu(self.conv4b(x))
+
+        cDa = self.relu(self.convDa(conv4))
+        cDb = self.relu(self.convDb(cDa))
+        desc = self.convDc(cDb)
+        descriptor_norm = torch.norm(desc, p=2, dim=1)
+        desc = desc.div(torch.unsqueeze(descriptor_norm, 1))
+        desc = self.trans_conv(desc)
+        if descriptor_only:
+            return desc
+
+        cPa = self.upsample(conv4)
+        cPa = torch.cat([cPa, conv3], dim=1)
+        cPa = self.dconv_up3(cPa)
+        cPa = self.upsample(cPa)
+        cPa = torch.cat([cPa, conv2], dim=1)
+        cPa = self.dconv_up2(cPa)
+        cPa = self.upsample(cPa)
+        cPa = torch.cat([cPa, conv1], dim=1)
+        cPa = self.dconv_up1(cPa)
+        main_logits = self.conv_last(cPa)
+
+        residual_conv2 = self.detector_residual_conv2(conv2)
+        residual_conv3 = self.detector_residual_conv3(conv3)
+        residual_conv3 = F.interpolate(
+            residual_conv3,
+            size=residual_conv2.shape[-2:],
+            mode='bilinear',
+            align_corners=True,
+        )
+        residual_logits = self.detector_residual_fusion(
+            torch.cat([residual_conv2, residual_conv3], dim=1)
+        )
+        residual_logits = F.interpolate(
+            residual_logits,
+            size=main_logits.shape[-2:],
+            mode='bilinear',
+            align_corners=True,
+        )
+        gate = self.detector_multiscale_gate_max * torch.sigmoid(
+            self.detector_multiscale_gate_logit
+        )
+        self._record_detector_residual_stats(
+            main_logits, residual_logits, gate
+        )
+        semi = torch.sigmoid(main_logits + gate * residual_logits)
         if return_cPa:
             return semi, desc, cPa
         return semi, desc

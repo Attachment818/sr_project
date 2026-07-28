@@ -359,6 +359,8 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
             model.reset_descriptor_gate_epoch_stats()
         if hasattr(model, 'reset_dense_descriptor_epoch_stats'):
             model.reset_dense_descriptor_epoch_stats()
+        if hasattr(model, 'reset_detector_residual_epoch_stats'):
+            model.reset_detector_residual_epoch_stats()
         # Each epoch may have some phases
         phases = list(dataloaders.keys())
         model.PKE_learn = True
@@ -597,6 +599,19 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
                     + ', '.join(
                         f'{key}={value:.6f}'
                         for key, value in dense_stats.items()
+                    )
+                )
+            if (
+                phase == 'train'
+                and train_config.get('log_detector_residual_stats', False)
+                and hasattr(model, 'detector_residual_epoch_summary')
+            ):
+                detector_stats = model.detector_residual_epoch_summary()
+                print(
+                    'detector residual: '
+                    + ', '.join(
+                        f'{key}={value:.6f}'
+                        for key, value in detector_stats.items()
                     )
                 )
 

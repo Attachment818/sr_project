@@ -1,0 +1,58 @@
+MODEL:
+  model_variant: vessel_masked_residual_multiscale
+  nms_size: 10
+  nms_thresh: 0.1
+  batch_size: 4
+  num_epoch: 150
+  seed: 3409
+  deterministic: true
+  num_workers: 8
+  device: cuda:3
+  load_pre_trained_model: false
+  pretrained_path: null
+  resume_optimizer: false
+  model_save_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3409_residual_multiscale_g7_v1/model_149.pth
+  model_save_epoch: 1
+  checkpoint_save_epochs: [149]
+  checkpoint_path_template: /home/data1/zhangjunhong/sr_project/sr/res/seed3409_residual_multiscale_g7_v1/model_{epoch}.pth
+  refuse_existing_experiment_outputs: true
+  vessel_weight: 0.3
+  vessel_schedule_mode: constant
+  vessel_mask_backend: morph
+  vessel_mask_threshold: 0.25
+  vessel_mask_dilate: 3
+  descriptor_hard_negative_mode: legacy
+  descriptor_hard_negative_chunk_size: 256
+  descriptor_hard_negative_min_distance: 0.0
+  descriptor_multiscale_gate_init: 0.1
+  log_descriptor_gate_stats: true
+  descriptor_gate_stats_max_calls: 64
+  log_descriptor_supervision_stats: true
+  memory_fraction: 0.9
+
+DATASET:
+  model_image_width: 768
+  model_image_height: 768
+  dataset_path: /home/data1/zhangjunhong/sr_project/sr/data/Lab4
+  train_split_file: train.txt
+  val_split_file: val.txt
+  auxiliary: /home/data1/zhangjunhong/sr_project/sr/data/Auxiliary
+
+PKE:
+  pke_start_epoch: 0
+  geometric_thresh: 0.4
+  content_thresh: 0.7
+  gaussian_kernel_size: 13
+  gaussian_sigma: 2
+  pke_show: false
+  pke_show_epoch: 5
+  pke_show_list: []
+
+VALUE_MAP:
+  area: 8
+  value_increase_point: 5
+  value_increase_area: 1
+  value_decay: 1
+  is_value_map_save: true
+  resume_value_map: false
+  value_map_save_dir: /home/data1/zhangjunhong/sr_project/sr/res/seed3409_residual_multiscale_g7_v1/value_maps

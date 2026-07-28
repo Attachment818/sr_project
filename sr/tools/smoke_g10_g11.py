@@ -16,6 +16,7 @@ from common.train_util import conflict_projected_backward
 from model.super_retina import (
     SuperRetinaWithResidualMultiScaleDescriptor,
     SuperRetinaWithVesselOnlyMasked,
+    SuperRetinaWithMultiScaleDetectorResidual,
 )
 
 
@@ -115,6 +116,42 @@ def check_pcgrad():
         assert torch.isfinite(parameter.grad).all()
 
 
+def check_g13_detector_residual():
+    config = minimal_config(
+        dense_descriptor_weight=0.0,
+        detector_multiscale_gate_init=0.05,
+        detector_multiscale_gate_max=0.15,
+        detector_multiscale_hidden_channels=8,
+        log_detector_residual_stats=True,
+    )
+    base = SuperRetinaWithVesselOnlyMasked(config, device='cpu')
+    g13 = SuperRetinaWithMultiScaleDetectorResidual(
+        config, device='cpu'
+    )
+    g13.load_state_dict(base.state_dict(), strict=False)
+    base.eval()
+    g13.eval()
+    probe = torch.rand(1, 1, 64, 64)
+    base_detector, base_descriptor = base.network(probe)
+    g13_detector, g13_descriptor = g13.network(probe)
+    assert torch.equal(base_detector, g13_detector), (
+        'zero-initialized G13 detector must exactly equal G0'
+    )
+    assert torch.equal(base_descriptor, g13_descriptor), (
+        'G13 must preserve the G0 descriptor'
+    )
+    assert torch.count_nonzero(
+        g13.detector_residual_fusion[-1].weight
+    ) == 0
+    g13.train()
+    detector, _ = g13.network(probe)
+    detector.mean().backward()
+    assert g13.detector_residual_fusion[-1].weight.grad is not None
+    assert torch.isfinite(
+        g13.detector_residual_fusion[-1].weight.grad
+    ).all()
+
+
 def check_cuda(config_path):
     source = yaml.safe_load(Path(config_path).read_text(encoding='utf-8'))
     config = {
@@ -125,11 +162,19 @@ def check_cuda(config_path):
     if not torch.cuda.is_available() or device.type != 'cuda':
         raise RuntimeError(f'Configured CUDA device is unavailable: {device}')
     model_variant = config['model_variant']
-    model_class = (
-        SuperRetinaWithResidualMultiScaleDescriptor
-        if model_variant == 'vessel_masked_residual_multiscale'
-        else SuperRetinaWithVesselOnlyMasked
-    )
+    model_classes = {
+        'vessel_masked_residual_multiscale':
+            SuperRetinaWithResidualMultiScaleDescriptor,
+        'vessel_masked_pcgrad':
+            SuperRetinaWithVesselOnlyMasked,
+        'vessel_masked_detector_residual_multiscale':
+            SuperRetinaWithMultiScaleDetectorResidual,
+    }
+    if model_variant not in model_classes:
+        raise ValueError(
+            f'Unsupported G10/G11/G13 preflight variant: {model_variant}'
+        )
+    model_class = model_classes[model_variant]
     model = model_class(config, device=device)
     model.train()
     model.nms_thresh = 2.0
@@ -181,7 +226,8 @@ def main():
     args = parser.parse_args()
     check_dense_descriptor()
     check_pcgrad()
-    print('G10/G11 CPU smoke tests passed')
+    check_g13_detector_residual()
+    print('G10/G11/G13 CPU smoke tests passed')
     if args.cuda_config is not None:
         check_cuda(args.cuda_config)
 
