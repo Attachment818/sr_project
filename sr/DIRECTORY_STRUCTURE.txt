@@ -3,6 +3,7 @@
 # res/seed3407_balanced_dense_descriptor_g10_v1/{train.yaml,FIRE_149/test.yaml,FIMD_149/test.yaml}
 # res/seed3407_balanced_dense_descriptor_g10_v2/{train.yaml,FIRE_149/test.yaml,FIMD_149/test.yaml}
 # res/seed3407_pcgrad_shared_g11_v1/{train.yaml,FIRE_149/test.yaml,FIMD_149/test.yaml}
+# res/seed3407_residual_multiscale_pcgrad_g12_v1/{train.yaml,FIRE_149/test.yaml,FIMD_149/test.yaml}
 sr/
 ├── common/
 │   ├── common_util.py
