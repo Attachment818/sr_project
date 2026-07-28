@@ -1,9 +1,3 @@
-# 2026-07-28: G10/G11 additions
-# tools/smoke_g10_g11.py
-# res/seed3407_balanced_dense_descriptor_g10_v1/{train.yaml,FIRE_149/test.yaml,FIMD_149/test.yaml}
-# res/seed3407_balanced_dense_descriptor_g10_v2/{train.yaml,FIRE_149/test.yaml,FIMD_149/test.yaml}
-# res/seed3407_pcgrad_shared_g11_v1/{train.yaml,FIRE_149/test.yaml,FIMD_149/test.yaml}
-# res/seed3407_residual_multiscale_pcgrad_g12_v1/{train.yaml,FIRE_149/test.yaml,FIMD_149/test.yaml}
 sr/
 ├── common/
 │   ├── common_util.py
@@ -5346,6 +5340,24 @@ sr/
 │   │   ├── pipeline.log
 │   │   ├── train.log
 │   │   └── train.yaml
+│   ├── seed3407_balanced_dense_descriptor_g10_v1/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
+│   │   ├── value_maps/
+│   │   ├── pipeline.log
+│   │   ├── train.log
+│   │   └── train.yaml
+│   ├── seed3407_balanced_dense_descriptor_g10_v2/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
+│   │   ├── value_maps/
+│   │   ├── pipeline.log
+│   │   ├── train.log
+│   │   └── train.yaml
 │   ├── seed3407_cross_dataset_diagnostics/
 │   │   └── c0_constant_masked/
 │   │       └── FIRE_149/
@@ -8364,6 +8376,229 @@ sr/
 │   │   ├── pipeline.log
 │   │   ├── train.log
 │   │   └── train.yaml
+│   ├── seed3407_pcgrad_shared_g11_v1/
+│   │   ├── FIMD_149/
+│   │   │   ├── aligned_images/
+│   │   │   ├── match_images/
+│   │   │   ├── paper_figures/
+│   │   │   │   ├── control_points_01_r_t/
+│   │   │   │   ├── control_points_02_r_t/
+│   │   │   │   ├── control_points_03_r_t/
+│   │   │   │   ├── control_points_04_r_t/
+│   │   │   │   ├── control_points_05_r_t/
+│   │   │   │   ├── control_points_06_r_t/
+│   │   │   │   ├── control_points_07_r_t/
+│   │   │   │   ├── control_points_08_r_t/
+│   │   │   │   ├── control_points_09_r_t/
+│   │   │   │   ├── control_points_10_r_t/
+│   │   │   │   ├── control_points_11_r_t/
+│   │   │   │   ├── control_points_12_r_t/
+│   │   │   │   ├── control_points_13_r_t/
+│   │   │   │   ├── control_points_14_r_t/
+│   │   │   │   ├── control_points_15_r_t/
+│   │   │   │   ├── control_points_16_r_t/
+│   │   │   │   ├── control_points_17_r_t/
+│   │   │   │   ├── control_points_18_r_t/
+│   │   │   │   ├── control_points_19_r_t/
+│   │   │   │   ├── control_points_20_r_t/
+│   │   │   │   ├── control_points_21_r_t/
+│   │   │   │   ├── control_points_22_r_t/
+│   │   │   │   ├── control_points_23_r_t/
+│   │   │   │   ├── control_points_24_r_t/
+│   │   │   │   ├── control_points_25_r_t/
+│   │   │   │   ├── control_points_26_r_t/
+│   │   │   │   ├── control_points_27_r_t/
+│   │   │   │   ├── control_points_28_r_t/
+│   │   │   │   ├── control_points_29_r_t/
+│   │   │   │   ├── control_points_30_r_t/
+│   │   │   │   ├── control_points_31_r_t/
+│   │   │   │   ├── control_points_32_r_t/
+│   │   │   │   ├── control_points_33_r_t/
+│   │   │   │   ├── control_points_34_r_t/
+│   │   │   │   ├── control_points_35_r_t/
+│   │   │   │   ├── control_points_36_r_t/
+│   │   │   │   ├── control_points_37_r_t/
+│   │   │   │   ├── control_points_38_r_t/
+│   │   │   │   ├── control_points_39_r_t/
+│   │   │   │   ├── control_points_40_r_t/
+│   │   │   │   ├── control_points_41_r_t/
+│   │   │   │   ├── control_points_42_r_t/
+│   │   │   │   ├── control_points_43_r_t/
+│   │   │   │   ├── control_points_44_r_t/
+│   │   │   │   ├── control_points_45_r_t/
+│   │   │   │   ├── control_points_46_r_t/
+│   │   │   │   ├── control_points_47_r_t/
+│   │   │   │   ├── control_points_48_r_t/
+│   │   │   │   ├── control_points_49_r_t/
+│   │   │   │   ├── control_points_50_r_t/
+│   │   │   │   ├── control_points_51_r_t/
+│   │   │   │   ├── control_points_52_r_t/
+│   │   │   │   ├── control_points_53_r_t/
+│   │   │   │   ├── control_points_54_r_t/
+│   │   │   │   ├── control_points_55_r_t/
+│   │   │   │   ├── control_points_56_r_t/
+│   │   │   │   ├── control_points_57_r_t/
+│   │   │   │   ├── control_points_58_r_t/
+│   │   │   │   ├── control_points_59_r_t/
+│   │   │   │   ├── control_points_60_r_t/
+│   │   │   │   ├── control_points_61_r_t/
+│   │   │   │   ├── control_points_62_r_t/
+│   │   │   │   ├── control_points_63_r_t/
+│   │   │   │   ├── control_points_64_r_t/
+│   │   │   │   ├── control_points_65_r_t/
+│   │   │   │   ├── control_points_66_r_t/
+│   │   │   │   ├── control_points_67_r_t/
+│   │   │   │   ├── control_points_68_r_t/
+│   │   │   │   ├── control_points_69_r_t/
+│   │   │   │   └── control_points_70_r_t/
+│   │   │   ├── FIMD_point_errors.txt
+│   │   │   ├── fimd_test.log
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   ├── aligned_images/
+│   │   │   ├── match_images/
+│   │   │   ├── paper_figures/
+│   │   │   │   ├── control_points_A01_1_2/
+│   │   │   │   ├── control_points_A02_1_2/
+│   │   │   │   ├── control_points_A03_1_2/
+│   │   │   │   ├── control_points_A04_1_2/
+│   │   │   │   ├── control_points_A05_1_2/
+│   │   │   │   ├── control_points_A06_1_2/
+│   │   │   │   ├── control_points_A07_1_2/
+│   │   │   │   ├── control_points_A08_1_2/
+│   │   │   │   ├── control_points_A09_1_2/
+│   │   │   │   ├── control_points_A10_1_2/
+│   │   │   │   ├── control_points_A11_1_2/
+│   │   │   │   ├── control_points_A12_1_2/
+│   │   │   │   ├── control_points_A13_1_2/
+│   │   │   │   ├── control_points_A14_1_2/
+│   │   │   │   ├── control_points_P01_1_2/
+│   │   │   │   ├── control_points_P02_1_2/
+│   │   │   │   ├── control_points_P03_1_2/
+│   │   │   │   ├── control_points_P04_1_2/
+│   │   │   │   ├── control_points_P05_1_2/
+│   │   │   │   ├── control_points_P06_1_2/
+│   │   │   │   ├── control_points_P07_1_2/
+│   │   │   │   ├── control_points_P08_1_2/
+│   │   │   │   ├── control_points_P09_1_2/
+│   │   │   │   ├── control_points_P10_1_2/
+│   │   │   │   ├── control_points_P11_1_2/
+│   │   │   │   ├── control_points_P12_1_2/
+│   │   │   │   ├── control_points_P13_1_2/
+│   │   │   │   ├── control_points_P14_1_2/
+│   │   │   │   ├── control_points_P15_1_2/
+│   │   │   │   ├── control_points_P16_1_2/
+│   │   │   │   ├── control_points_P17_1_2/
+│   │   │   │   ├── control_points_P18_1_2/
+│   │   │   │   ├── control_points_P19_1_2/
+│   │   │   │   ├── control_points_P20_1_2/
+│   │   │   │   ├── control_points_P21_1_2/
+│   │   │   │   ├── control_points_P22_1_2/
+│   │   │   │   ├── control_points_P23_1_2/
+│   │   │   │   ├── control_points_P24_1_2/
+│   │   │   │   ├── control_points_P25_1_2/
+│   │   │   │   ├── control_points_P26_1_2/
+│   │   │   │   ├── control_points_P27_1_2/
+│   │   │   │   ├── control_points_P28_1_2/
+│   │   │   │   ├── control_points_P29_1_2/
+│   │   │   │   ├── control_points_P30_1_2/
+│   │   │   │   ├── control_points_P31_1_2/
+│   │   │   │   ├── control_points_P32_1_2/
+│   │   │   │   ├── control_points_P33_1_2/
+│   │   │   │   ├── control_points_P34_1_2/
+│   │   │   │   ├── control_points_P35_1_2/
+│   │   │   │   ├── control_points_P36_1_2/
+│   │   │   │   ├── control_points_P38_1_2/
+│   │   │   │   ├── control_points_P39_1_2/
+│   │   │   │   ├── control_points_P40_1_2/
+│   │   │   │   ├── control_points_P41_1_2/
+│   │   │   │   ├── control_points_P42_1_2/
+│   │   │   │   ├── control_points_P43_1_2/
+│   │   │   │   ├── control_points_P44_1_2/
+│   │   │   │   ├── control_points_P45_1_2/
+│   │   │   │   ├── control_points_P46_1_2/
+│   │   │   │   ├── control_points_P47_1_2/
+│   │   │   │   ├── control_points_P48_1_2/
+│   │   │   │   ├── control_points_P49_1_2/
+│   │   │   │   ├── control_points_S01_1_2/
+│   │   │   │   ├── control_points_S02_1_2/
+│   │   │   │   ├── control_points_S03_1_2/
+│   │   │   │   ├── control_points_S04_1_2/
+│   │   │   │   ├── control_points_S05_1_2/
+│   │   │   │   ├── control_points_S06_1_2/
+│   │   │   │   ├── control_points_S07_1_2/
+│   │   │   │   ├── control_points_S08_1_2/
+│   │   │   │   ├── control_points_S09_1_2/
+│   │   │   │   ├── control_points_S10_1_2/
+│   │   │   │   ├── control_points_S11_1_2/
+│   │   │   │   ├── control_points_S12_1_2/
+│   │   │   │   ├── control_points_S13_1_2/
+│   │   │   │   ├── control_points_S14_1_2/
+│   │   │   │   ├── control_points_S15_1_2/
+│   │   │   │   ├── control_points_S16_1_2/
+│   │   │   │   ├── control_points_S17_1_2/
+│   │   │   │   ├── control_points_S18_1_2/
+│   │   │   │   ├── control_points_S19_1_2/
+│   │   │   │   ├── control_points_S20_1_2/
+│   │   │   │   ├── control_points_S21_1_2/
+│   │   │   │   ├── control_points_S22_1_2/
+│   │   │   │   ├── control_points_S23_1_2/
+│   │   │   │   ├── control_points_S24_1_2/
+│   │   │   │   ├── control_points_S25_1_2/
+│   │   │   │   ├── control_points_S26_1_2/
+│   │   │   │   ├── control_points_S27_1_2/
+│   │   │   │   ├── control_points_S28_1_2/
+│   │   │   │   ├── control_points_S29_1_2/
+│   │   │   │   ├── control_points_S30_1_2/
+│   │   │   │   ├── control_points_S31_1_2/
+│   │   │   │   ├── control_points_S32_1_2/
+│   │   │   │   ├── control_points_S33_1_2/
+│   │   │   │   ├── control_points_S34_1_2/
+│   │   │   │   ├── control_points_S35_1_2/
+│   │   │   │   ├── control_points_S36_1_2/
+│   │   │   │   ├── control_points_S37_1_2/
+│   │   │   │   ├── control_points_S38_1_2/
+│   │   │   │   ├── control_points_S39_1_2/
+│   │   │   │   ├── control_points_S40_1_2/
+│   │   │   │   ├── control_points_S41_1_2/
+│   │   │   │   ├── control_points_S42_1_2/
+│   │   │   │   ├── control_points_S43_1_2/
+│   │   │   │   ├── control_points_S44_1_2/
+│   │   │   │   ├── control_points_S45_1_2/
+│   │   │   │   ├── control_points_S46_1_2/
+│   │   │   │   ├── control_points_S47_1_2/
+│   │   │   │   ├── control_points_S48_1_2/
+│   │   │   │   ├── control_points_S49_1_2/
+│   │   │   │   ├── control_points_S50_1_2/
+│   │   │   │   ├── control_points_S51_1_2/
+│   │   │   │   ├── control_points_S52_1_2/
+│   │   │   │   ├── control_points_S53_1_2/
+│   │   │   │   ├── control_points_S54_1_2/
+│   │   │   │   ├── control_points_S55_1_2/
+│   │   │   │   ├── control_points_S56_1_2/
+│   │   │   │   ├── control_points_S57_1_2/
+│   │   │   │   ├── control_points_S58_1_2/
+│   │   │   │   ├── control_points_S59_1_2/
+│   │   │   │   ├── control_points_S60_1_2/
+│   │   │   │   ├── control_points_S61_1_2/
+│   │   │   │   ├── control_points_S62_1_2/
+│   │   │   │   ├── control_points_S63_1_2/
+│   │   │   │   ├── control_points_S64_1_2/
+│   │   │   │   ├── control_points_S65_1_2/
+│   │   │   │   ├── control_points_S66_1_2/
+│   │   │   │   ├── control_points_S67_1_2/
+│   │   │   │   ├── control_points_S68_1_2/
+│   │   │   │   ├── control_points_S69_1_2/
+│   │   │   │   ├── control_points_S70_1_2/
+│   │   │   │   └── control_points_S71_1_2/
+│   │   │   ├── FIRE_point_errors.txt
+│   │   │   ├── fire_test.log
+│   │   │   └── test.yaml
+│   │   ├── value_maps/
+│   │   ├── model_149.pth
+│   │   ├── pipeline.log
+│   │   ├── train.log
+│   │   └── train.yaml
 │   ├── seed3407_pke_descriptor_feedback_g2_v2/
 │   │   ├── FIMD_149/
 │   │   │   ├── aligned_images/
@@ -9603,6 +9838,229 @@ sr/
 │   │   ├── model_149.pth
 │   │   ├── model_49.pth
 │   │   ├── model_99.pth
+│   │   ├── pipeline.log
+│   │   ├── train.log
+│   │   └── train.yaml
+│   ├── seed3407_residual_multiscale_pcgrad_g12_v1/
+│   │   ├── FIMD_149/
+│   │   │   ├── aligned_images/
+│   │   │   ├── match_images/
+│   │   │   ├── paper_figures/
+│   │   │   │   ├── control_points_01_r_t/
+│   │   │   │   ├── control_points_02_r_t/
+│   │   │   │   ├── control_points_03_r_t/
+│   │   │   │   ├── control_points_04_r_t/
+│   │   │   │   ├── control_points_05_r_t/
+│   │   │   │   ├── control_points_06_r_t/
+│   │   │   │   ├── control_points_07_r_t/
+│   │   │   │   ├── control_points_08_r_t/
+│   │   │   │   ├── control_points_09_r_t/
+│   │   │   │   ├── control_points_10_r_t/
+│   │   │   │   ├── control_points_11_r_t/
+│   │   │   │   ├── control_points_12_r_t/
+│   │   │   │   ├── control_points_13_r_t/
+│   │   │   │   ├── control_points_14_r_t/
+│   │   │   │   ├── control_points_15_r_t/
+│   │   │   │   ├── control_points_16_r_t/
+│   │   │   │   ├── control_points_17_r_t/
+│   │   │   │   ├── control_points_18_r_t/
+│   │   │   │   ├── control_points_19_r_t/
+│   │   │   │   ├── control_points_20_r_t/
+│   │   │   │   ├── control_points_21_r_t/
+│   │   │   │   ├── control_points_22_r_t/
+│   │   │   │   ├── control_points_23_r_t/
+│   │   │   │   ├── control_points_24_r_t/
+│   │   │   │   ├── control_points_25_r_t/
+│   │   │   │   ├── control_points_26_r_t/
+│   │   │   │   ├── control_points_27_r_t/
+│   │   │   │   ├── control_points_28_r_t/
+│   │   │   │   ├── control_points_29_r_t/
+│   │   │   │   ├── control_points_30_r_t/
+│   │   │   │   ├── control_points_31_r_t/
+│   │   │   │   ├── control_points_32_r_t/
+│   │   │   │   ├── control_points_33_r_t/
+│   │   │   │   ├── control_points_34_r_t/
+│   │   │   │   ├── control_points_35_r_t/
+│   │   │   │   ├── control_points_36_r_t/
+│   │   │   │   ├── control_points_37_r_t/
+│   │   │   │   ├── control_points_38_r_t/
+│   │   │   │   ├── control_points_39_r_t/
+│   │   │   │   ├── control_points_40_r_t/
+│   │   │   │   ├── control_points_41_r_t/
+│   │   │   │   ├── control_points_42_r_t/
+│   │   │   │   ├── control_points_43_r_t/
+│   │   │   │   ├── control_points_44_r_t/
+│   │   │   │   ├── control_points_45_r_t/
+│   │   │   │   ├── control_points_46_r_t/
+│   │   │   │   ├── control_points_47_r_t/
+│   │   │   │   ├── control_points_48_r_t/
+│   │   │   │   ├── control_points_49_r_t/
+│   │   │   │   ├── control_points_50_r_t/
+│   │   │   │   ├── control_points_51_r_t/
+│   │   │   │   ├── control_points_52_r_t/
+│   │   │   │   ├── control_points_53_r_t/
+│   │   │   │   ├── control_points_54_r_t/
+│   │   │   │   ├── control_points_55_r_t/
+│   │   │   │   ├── control_points_56_r_t/
+│   │   │   │   ├── control_points_57_r_t/
+│   │   │   │   ├── control_points_58_r_t/
+│   │   │   │   ├── control_points_59_r_t/
+│   │   │   │   ├── control_points_60_r_t/
+│   │   │   │   ├── control_points_61_r_t/
+│   │   │   │   ├── control_points_62_r_t/
+│   │   │   │   ├── control_points_63_r_t/
+│   │   │   │   ├── control_points_64_r_t/
+│   │   │   │   ├── control_points_65_r_t/
+│   │   │   │   ├── control_points_66_r_t/
+│   │   │   │   ├── control_points_67_r_t/
+│   │   │   │   ├── control_points_68_r_t/
+│   │   │   │   ├── control_points_69_r_t/
+│   │   │   │   └── control_points_70_r_t/
+│   │   │   ├── FIMD_point_errors.txt
+│   │   │   ├── fimd_test.log
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   ├── aligned_images/
+│   │   │   ├── match_images/
+│   │   │   ├── paper_figures/
+│   │   │   │   ├── control_points_A01_1_2/
+│   │   │   │   ├── control_points_A02_1_2/
+│   │   │   │   ├── control_points_A03_1_2/
+│   │   │   │   ├── control_points_A04_1_2/
+│   │   │   │   ├── control_points_A05_1_2/
+│   │   │   │   ├── control_points_A06_1_2/
+│   │   │   │   ├── control_points_A07_1_2/
+│   │   │   │   ├── control_points_A08_1_2/
+│   │   │   │   ├── control_points_A09_1_2/
+│   │   │   │   ├── control_points_A10_1_2/
+│   │   │   │   ├── control_points_A11_1_2/
+│   │   │   │   ├── control_points_A12_1_2/
+│   │   │   │   ├── control_points_A13_1_2/
+│   │   │   │   ├── control_points_A14_1_2/
+│   │   │   │   ├── control_points_P01_1_2/
+│   │   │   │   ├── control_points_P02_1_2/
+│   │   │   │   ├── control_points_P03_1_2/
+│   │   │   │   ├── control_points_P04_1_2/
+│   │   │   │   ├── control_points_P05_1_2/
+│   │   │   │   ├── control_points_P06_1_2/
+│   │   │   │   ├── control_points_P07_1_2/
+│   │   │   │   ├── control_points_P08_1_2/
+│   │   │   │   ├── control_points_P09_1_2/
+│   │   │   │   ├── control_points_P10_1_2/
+│   │   │   │   ├── control_points_P11_1_2/
+│   │   │   │   ├── control_points_P12_1_2/
+│   │   │   │   ├── control_points_P13_1_2/
+│   │   │   │   ├── control_points_P14_1_2/
+│   │   │   │   ├── control_points_P15_1_2/
+│   │   │   │   ├── control_points_P16_1_2/
+│   │   │   │   ├── control_points_P17_1_2/
+│   │   │   │   ├── control_points_P18_1_2/
+│   │   │   │   ├── control_points_P19_1_2/
+│   │   │   │   ├── control_points_P20_1_2/
+│   │   │   │   ├── control_points_P21_1_2/
+│   │   │   │   ├── control_points_P22_1_2/
+│   │   │   │   ├── control_points_P23_1_2/
+│   │   │   │   ├── control_points_P24_1_2/
+│   │   │   │   ├── control_points_P25_1_2/
+│   │   │   │   ├── control_points_P26_1_2/
+│   │   │   │   ├── control_points_P27_1_2/
+│   │   │   │   ├── control_points_P28_1_2/
+│   │   │   │   ├── control_points_P29_1_2/
+│   │   │   │   ├── control_points_P30_1_2/
+│   │   │   │   ├── control_points_P31_1_2/
+│   │   │   │   ├── control_points_P32_1_2/
+│   │   │   │   ├── control_points_P33_1_2/
+│   │   │   │   ├── control_points_P34_1_2/
+│   │   │   │   ├── control_points_P35_1_2/
+│   │   │   │   ├── control_points_P36_1_2/
+│   │   │   │   ├── control_points_P38_1_2/
+│   │   │   │   ├── control_points_P39_1_2/
+│   │   │   │   ├── control_points_P40_1_2/
+│   │   │   │   ├── control_points_P41_1_2/
+│   │   │   │   ├── control_points_P42_1_2/
+│   │   │   │   ├── control_points_P43_1_2/
+│   │   │   │   ├── control_points_P44_1_2/
+│   │   │   │   ├── control_points_P45_1_2/
+│   │   │   │   ├── control_points_P46_1_2/
+│   │   │   │   ├── control_points_P47_1_2/
+│   │   │   │   ├── control_points_P48_1_2/
+│   │   │   │   ├── control_points_P49_1_2/
+│   │   │   │   ├── control_points_S01_1_2/
+│   │   │   │   ├── control_points_S02_1_2/
+│   │   │   │   ├── control_points_S03_1_2/
+│   │   │   │   ├── control_points_S04_1_2/
+│   │   │   │   ├── control_points_S05_1_2/
+│   │   │   │   ├── control_points_S06_1_2/
+│   │   │   │   ├── control_points_S07_1_2/
+│   │   │   │   ├── control_points_S08_1_2/
+│   │   │   │   ├── control_points_S09_1_2/
+│   │   │   │   ├── control_points_S10_1_2/
+│   │   │   │   ├── control_points_S11_1_2/
+│   │   │   │   ├── control_points_S12_1_2/
+│   │   │   │   ├── control_points_S13_1_2/
+│   │   │   │   ├── control_points_S14_1_2/
+│   │   │   │   ├── control_points_S15_1_2/
+│   │   │   │   ├── control_points_S16_1_2/
+│   │   │   │   ├── control_points_S17_1_2/
+│   │   │   │   ├── control_points_S18_1_2/
+│   │   │   │   ├── control_points_S19_1_2/
+│   │   │   │   ├── control_points_S20_1_2/
+│   │   │   │   ├── control_points_S21_1_2/
+│   │   │   │   ├── control_points_S22_1_2/
+│   │   │   │   ├── control_points_S23_1_2/
+│   │   │   │   ├── control_points_S24_1_2/
+│   │   │   │   ├── control_points_S25_1_2/
+│   │   │   │   ├── control_points_S26_1_2/
+│   │   │   │   ├── control_points_S27_1_2/
+│   │   │   │   ├── control_points_S28_1_2/
+│   │   │   │   ├── control_points_S29_1_2/
+│   │   │   │   ├── control_points_S30_1_2/
+│   │   │   │   ├── control_points_S31_1_2/
+│   │   │   │   ├── control_points_S32_1_2/
+│   │   │   │   ├── control_points_S33_1_2/
+│   │   │   │   ├── control_points_S34_1_2/
+│   │   │   │   ├── control_points_S35_1_2/
+│   │   │   │   ├── control_points_S36_1_2/
+│   │   │   │   ├── control_points_S37_1_2/
+│   │   │   │   ├── control_points_S38_1_2/
+│   │   │   │   ├── control_points_S39_1_2/
+│   │   │   │   ├── control_points_S40_1_2/
+│   │   │   │   ├── control_points_S41_1_2/
+│   │   │   │   ├── control_points_S42_1_2/
+│   │   │   │   ├── control_points_S43_1_2/
+│   │   │   │   ├── control_points_S44_1_2/
+│   │   │   │   ├── control_points_S45_1_2/
+│   │   │   │   ├── control_points_S46_1_2/
+│   │   │   │   ├── control_points_S47_1_2/
+│   │   │   │   ├── control_points_S48_1_2/
+│   │   │   │   ├── control_points_S49_1_2/
+│   │   │   │   ├── control_points_S50_1_2/
+│   │   │   │   ├── control_points_S51_1_2/
+│   │   │   │   ├── control_points_S52_1_2/
+│   │   │   │   ├── control_points_S53_1_2/
+│   │   │   │   ├── control_points_S54_1_2/
+│   │   │   │   ├── control_points_S55_1_2/
+│   │   │   │   ├── control_points_S56_1_2/
+│   │   │   │   ├── control_points_S57_1_2/
+│   │   │   │   ├── control_points_S58_1_2/
+│   │   │   │   ├── control_points_S59_1_2/
+│   │   │   │   ├── control_points_S60_1_2/
+│   │   │   │   ├── control_points_S61_1_2/
+│   │   │   │   ├── control_points_S62_1_2/
+│   │   │   │   ├── control_points_S63_1_2/
+│   │   │   │   ├── control_points_S64_1_2/
+│   │   │   │   ├── control_points_S65_1_2/
+│   │   │   │   ├── control_points_S66_1_2/
+│   │   │   │   ├── control_points_S67_1_2/
+│   │   │   │   ├── control_points_S68_1_2/
+│   │   │   │   ├── control_points_S69_1_2/
+│   │   │   │   ├── control_points_S70_1_2/
+│   │   │   │   └── control_points_S71_1_2/
+│   │   │   ├── FIRE_point_errors.txt
+│   │   │   ├── fire_test.log
+│   │   │   └── test.yaml
+│   │   ├── value_maps/
+│   │   ├── model_149.pth
 │   │   ├── pipeline.log
 │   │   ├── train.log
 │   │   └── train.yaml
@@ -15924,6 +16382,7 @@ sr/
 │   ├── audit_selected_matching_chain.py
 │   ├── audit_value_maps.py
 │   ├── compare_fimd_matching_chain.py
+│   ├── smoke_g10_g11.py
 │   ├── smoke_g4_multiview_feedback.py
 │   ├── smoke_g5_g6.py
 │   └── summarize_pke_diagnostics.py
