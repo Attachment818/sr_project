@@ -1,0 +1,14 @@
+{
+  "audit_type": "checkpoint_scalar_parameters",
+  "checkpoint_path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_residual_multiscale_g7_v1/model_149.pth",
+  "checkpoint_epoch": 149,
+  "records": [
+    {
+      "parameter_name": "descriptor_multiscale_gate_logit",
+      "transform": "sigmoid",
+      "raw_value": -2.114819288253784,
+      "transformed_value": 0.10766478669841524
+    }
+  ],
+  "safety": "The checkpoint is loaded read-only on CPU and is not modified."
+}
