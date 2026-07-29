@@ -4,6 +4,10 @@ import random
 import shutil
 import time
 import warnings
+try:
+    import resource
+except ImportError:
+    resource = None
 import torch
 from torchvision import transforms as T
 from torch.nn import functional as F
@@ -243,6 +247,53 @@ def conflict_projected_backward(model, detector_loss, descriptor_loss):
     }
 
 
+def training_resource_summary(device):
+    """Return lightweight process, host-memory and CUDA diagnostics."""
+    summary = {}
+    if resource is not None:
+        max_rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        summary['process_max_rss_gib'] = float(max_rss) / (1024 ** 2)
+    try:
+        memory = {}
+        with open('/proc/meminfo', 'r', encoding='utf-8') as handle:
+            for line in handle:
+                key, value = line.split(':', 1)
+                memory[key] = float(value.strip().split()[0])
+        summary['host_available_gib'] = (
+            memory['MemAvailable'] / (1024 ** 2)
+        )
+    except (OSError, KeyError, ValueError):
+        pass
+    if torch.cuda.is_available() and device.type == 'cuda':
+        summary.update({
+            'cuda_allocated_gib':
+                torch.cuda.memory_allocated(device) / (1024 ** 3),
+            'cuda_reserved_gib':
+                torch.cuda.memory_reserved(device) / (1024 ** 3),
+            'cuda_peak_allocated_gib':
+                torch.cuda.max_memory_allocated(device) / (1024 ** 3),
+        })
+    return summary
+
+
+def snapshot_value_map_directory(source_dir, snapshot_root, epoch):
+    """Atomically copy the current value maps for a recovery checkpoint."""
+    if not os.path.isdir(source_dir):
+        raise FileNotFoundError(
+            f'value_map_save_dir does not exist: {source_dir}'
+        )
+    os.makedirs(snapshot_root, exist_ok=True)
+    snapshot_path = os.path.join(snapshot_root, f'epoch_{epoch}')
+    temporary_path = snapshot_path + '.incomplete'
+    if os.path.exists(snapshot_path) or os.path.exists(temporary_path):
+        raise FileExistsError(
+            f'Refusing to overwrite value-map snapshot: {snapshot_path}'
+        )
+    shutil.copytree(source_dir, temporary_path)
+    os.replace(temporary_path, snapshot_path)
+    return snapshot_path
+
+
 def train_model(model, optimizer, dataloaders, device, num_epochs, train_config, start_epoch=0):
     model_save_path = train_config['model_save_path']
     model_save_epoch = train_config['model_save_epoch']
@@ -252,6 +303,19 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
     is_value_map_save = train_config['is_value_map_save']
     value_map_save_dir = train_config['value_map_save_dir']
     resume_value_map = train_config.get('resume_value_map', False)
+    snapshot_value_maps = bool(
+        train_config.get('snapshot_value_maps_on_checkpoint', False)
+    )
+    value_map_snapshot_dir = train_config.get(
+        'value_map_snapshot_dir',
+        os.path.join(
+            os.path.dirname(model_save_path), 'value_map_snapshots'
+        ),
+    )
+    if snapshot_value_maps and not is_value_map_save:
+        raise ValueError(
+            'snapshot_value_maps_on_checkpoint requires is_value_map_save=True'
+        )
     shared_gradient_mode = train_config.get(
         'shared_gradient_mode', 'standard'
     )
@@ -316,6 +380,12 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
         occupied = [path for path in checkpoint_paths if os.path.exists(path)]
         if os.path.isdir(value_map_save_dir) and os.listdir(value_map_save_dir):
             occupied.append(value_map_save_dir)
+        if (
+            snapshot_value_maps
+            and os.path.isdir(value_map_snapshot_dir)
+            and os.listdir(value_map_snapshot_dir)
+        ):
+            occupied.append(value_map_snapshot_dir)
         if occupied:
             raise FileExistsError(
                 'Refusing to overwrite existing experiment output(s): '
@@ -354,6 +424,8 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
 
     for epoch in range(start_epoch, num_epochs):
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
+        if torch.cuda.is_available() and device.type == 'cuda':
+            torch.cuda.reset_peak_memory_stats(device)
         model.current_epoch = epoch
         if hasattr(model, 'reset_descriptor_gate_epoch_stats'):
             model.reset_descriptor_gate_epoch_stats()
@@ -395,6 +467,16 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
                     print(f'save model for epoch {epoch} -> {save_path}')
                     state = {'net': model.state_dict(), 'optimizer': optimizer.state_dict(), 'epoch': epoch}
                     torch.save(state, save_path)
+                    if snapshot_value_maps:
+                        snapshot_path = snapshot_value_map_directory(
+                            value_map_save_dir,
+                            value_map_snapshot_dir,
+                            epoch,
+                        )
+                        print(
+                            'saved value-map snapshot for epoch '
+                            f'{epoch} -> {snapshot_path}'
+                        )
                 continue
             print('-' * 10 + 'phase:' + phase + '\t PKE_learn:' + str(model.PKE_learn) + '-' * 10)
             if 'train' in phase:
@@ -612,6 +694,18 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
                     + ', '.join(
                         f'{key}={value:.6f}'
                         for key, value in detector_stats.items()
+                    )
+                )
+            if (
+                phase == 'train'
+                and train_config.get('log_training_resources', False)
+            ):
+                resource_stats = training_resource_summary(device)
+                print(
+                    'training resources: '
+                    + ', '.join(
+                        f'{key}={value:.6f}'
+                        for key, value in resource_stats.items()
                     )
                 )
 

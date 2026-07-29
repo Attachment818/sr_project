@@ -1,0 +1,6 @@
+AUDIT:
+  method: G10_v2
+  seed: 3407
+  source_log: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_balanced_dense_descriptor_g10_v2/train.log
+  output_dir: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_balanced_dense_descriptor_g10_v2/diagnostics/partial_training_d22
+  read_only: true

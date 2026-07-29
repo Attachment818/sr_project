@@ -19,6 +19,7 @@ from model.super_retina import (
     SuperRetinaWithSpatialGatedMultiScaleDescriptor,
     SuperRetinaWithAgreementGatedMultiScaleDescriptor,
     SuperRetinaWithMultiScaleDetectorResidual,
+    SuperRetinaWithZeroStartResidualMultiScaleDescriptor,
 )
 import torch.optim as optim
 import yaml
@@ -153,6 +154,10 @@ if __name__ == '__main__':
         model = SuperRetinaWithMultiScaleDetectorResidual(
             train_config, device=device
         )
+    elif model_variant == 'vessel_masked_zero_start_residual_multiscale':
+        model = SuperRetinaWithZeroStartResidualMultiScaleDescriptor(
+            train_config, device=device
+        )
     else:
         raise ValueError(f"Unknown model_variant: {model_variant}")
 
@@ -254,6 +259,12 @@ if __name__ == '__main__':
           f"{train_config.get('detector_multiscale_hidden_channels', 32)}")
     print(f"  - log_detector_residual_stats: "
           f"{train_config.get('log_detector_residual_stats', False)}")
+    print(f"  - snapshot_value_maps_on_checkpoint: "
+          f"{train_config.get('snapshot_value_maps_on_checkpoint', False)}")
+    print(f"  - value_map_snapshot_dir: "
+          f"{train_config.get('value_map_snapshot_dir')}")
+    print(f"  - log_training_resources: "
+          f"{train_config.get('log_training_resources', False)}")
     print(f"  - descriptor_gate_stats_max_calls: "
           f"{train_config.get('descriptor_gate_stats_max_calls', 64)}")
     print(f"  - log_descriptor_supervision_stats: "

@@ -2,6 +2,7 @@
 
 import argparse
 import sys
+import tempfile
 from pathlib import Path
 
 import torch
@@ -12,11 +13,16 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from common.train_util import conflict_projected_backward
+from common.train_util import (
+    conflict_projected_backward,
+    snapshot_value_map_directory,
+    training_resource_summary,
+)
 from model.super_retina import (
     SuperRetinaWithResidualMultiScaleDescriptor,
     SuperRetinaWithVesselOnlyMasked,
     SuperRetinaWithMultiScaleDetectorResidual,
+    SuperRetinaWithZeroStartResidualMultiScaleDescriptor,
 )
 
 
@@ -152,6 +158,59 @@ def check_g13_detector_residual():
     ).all()
 
 
+def check_g15_zero_start_descriptor():
+    config = minimal_config(
+        dense_descriptor_weight=0.0,
+        descriptor_multiscale_gate_init=0.1,
+        log_descriptor_gate_stats=True,
+    )
+    base = SuperRetinaWithVesselOnlyMasked(config, device='cpu')
+    g15 = SuperRetinaWithZeroStartResidualMultiScaleDescriptor(
+        config, device='cpu'
+    )
+    g15.load_state_dict(base.state_dict(), strict=False)
+    base.eval()
+    g15.eval()
+    probe = torch.rand(1, 1, 64, 64)
+    base_detector, base_descriptor = base.network(probe)
+    g15_detector, g15_descriptor = g15.network(probe)
+    assert torch.equal(base_detector, g15_detector)
+    assert torch.equal(base_descriptor, g15_descriptor), (
+        'zero-start G15 descriptor must exactly equal G0'
+    )
+    projection = g15.descriptor_residual_fusion[-1]
+    assert torch.count_nonzero(projection.weight) == 0
+    g15.train()
+    _, descriptor = g15.network(probe)
+    descriptor.square().mean().backward()
+    assert projection.weight.grad is not None
+    assert torch.isfinite(projection.weight.grad).all()
+    assert float(projection.weight.grad.abs().sum()) > 0
+
+
+def check_recovery_infrastructure():
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        source = root / 'value_maps'
+        snapshots = root / 'snapshots'
+        source.mkdir()
+        (source / 'sample.png').write_bytes(b'value-map')
+        observed = Path(snapshot_value_map_directory(
+            str(source), str(snapshots), 29
+        ))
+        assert (observed / 'sample.png').read_bytes() == b'value-map'
+        try:
+            snapshot_value_map_directory(
+                str(source), str(snapshots), 29
+            )
+        except FileExistsError:
+            pass
+        else:
+            raise AssertionError('snapshot overwrite was not refused')
+    resources = training_resource_summary(torch.device('cpu'))
+    assert isinstance(resources, dict)
+
+
 def check_cuda(config_path):
     source = yaml.safe_load(Path(config_path).read_text(encoding='utf-8'))
     config = {
@@ -169,6 +228,8 @@ def check_cuda(config_path):
             SuperRetinaWithVesselOnlyMasked,
         'vessel_masked_detector_residual_multiscale':
             SuperRetinaWithMultiScaleDetectorResidual,
+        'vessel_masked_zero_start_residual_multiscale':
+            SuperRetinaWithZeroStartResidualMultiScaleDescriptor,
     }
     if model_variant not in model_classes:
         raise ValueError(
@@ -227,7 +288,9 @@ def main():
     check_dense_descriptor()
     check_pcgrad()
     check_g13_detector_residual()
-    print('G10/G11/G13 CPU smoke tests passed')
+    check_g15_zero_start_descriptor()
+    check_recovery_infrastructure()
+    print('G10/G11/G13/G15 CPU smoke tests passed')
     if args.cuda_config is not None:
         check_cuda(args.cuda_config)
 

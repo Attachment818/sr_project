@@ -9,7 +9,7 @@ from scipy.ndimage import map_coordinates
 from common.common_util import pre_processing, simple_nms, remove_borders, \
     sample_keypoint_desc, remove_keypoints_by_mask
 from common.inference_diagnostics import summarize_keypoints
-from model.super_retina import SuperRetina, SuperRetinaFPN, SuperRetinaWithSelfAttention, SuperRetinaWithMultiScaleDescriptor, SuperRetinaWithASPP, SuperRetinaWithoutPKE, SuperRetinaWithoutPKEWithAttention,SuperRetinaWithPerceptualLoss,SuperRetinaWithVesselRegularization,SuperRetinaWithVesselOnly,SuperRetinaWithVesselOnlyMasked,SuperRetinaWithDecoupledMultiScaleDescriptor,SuperRetinaWithResidualMultiScaleDescriptor,SuperRetinaWithSpatialGatedMultiScaleDescriptor,SuperRetinaWithAgreementGatedMultiScaleDescriptor,SuperRetinaWithMultiScaleDetectorResidual
+from model.super_retina import SuperRetina, SuperRetinaFPN, SuperRetinaWithSelfAttention, SuperRetinaWithMultiScaleDescriptor, SuperRetinaWithASPP, SuperRetinaWithoutPKE, SuperRetinaWithoutPKEWithAttention,SuperRetinaWithPerceptualLoss,SuperRetinaWithVesselRegularization,SuperRetinaWithVesselOnly,SuperRetinaWithVesselOnlyMasked,SuperRetinaWithDecoupledMultiScaleDescriptor,SuperRetinaWithResidualMultiScaleDescriptor,SuperRetinaWithSpatialGatedMultiScaleDescriptor,SuperRetinaWithAgreementGatedMultiScaleDescriptor,SuperRetinaWithMultiScaleDetectorResidual,SuperRetinaWithZeroStartResidualMultiScaleDescriptor
 from model.super_retina_attention import SuperRetinaWithAttention
 
 from PIL import Image
@@ -229,6 +229,15 @@ class Predictor:
             print(
                 '✅ Loaded G8 spatial-gated multi-scale descriptor model'
             )
+        elif model_type == 'vessel_masked_zero_start_residual_multiscale':
+            model = SuperRetinaWithZeroStartResidualMultiScaleDescriptor(
+                config=None,
+                device=device,
+            )
+            model.load_pretrained_weights(
+                model_save_path, device=device, strict=False
+            )
+            print('Loaded G15 zero-start residual multi-scale model')
         elif model_type == 'vessel_masked_detector_residual_multiscale':
             model = SuperRetinaWithMultiScaleDetectorResidual(
                 config=None,

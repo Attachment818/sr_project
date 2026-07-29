@@ -3087,6 +3087,35 @@ class SuperRetinaWithResidualMultiScaleDescriptor(SuperRetinaWithVesselOnlyMaske
         return semi, desc
 
 
+class SuperRetinaWithZeroStartResidualMultiScaleDescriptor(
+    SuperRetinaWithResidualMultiScaleDescriptor
+):
+    """G15: G7 multi-scale detail with an exactly zero initial residual."""
+
+    def __init__(self, config=None, device='cpu', n_class=1):
+        super().__init__(config=config, device=device, n_class=n_class)
+        c2, c3, descriptor_channels = 64, 128, 256
+        self.descriptor_residual_fusion = nn.Sequential(
+            nn.Conv2d(
+                c2 + c3, descriptor_channels,
+                kernel_size=3, padding=1,
+            ),
+            nn.ReLU(inplace=True),
+            # No activation follows this projection: at zero initialization
+            # its weights receive gradients on the first optimizer step.
+            nn.Conv2d(
+                descriptor_channels, descriptor_channels, kernel_size=1
+            ),
+        )
+        nn.init.zeros_(self.descriptor_residual_fusion[-1].weight)
+        nn.init.zeros_(self.descriptor_residual_fusion[-1].bias)
+        self.to(device)
+        print(
+            'SuperRetinaWithZeroStartResidualMultiScaleDescriptor '
+            'initialized: descriptor residual projection starts at zero'
+        )
+
+
 class SuperRetinaWithMultiScaleDetectorResidual(
     SuperRetinaWithVesselOnlyMasked
 ):
