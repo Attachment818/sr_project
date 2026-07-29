@@ -2,6 +2,7 @@
 # tools/summarize_partial_training.py
 # res/seed3407_zero_start_multiscale_g15_v1/
 # res/seed3407_balanced_dense_descriptor_g10_v2/diagnostics/partial_training_d22/
+# res/seed3407_balanced_dense_descriptor_g10_v2/diagnostics/partial_training_d22_fix/
 sr/
 ├── common/
 │   ├── common_util.py

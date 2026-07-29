@@ -27,14 +27,15 @@ def main():
     if not args.log.is_file():
         raise FileNotFoundError(args.log)
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    existing = [
-        path for path in args.output_dir.iterdir()
-        if path.name != 'audit.yaml'
+    output_paths = [
+        args.output_dir / 'partial_training_epochs.csv',
+        args.output_dir / 'partial_training_summary.json',
     ]
-    if existing:
+    conflicts = [path for path in output_paths if path.exists()]
+    if conflicts:
         raise FileExistsError(
-            f'Refusing to overwrite non-empty output directory: '
-            f'{args.output_dir}'
+            'Refusing to overwrite existing summary output(s): '
+            + ', '.join(str(path) for path in conflicts)
         )
 
     text = args.log.read_text(encoding='utf-8', errors='replace')
