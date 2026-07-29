@@ -1,8 +1,3 @@
-# 2026-07-29 additions:
-# tools/summarize_partial_training.py
-# res/seed3407_zero_start_multiscale_g15_v1/
-# res/seed3407_balanced_dense_descriptor_g10_v2/diagnostics/partial_training_d22/
-# res/seed3407_balanced_dense_descriptor_g10_v2/diagnostics/partial_training_d22_fix/
 sr/
 ├── common/
 │   ├── common_util.py
@@ -5355,6 +5350,15 @@ sr/
 │   │   ├── train.log
 │   │   └── train.yaml
 │   ├── seed3407_balanced_dense_descriptor_g10_v2/
+│   │   ├── diagnostics/
+│   │   │   ├── partial_training_d22/
+│   │   │   │   ├── audit.yaml
+│   │   │   │   ├── partial_training_epochs.csv
+│   │   │   │   └── partial_training_summary.json
+│   │   │   └── partial_training_d22_fix/
+│   │   │       ├── audit.yaml
+│   │   │       ├── partial_training_epochs.csv
+│   │   │       └── partial_training_summary.json
 │   │   ├── FIMD_149/
 │   │   │   └── test.yaml
 │   │   ├── FIRE_149/
@@ -13853,6 +13857,15 @@ sr/
 │   │       ├── FIRE_99/
 │   │       ├── seed3407_vessel_two_stage_ep149.pth
 │   │       └── train.log
+│   ├── seed3407_zero_start_multiscale_g15_v1/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
+│   │   ├── value_maps/
+│   │   ├── pipeline.log
+│   │   ├── train.log
+│   │   └── train.yaml
 │   ├── seed3408_inference_diagnostics/
 │   │   ├── FIRE_summary/
 │   │   │   ├── pair_diagnostics_comparison.csv
@@ -17059,6 +17072,7 @@ sr/
 │   ├── smoke_g10_g11.py
 │   ├── smoke_g4_multiview_feedback.py
 │   ├── smoke_g5_g6.py
+│   ├── summarize_partial_training.py
 │   └── summarize_pke_diagnostics.py
 ├── predictor.py
 ├── requirements.txt

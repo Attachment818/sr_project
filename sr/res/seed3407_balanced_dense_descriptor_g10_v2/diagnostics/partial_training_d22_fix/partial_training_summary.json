@@ -1,0 +1,63 @@
+{
+  "source_log": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_balanced_dense_descriptor_g10_v2/train.log",
+  "epoch_records": 69,
+  "first_epoch": 0,
+  "last_epoch": 68,
+  "dense_records": 68,
+  "dense_sampled_points_per_call": {
+    "first": 487.171875,
+    "last": 490.609375,
+    "minimum": 486.5,
+    "maximum": 493.984375,
+    "mean": 489.7431066176471
+  },
+  "dense_valid_pairs_per_call": {
+    "first": 487.171875,
+    "last": 490.609375,
+    "minimum": 486.5,
+    "maximum": 493.984375,
+    "mean": 489.7431066176471
+  },
+  "dense_occupied_cells_per_call": {
+    "first": 250.796875,
+    "last": 251.53125,
+    "minimum": 250.125,
+    "maximum": 252.578125,
+    "mean": 251.27205882352942
+  },
+  "dense_positive_distance": {
+    "first": 0.911829,
+    "last": 0.486992,
+    "minimum": 0.486992,
+    "maximum": 0.911829,
+    "mean": 0.5923952499999999
+  },
+  "dense_negative_distance": {
+    "first": 0.086783,
+    "last": 1.08402,
+    "minimum": 0.086783,
+    "maximum": 1.085282,
+    "mean": 0.9961479852941179
+  },
+  "dense_loss": {
+    "first": 1.023916,
+    "last": 0.00561,
+    "minimum": 0.004959,
+    "maximum": 1.023916,
+    "mean": 0.06455217647058822
+  },
+  "descriptor_loss": {
+    "first": 2.1690828800201416,
+    "last": 0.18354485929012299,
+    "minimum": 0.17707675695419312,
+    "maximum": 2.1690828800201416,
+    "mean": 0.4472725994008429
+  },
+  "avg_learned_keypoints": {
+    "first": 0.09375,
+    "last": 71.1328125,
+    "minimum": 0.0,
+    "maximum": 71.19921875,
+    "mean": 31.77504595588235
+  }
+}
