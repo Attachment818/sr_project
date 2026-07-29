@@ -1,0 +1,19 @@
+# D24: read-only G15 gate and zero-start projection evolution.
+AUDIT:
+  output_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/diagnostics/checkpoint_tensor_series_d24/checkpoint_tensor_series.json
+  checkpoints:
+    - label: epoch29
+      path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/model_29.pth
+    - label: epoch59
+      path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/model_59.pth
+    - label: epoch89
+      path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/model_89.pth
+    - label: epoch119
+      path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/model_119.pth
+    - label: epoch149
+      path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/model_149.pth
+  parameters:
+    - name: descriptor_multiscale_gate_logit
+      transform: sigmoid
+    - name: descriptor_residual_fusion.2.weight
+    - name: descriptor_residual_fusion.2.bias

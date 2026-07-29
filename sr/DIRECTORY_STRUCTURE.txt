@@ -13867,7 +13867,19 @@ sr/
 │   │       ├── seed3407_vessel_two_stage_ep149.pth
 │   │       └── train.log
 │   ├── seed3407_zero_start_multiscale_g15_v1/
+│   │   ├── diagnostics/
+│   │   │   ├── checkpoint_tensor_series_d24/
+│   │   │   │   ├── audit.yaml
+│   │   │   │   ├── checkpoint_tensor_series.json
+│   │   │   │   └── d24.log
+│   │   │   └── d24_d25_pipeline.log
 │   │   ├── FIMD_149/
+│   │   │   ├── diagnostics/
+│   │   │   │   └── selected_chain_g0_g7_g15_d25/
+│   │   │   │       ├── audit.yaml
+│   │   │   │       ├── d25.log
+│   │   │   │       ├── selected_matching_chain.csv
+│   │   │   │       └── selected_matching_chain.json
 │   │   │   ├── aligned_images/
 │   │   │   ├── match_images/
 │   │   │   ├── paper_figures/
@@ -17281,6 +17293,7 @@ sr/
 ├── tools/
 │   ├── analyze_fimd_pair_diagnostics.py
 │   ├── audit_checkpoint_scalars.py
+│   ├── audit_checkpoint_tensor_series.py
 │   ├── audit_descriptor_supervision.py
 │   ├── audit_detector_descriptor_gradients.py
 │   ├── audit_fimd_descriptor_margin.py
