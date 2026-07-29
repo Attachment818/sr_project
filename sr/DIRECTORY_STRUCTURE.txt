@@ -14114,6 +14114,12 @@ sr/
 │   │   ├── pipeline.log
 │   │   ├── train.log
 │   │   └── train.yaml
+│   ├── seed3408_zero_start_multiscale_g15_v1/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
+│   │   └── train.yaml
 │   ├── seed3408_inference_diagnostics/
 │   │   ├── FIRE_summary/
 │   │   │   ├── pair_diagnostics_comparison.csv
@@ -16570,6 +16576,12 @@ sr/
 │   │   ├── model_149.pth
 │   │   ├── pipeline.log
 │   │   ├── train.log
+│   │   └── train.yaml
+│   ├── seed3409_zero_start_multiscale_g15_v1/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
 │   │   └── train.yaml
 │   ├── seed3409_vessel_schedule_controls/
 │   │   └── seed3409_three_stage_masked_03_50_005_0_50/
