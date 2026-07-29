@@ -1,5 +1,5 @@
 PREDICT:
-  device: cuda:0
+  device: cuda:2
   model_save_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_balanced_dense_descriptor_g10_v2/model_149.pth
   model_type: vessel_masked_residual_multiscale
   model_image_width: 768

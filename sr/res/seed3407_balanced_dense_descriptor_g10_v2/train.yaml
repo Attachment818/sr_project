@@ -8,7 +8,7 @@ MODEL:
   seed: 3407
   deterministic: true
   num_workers: 8
-  device: cuda:0
+  device: cuda:2
   load_pre_trained_model: false
   pretrained_path: null
   resume_optimizer: false
