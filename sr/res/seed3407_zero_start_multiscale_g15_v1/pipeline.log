@@ -1,0 +1,111 @@
+nohup: ignoring input
+✅ SuperRetinaWithVesselOnly 初始化完成，vessel_weight=0.3（纯 vessel regularization）
+✅ SuperRetinaWithVesselOnlyMasked 初始化完成，vessel_weight=0.3，mask_backend=morph，threshold=0.25，stage1_epochs=50，stage2_vessel_weight=0.05，schedule=constant，pke_geometry=constant
+✅ SuperRetinaWithVesselOnly 初始化完成，vessel_weight=0.3（纯 vessel regularization）
+✅ SuperRetinaWithVesselOnlyMasked 初始化完成，vessel_weight=0.3，mask_backend=morph，threshold=0.25，stage1_epochs=50，stage2_vessel_weight=0.05，schedule=constant，pke_geometry=constant
+✅ SuperRetinaWithResidualMultiScaleDescriptor 初始化完成，G0描述子主路径保留，多尺度残差=conv2/3，初始门控=0.1000
+✅ SuperRetinaWithVesselOnly 初始化完成，vessel_weight=0.3（纯 vessel regularization）
+✅ SuperRetinaWithVesselOnlyMasked 初始化完成，vessel_weight=0.3，mask_backend=morph，threshold=0.25，stage1_epochs=50，stage2_vessel_weight=0.05，schedule=constant，pke_geometry=constant
+✅ SuperRetinaWithVesselOnly 初始化完成，vessel_weight=0.3（纯 vessel regularization）
+✅ SuperRetinaWithVesselOnlyMasked 初始化完成，vessel_weight=0.3，mask_backend=morph，threshold=0.25，stage1_epochs=50，stage2_vessel_weight=0.05，schedule=constant，pke_geometry=constant
+SuperRetinaWithMultiScaleDetectorResidual initialized: gate_init=0.0500, gate_max=0.1500, hidden_channels=8
+✅ SuperRetinaWithVesselOnly 初始化完成，vessel_weight=0.3（纯 vessel regularization）
+✅ SuperRetinaWithVesselOnlyMasked 初始化完成，vessel_weight=0.3，mask_backend=morph，threshold=0.25，stage1_epochs=50，stage2_vessel_weight=0.05，schedule=constant，pke_geometry=constant
+✅ SuperRetinaWithVesselOnly 初始化完成，vessel_weight=0.3（纯 vessel regularization）
+✅ SuperRetinaWithVesselOnlyMasked 初始化完成，vessel_weight=0.3，mask_backend=morph，threshold=0.25，stage1_epochs=50，stage2_vessel_weight=0.05，schedule=constant，pke_geometry=constant
+✅ SuperRetinaWithResidualMultiScaleDescriptor 初始化完成，G0描述子主路径保留，多尺度残差=conv2/3，初始门控=0.1000
+SuperRetinaWithZeroStartResidualMultiScaleDescriptor initialized: descriptor residual projection starts at zero
+G10/G11/G13/G15 CPU smoke tests passed
+✅ SuperRetinaWithVesselOnly 初始化完成，vessel_weight=0.3（纯 vessel regularization）
+✅ SuperRetinaWithVesselOnlyMasked 初始化完成，vessel_weight=0.3，mask_backend=morph，threshold=0.25，stage1_epochs=50，stage2_vessel_weight=0.05，schedule=constant，pke_geometry=constant
+✅ SuperRetinaWithResidualMultiScaleDescriptor 初始化完成，G0描述子主路径保留，多尺度残差=conv2/3，初始门控=0.1000
+SuperRetinaWithZeroStartResidualMultiScaleDescriptor initialized: descriptor residual projection starts at zero
+CUDA preflight passed: variant=vessel_masked_zero_start_residual_multiscale, device=cuda:0, batch=4, image=768x768, peak_allocated=9.19 GiB
+[W729 16:20:28.118090728 Context.cpp:258] Warning: torch.backends.cuda.preferred_linalg_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+----------Load Lab train data, and there is no auxiliary data----------
+----------Load Lab eval data, and there is no auxiliary data----------
+✅ SuperRetinaWithVesselOnly 初始化完成，vessel_weight=0.3（纯 vessel regularization）
+✅ SuperRetinaWithVesselOnlyMasked 初始化完成，vessel_weight=0.3，mask_backend=morph，threshold=0.25，stage1_epochs=50，stage2_vessel_weight=0.05，schedule=constant，pke_geometry=constant
+✅ SuperRetinaWithResidualMultiScaleDescriptor 初始化完成，G0描述子主路径保留，多尺度残差=conv2/3，初始门控=0.1000
+SuperRetinaWithZeroStartResidualMultiScaleDescriptor initialized: descriptor residual projection starts at zero
+🔍 GPU 检查报告:
+  - torch.cuda.is_available(): True
+  - 当前 device: cuda:0
+  - 模型是否在 GPU 上: cuda:0
+  - batch_size: 4, num_workers: 查看 DataLoader
+  - seed: 3407, deterministic: True, num_workers: 8
+  - model_variant: vessel_masked_zero_start_residual_multiscale
+  - start_epoch: 0
+  - resume_optimizer: False
+  - is_value_map_save: True
+  - resume_value_map: False
+  - pke_content_mode: one_way
+  - pke_content_weak_feedback: False
+  - pke_content_strong_feedback_multiplier: 1
+  - pke_content_weak_feedback_multiplier: 1
+  - pke_descriptor_feedback_weight: 0.0
+  - pke_descriptor_margin: 0.2
+  - pke_descriptor_negative_distance: 16.0
+  - pke_multiview_noncore_feedback_enabled: False
+  - pke_multiview_noncore_start_epoch: 1000000000
+  - pke_multiview_noncore_bonus: 0
+  - pke_multiview_noncore_grid_size: 8
+  - pke_multiview_noncore_low_density_max: 4
+  - pke_multiview_noncore_max_per_image: 8
+  - descriptor_hard_negative_min_distance: 0.0
+  - descriptor_hard_negative_mode: legacy
+  - descriptor_hard_negative_chunk_size: 256
+  - descriptor_multiscale_gate_init: 0.1
+  - descriptor_gate_max: 0.2
+  - descriptor_spatial_gate_hidden_channels: 32
+  - descriptor_agreement_center_init: 0.0
+  - descriptor_agreement_scale_init: 2.0
+  - log_descriptor_gate_stats: True
+  - shared_gradient_mode: standard
+  - dense_descriptor_weight: 0.0
+  - dense_descriptor_ramp_epochs: 10
+  - dense_descriptor_grid_size: 8
+  - dense_descriptor_structure_per_cell: 1
+  - dense_descriptor_uniform_per_cell: 1
+  - detector_multiscale_gate_init: 0.05
+  - detector_multiscale_gate_max: 0.15
+  - detector_multiscale_hidden_channels: 32
+  - log_detector_residual_stats: False
+  - snapshot_value_maps_on_checkpoint: True
+  - value_map_snapshot_dir: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/value_map_snapshots
+  - log_training_resources: True
+  - descriptor_gate_stats_max_calls: 64
+  - log_descriptor_supervision_stats: True
+  - checkpoint_save_epochs: [29, 59, 89, 119, 149]
+  - checkpoint_path_template: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/model_{epoch}.pth
+  - refuse_existing_experiment_outputs: True
+Traceback (most recent call last):
+  File "train.py", line 279, in <module>
+    model = train_model(
+  File "/home/data1/zhangjunhong/sr_project/sr/common/train_util.py", line 390, in train_model
+    raise FileExistsError(
+FileExistsError: Refusing to overwrite existing experiment output(s): /home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/model_149.pth, /home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/model_119.pth, /home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/model_89.pth, /home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/model_59.pth, /home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/model_29.pth, /home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/value_maps, /home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/value_map_snapshots
+Command exited with non-zero status 1
+	Command being timed: "python train.py --config /home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/train.yaml"
+	User time (seconds): 14.19
+	System time (seconds): 2.97
+	Percent of CPU this job got: 352%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:04.86
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 744884
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 167334
+	Voluntary context switches: 322
+	Involuntary context switches: 112033
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 1
