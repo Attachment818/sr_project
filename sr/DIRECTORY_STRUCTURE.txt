@@ -5372,7 +5372,10 @@ sr/
 │   │   │   └── test.yaml
 │   │   ├── FIRE_149/
 │   │   │   └── test.yaml
+│   │   ├── value_map_snapshots/
+│   │   │   └── epoch_29/
 │   │   ├── value_maps/
+│   │   ├── model_29.pth
 │   │   ├── pipeline.log
 │   │   ├── train.log
 │   │   └── train.yaml
@@ -13874,13 +13877,13 @@ sr/
 │   │   │   │   └── d24.log
 │   │   │   └── d24_d25_pipeline.log
 │   │   ├── FIMD_149/
+│   │   │   ├── aligned_images/
 │   │   │   ├── diagnostics/
 │   │   │   │   └── selected_chain_g0_g7_g15_d25/
 │   │   │   │       ├── audit.yaml
 │   │   │   │       ├── d25.log
 │   │   │   │       ├── selected_matching_chain.csv
 │   │   │   │       └── selected_matching_chain.json
-│   │   │   ├── aligned_images/
 │   │   │   ├── match_images/
 │   │   │   ├── paper_figures/
 │   │   │   │   ├── control_points_01_r_t/

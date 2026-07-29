@@ -1,0 +1,245 @@
+{
+  "audit_type": "checkpoint_tensor_series",
+  "checkpoints": [
+    {
+      "label": "epoch29",
+      "path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/model_29.pth",
+      "saved_epoch": 29,
+      "records": [
+        {
+          "parameter_name": "descriptor_multiscale_gate_logit",
+          "shape": [],
+          "numel": 1,
+          "l1_mean": 2.1948957443237305,
+          "l2_norm": 2.1948957443237305,
+          "max_abs": 2.1948957443237305,
+          "nonzero_fraction": 1.0,
+          "raw_value": -2.1948957443237305,
+          "transformed_value": 0.10020979030294146
+        },
+        {
+          "parameter_name": "descriptor_residual_fusion.2.weight",
+          "shape": [
+            256,
+            256,
+            1,
+            1
+          ],
+          "numel": 65536,
+          "l1_mean": 0.0036081415601074696,
+          "l2_norm": 1.205830693244934,
+          "max_abs": 0.056160248816013336,
+          "nonzero_fraction": 1.0
+        },
+        {
+          "parameter_name": "descriptor_residual_fusion.2.bias",
+          "shape": [
+            256
+          ],
+          "numel": 256,
+          "l1_mean": 0.004469793289899826,
+          "l2_norm": 0.08253834396600723,
+          "max_abs": 0.01721113547682762,
+          "nonzero_fraction": 1.0
+        }
+      ]
+    },
+    {
+      "label": "epoch59",
+      "path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/model_59.pth",
+      "saved_epoch": 59,
+      "records": [
+        {
+          "parameter_name": "descriptor_multiscale_gate_logit",
+          "shape": [],
+          "numel": 1,
+          "l1_mean": 2.193437337875366,
+          "l2_norm": 2.193437337875366,
+          "max_abs": 2.193437337875366,
+          "nonzero_fraction": 1.0,
+          "raw_value": -2.193437337875366,
+          "transformed_value": 0.10034136828082078,
+          "delta_l2_from_previous": 0.0014584064483642578,
+          "relative_delta_l2_from_previous": 0.0006644536316296005
+        },
+        {
+          "parameter_name": "descriptor_residual_fusion.2.weight",
+          "shape": [
+            256,
+            256,
+            1,
+            1
+          ],
+          "numel": 65536,
+          "l1_mean": 0.004915738943964243,
+          "l2_norm": 1.6694890260696411,
+          "max_abs": 0.0749724805355072,
+          "nonzero_fraction": 1.0,
+          "delta_l2_from_previous": 0.9711145758628845,
+          "relative_delta_l2_from_previous": 0.8053490272747826
+        },
+        {
+          "parameter_name": "descriptor_residual_fusion.2.bias",
+          "shape": [
+            256
+          ],
+          "numel": 256,
+          "l1_mean": 0.005637359339743853,
+          "l2_norm": 0.10378210246562958,
+          "max_abs": 0.023651063442230225,
+          "nonzero_fraction": 1.0,
+          "delta_l2_from_previous": 0.030926262959837914,
+          "relative_delta_l2_from_previous": 0.374689646942452
+        }
+      ]
+    },
+    {
+      "label": "epoch89",
+      "path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/model_89.pth",
+      "saved_epoch": 89,
+      "records": [
+        {
+          "parameter_name": "descriptor_multiscale_gate_logit",
+          "shape": [],
+          "numel": 1,
+          "l1_mean": 2.187948703765869,
+          "l2_norm": 2.187948703765869,
+          "max_abs": 2.187948703765869,
+          "nonzero_fraction": 1.0,
+          "raw_value": -2.187948703765869,
+          "transformed_value": 0.1008379316323956,
+          "delta_l2_from_previous": 0.00548863410949707,
+          "relative_delta_l2_from_previous": 0.00250229811206439
+        },
+        {
+          "parameter_name": "descriptor_residual_fusion.2.weight",
+          "shape": [
+            256,
+            256,
+            1,
+            1
+          ],
+          "numel": 65536,
+          "l1_mean": 0.006084369029849768,
+          "l2_norm": 2.07199764251709,
+          "max_abs": 0.08162906020879745,
+          "nonzero_fraction": 1.0,
+          "delta_l2_from_previous": 0.8563472032546997,
+          "relative_delta_l2_from_previous": 0.5129397018384343
+        },
+        {
+          "parameter_name": "descriptor_residual_fusion.2.bias",
+          "shape": [
+            256
+          ],
+          "numel": 256,
+          "l1_mean": 0.006254520267248154,
+          "l2_norm": 0.11589228361845016,
+          "max_abs": 0.024746941402554512,
+          "nonzero_fraction": 1.0,
+          "delta_l2_from_previous": 0.021570229902863503,
+          "relative_delta_l2_from_previous": 0.2078415197842721
+        }
+      ]
+    },
+    {
+      "label": "epoch119",
+      "path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/model_119.pth",
+      "saved_epoch": 119,
+      "records": [
+        {
+          "parameter_name": "descriptor_multiscale_gate_logit",
+          "shape": [],
+          "numel": 1,
+          "l1_mean": 2.179837226867676,
+          "l2_norm": 2.179837226867676,
+          "max_abs": 2.179837226867676,
+          "nonzero_fraction": 1.0,
+          "raw_value": -2.179837226867676,
+          "transformed_value": 0.10157578130793608,
+          "delta_l2_from_previous": 0.00811147689819336,
+          "relative_delta_l2_from_previous": 0.003707343268254868
+        },
+        {
+          "parameter_name": "descriptor_residual_fusion.2.weight",
+          "shape": [
+            256,
+            256,
+            1,
+            1
+          ],
+          "numel": 65536,
+          "l1_mean": 0.007048945873975754,
+          "l2_norm": 2.408017635345459,
+          "max_abs": 0.09264343231916428,
+          "nonzero_fraction": 1.0,
+          "delta_l2_from_previous": 0.7491180300712585,
+          "relative_delta_l2_from_previous": 0.36154386216444734
+        },
+        {
+          "parameter_name": "descriptor_residual_fusion.2.bias",
+          "shape": [
+            256
+          ],
+          "numel": 256,
+          "l1_mean": 0.006791653577238321,
+          "l2_norm": 0.12640483677387238,
+          "max_abs": 0.024685874581336975,
+          "nonzero_fraction": 1.0,
+          "delta_l2_from_previous": 0.017306718975305557,
+          "relative_delta_l2_from_previous": 0.14933452370551364
+        }
+      ]
+    },
+    {
+      "label": "epoch149",
+      "path": "/home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/model_149.pth",
+      "saved_epoch": 149,
+      "records": [
+        {
+          "parameter_name": "descriptor_multiscale_gate_logit",
+          "shape": [],
+          "numel": 1,
+          "l1_mean": 2.171574115753174,
+          "l2_norm": 2.171574115753174,
+          "max_abs": 2.171574115753174,
+          "nonzero_fraction": 1.0,
+          "raw_value": -2.171574115753174,
+          "transformed_value": 0.102332343943634,
+          "delta_l2_from_previous": 0.008263111114501953,
+          "relative_delta_l2_from_previous": 0.003790700981089151
+        },
+        {
+          "parameter_name": "descriptor_residual_fusion.2.weight",
+          "shape": [
+            256,
+            256,
+            1,
+            1
+          ],
+          "numel": 65536,
+          "l1_mean": 0.007830912247300148,
+          "l2_norm": 2.6943793296813965,
+          "max_abs": 0.1060478463768959,
+          "nonzero_fraction": 1.0,
+          "delta_l2_from_previous": 0.6170151829719543,
+          "relative_delta_l2_from_previous": 0.25623366453603075
+        },
+        {
+          "parameter_name": "descriptor_residual_fusion.2.bias",
+          "shape": [
+            256
+          ],
+          "numel": 256,
+          "l1_mean": 0.0072295828722417355,
+          "l2_norm": 0.13575860857963562,
+          "max_abs": 0.02388799376785755,
+          "nonzero_fraction": 1.0,
+          "delta_l2_from_previous": 0.015719681978225708,
+          "relative_delta_l2_from_previous": 0.12435981390765052
+        }
+      ]
+    }
+  ],
+  "safety": "All checkpoints were loaded read-only on CPU."
+}
