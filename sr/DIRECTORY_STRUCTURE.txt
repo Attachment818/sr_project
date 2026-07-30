@@ -7504,7 +7504,9 @@ sr/
 │   │   │   └── pair_diagnostics_report.md
 │   │   └── pipeline.log
 │   ├── seed3407_appearance_stability_audits/
-│   │   └── g0_g7_g15_d26/
+│   │   ├── g0_g7_g15_d26/
+│   │       └── audit.yaml
+│   │   └── g0_g7_g15_d26_fix/
 │   │       └── audit.yaml
 │   ├── seed3407_ema_teacher_pke_g14_v1/
 │   │   ├── FIMD_149/
@@ -7512,7 +7514,19 @@ sr/
 │   │   ├── FIRE_149/
 │   │   │   └── test.yaml
 │   │   └── train.yaml
+│   ├── seed3407_ema_teacher_pke_g14_resume60_v1/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
+│   │   └── train.yaml
 │   ├── seed3407_norm_controlled_multiscale_g16_v1/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
+│   │   └── train.yaml
+│   ├── seed3407_norm_controlled_multiscale_g16_resume60_v1/
 │   │   ├── FIMD_149/
 │   │   │   └── test.yaml
 │   │   ├── FIRE_149/

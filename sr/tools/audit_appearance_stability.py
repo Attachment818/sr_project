@@ -11,6 +11,7 @@ import argparse
 import csv
 import json
 import sys
+import tempfile
 from pathlib import Path
 
 import cv2
@@ -219,6 +220,28 @@ def self_test():
     assert len(pairs) == 1 and pairs[0][:2] == (0, 0)
     cells, coverage, hull = grid_metrics([(1, 1), (7, 7)], (8, 8), 2)
     assert cells == 2 and coverage == 0.5 and hull == 0.0
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        dataset = root / "dataset"
+        dataset.mkdir()
+        config = root / "test.yaml"
+        checkpoint = root / "model.pth"
+        config.touch()
+        checkpoint.touch()
+        audit = {
+            "dataset_root": str(dataset),
+            "output_dir": str(root / "output"),
+            "sources": [
+                {
+                    "label": label,
+                    "test_config_path": str(config),
+                    "checkpoint_path": str(checkpoint),
+                }
+                for label in ("G0", "G15")
+            ],
+            "transforms": [{"name": "identity", "type": "identity"}],
+        }
+        validate_and_load(audit)
     print("appearance-stability audit self-test passed")
 
 
@@ -243,8 +266,11 @@ def validate_and_load(audit):
         for field in ("label", "test_config_path", "checkpoint_path"):
             if field not in source:
                 raise KeyError(f"Source is missing {field}: {source}")
+        for field in ("test_config_path", "checkpoint_path"):
             if not Path(source[field]).is_file():
-                raise FileNotFoundError(f"Source {field} not found: {source[field]}")
+                raise FileNotFoundError(
+                    f"Source {field} not found: {source[field]}"
+                )
     transforms = list(audit.get("transforms", []))
     if not transforms or transforms[0].get("type") != "identity":
         raise ValueError("The first transform must be an identity baseline")

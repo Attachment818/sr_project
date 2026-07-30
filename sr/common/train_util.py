@@ -303,6 +303,9 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
     is_value_map_save = train_config['is_value_map_save']
     value_map_save_dir = train_config['value_map_save_dir']
     resume_value_map = train_config.get('resume_value_map', False)
+    resume_value_map_source_dir = train_config.get(
+        'resume_value_map_source_dir'
+    )
     snapshot_value_maps = bool(
         train_config.get('snapshot_value_maps_on_checkpoint', False)
     )
@@ -365,6 +368,10 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
         raise ValueError(f'start_epoch ({start_epoch}) must be smaller than num_epochs ({num_epochs})')
     if resume_value_map and not is_value_map_save:
         raise ValueError('resume_value_map=True requires is_value_map_save=True; in-memory value_map cannot be resumed across runs')
+    if resume_value_map_source_dir and not resume_value_map:
+        raise ValueError(
+            'resume_value_map_source_dir requires resume_value_map=True'
+        )
 
     if (
         train_config.get('refuse_existing_experiment_outputs', False)
@@ -401,6 +408,33 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
         raise ValueError('model_save_path must be different from pretrained_path to avoid overwriting the source checkpoint')
 
     if is_value_map_save:
+        if resume_value_map_source_dir:
+            if start_epoch == 0:
+                raise ValueError(
+                    'resume_value_map_source_dir requires a resumed checkpoint'
+                )
+            if not os.path.isdir(resume_value_map_source_dir):
+                raise FileNotFoundError(
+                    'resume value-map source does not exist: '
+                    f'{resume_value_map_source_dir}'
+                )
+            if not os.listdir(resume_value_map_source_dir):
+                raise ValueError(
+                    'resume value-map source is empty: '
+                    f'{resume_value_map_source_dir}'
+                )
+            if os.path.exists(value_map_save_dir):
+                raise FileExistsError(
+                    'Refusing to overwrite resume value-map destination: '
+                    f'{value_map_save_dir}'
+                )
+            shutil.copytree(
+                resume_value_map_source_dir, value_map_save_dir
+            )
+            print(
+                'restored value maps: '
+                f'{resume_value_map_source_dir} -> {value_map_save_dir}'
+            )
         if os.path.exists(value_map_save_dir):
             if not resume_value_map:
                 shutil.rmtree(value_map_save_dir)
