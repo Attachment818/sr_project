@@ -5340,6 +5340,16 @@ sr/
 │   │   ├── pipeline.log
 │   │   ├── train.log
 │   │   └── train.yaml
+│   ├── seed3407_appearance_stability_audits/
+│   │   ├── g0_g7_g15_d26/
+│   │   │   ├── audit.yaml
+│   │   │   ├── d26.log
+│   │   │   └── pipeline.log
+│   │   └── g0_g7_g15_d26_fix/
+│   │       ├── appearance_stability.csv
+│   │       ├── appearance_stability.json
+│   │       ├── audit.yaml
+│   │       └── pipeline.log
 │   ├── seed3407_balanced_dense_descriptor_g10_v1/
 │   │   ├── FIMD_149/
 │   │   │   └── test.yaml
@@ -7337,6 +7347,29 @@ sr/
 │   │   ├── pipeline.log
 │   │   ├── train.log
 │   │   └── train.yaml
+│   ├── seed3407_ema_teacher_pke_g14_resume60_v1/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
+│   │   ├── value_maps/
+│   │   ├── pipeline.log
+│   │   ├── train.log
+│   │   └── train.yaml
+│   ├── seed3407_ema_teacher_pke_g14_v1/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
+│   │   ├── value_map_snapshots/
+│   │   │   ├── epoch_29/
+│   │   │   └── epoch_59/
+│   │   ├── value_maps/
+│   │   ├── model_29.pth
+│   │   ├── model_59.pth
+│   │   ├── pipeline.log
+│   │   ├── train.log
+│   │   └── train.yaml
 │   ├── seed3407_fimd_descriptor_margin_d2/
 │   │   ├── audit_sources.yaml
 │   │   ├── descriptor_margin_summary.csv
@@ -7503,35 +7536,6 @@ sr/
 │   │   │   ├── pair_diagnostics_comparison.csv
 │   │   │   └── pair_diagnostics_report.md
 │   │   └── pipeline.log
-│   ├── seed3407_appearance_stability_audits/
-│   │   ├── g0_g7_g15_d26/
-│   │       └── audit.yaml
-│   │   └── g0_g7_g15_d26_fix/
-│   │       └── audit.yaml
-│   ├── seed3407_ema_teacher_pke_g14_v1/
-│   │   ├── FIMD_149/
-│   │   │   └── test.yaml
-│   │   ├── FIRE_149/
-│   │   │   └── test.yaml
-│   │   └── train.yaml
-│   ├── seed3407_ema_teacher_pke_g14_resume60_v1/
-│   │   ├── FIMD_149/
-│   │   │   └── test.yaml
-│   │   ├── FIRE_149/
-│   │   │   └── test.yaml
-│   │   └── train.yaml
-│   ├── seed3407_norm_controlled_multiscale_g16_v1/
-│   │   ├── FIMD_149/
-│   │   │   └── test.yaml
-│   │   ├── FIRE_149/
-│   │   │   └── test.yaml
-│   │   └── train.yaml
-│   ├── seed3407_norm_controlled_multiscale_g16_resume60_v1/
-│   │   ├── FIMD_149/
-│   │   │   └── test.yaml
-│   │   ├── FIRE_149/
-│   │   │   └── test.yaml
-│   │   └── train.yaml
 │   ├── seed3407_inference_diagnostics/
 │   │   ├── c0_constant_masked/
 │   │   │   └── FIMD_149/
@@ -8867,6 +8871,29 @@ sr/
 │   │   ├── model_149.pth
 │   │   ├── model_149_epoch49.pth
 │   │   ├── model_149_epoch99.pth
+│   │   ├── pipeline.log
+│   │   ├── train.log
+│   │   └── train.yaml
+│   ├── seed3407_norm_controlled_multiscale_g16_resume60_v1/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
+│   │   ├── value_maps/
+│   │   ├── pipeline.log
+│   │   ├── train.log
+│   │   └── train.yaml
+│   ├── seed3407_norm_controlled_multiscale_g16_v1/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
+│   │   ├── value_map_snapshots/
+│   │   │   ├── epoch_29/
+│   │   │   └── epoch_59/
+│   │   ├── value_maps/
+│   │   ├── model_29.pth
+│   │   ├── model_59.pth
 │   │   ├── pipeline.log
 │   │   ├── train.log
 │   │   └── train.yaml
@@ -18011,6 +18038,7 @@ sr/
 │   └── shared_ep45_perceptual_branch.pth
 ├── tools/
 │   ├── analyze_fimd_pair_diagnostics.py
+│   ├── audit_appearance_stability.py
 │   ├── audit_checkpoint_scalars.py
 │   ├── audit_checkpoint_tensor_series.py
 │   ├── audit_descriptor_supervision.py
@@ -18032,7 +18060,6 @@ sr/
 │   ├── audit_pke_region_feedback.py
 │   ├── audit_pke_value_map_retention.py
 │   ├── audit_selected_matching_chain.py
-│   ├── audit_appearance_stability.py
 │   ├── audit_value_maps.py
 │   ├── compare_fimd_matching_chain.py
 │   ├── smoke_g10_g11.py
