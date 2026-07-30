@@ -601,6 +601,8 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
                     else:
                         loss.backward()
                     optimizer.step()
+                    if hasattr(model, 'update_ema_teacher'):
+                        model.update_ema_teacher()
                     # 定期清理显存，避免碎片化
                     if torch.cuda.is_available():
                         torch.cuda.empty_cache()
@@ -681,6 +683,19 @@ def train_model(model, optimizer, dataloaders, device, num_epochs, train_config,
                     + ', '.join(
                         f'{key}={value:.6f}'
                         for key, value in dense_stats.items()
+                    )
+                )
+            if (
+                phase == 'train'
+                and train_config.get('log_pke_ema_teacher_stats', False)
+                and hasattr(model, 'ema_teacher_summary')
+            ):
+                ema_stats = model.ema_teacher_summary()
+                print(
+                    'PKE EMA teacher: '
+                    + ', '.join(
+                        f'{key}={value:.6f}'
+                        for key, value in ema_stats.items()
                     )
                 )
             if (

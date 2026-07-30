@@ -1,0 +1,25 @@
+PREDICT:
+  device: cuda:1
+  model_save_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_norm_controlled_multiscale_g16_v1/model_149.pth
+  model_type: vessel_masked_norm_controlled_zero_start_multiscale
+  descriptor_injection_norm_control_enabled: true
+  descriptor_injection_ratio_cap: 0.2
+  resize_refer_to_query: true
+  model_image_width: 768
+  model_image_height: 768
+  use_matching_trick: true
+  registration_method: quadratic
+  displacement_threshold: 300.0
+  nms_size: 10
+  nms_thresh: 0.01
+  knn_thresh: 0.9
+  use_inverse_consistency: true
+  iccl: 3.0
+  use_outlier_filter: true
+  outlier_criteria: homography
+  outlier_threshold: 20.0
+  eye_mask_path: null
+  checkerboard_tile_size: 240
+
+FIMD:
+  data_root: /home/data1/zhangjunhong/sr_project/sr/data/FIMD

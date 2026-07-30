@@ -20,6 +20,8 @@ from model.super_retina import (
     SuperRetinaWithAgreementGatedMultiScaleDescriptor,
     SuperRetinaWithMultiScaleDetectorResidual,
     SuperRetinaWithZeroStartResidualMultiScaleDescriptor,
+    SuperRetinaWithEMATeacherPKE,
+    SuperRetinaWithNormControlledZeroStartMultiScaleDescriptor,
 )
 import torch.optim as optim
 import yaml
@@ -158,10 +160,23 @@ if __name__ == '__main__':
         model = SuperRetinaWithZeroStartResidualMultiScaleDescriptor(
             train_config, device=device
         )
+    elif model_variant == 'vessel_masked_ema_teacher_pke':
+        model = SuperRetinaWithEMATeacherPKE(
+            train_config, device=device
+        )
+    elif model_variant == 'vessel_masked_norm_controlled_zero_start_multiscale':
+        model = SuperRetinaWithNormControlledZeroStartMultiScaleDescriptor(
+            train_config, device=device
+        )
     else:
         raise ValueError(f"Unknown model_variant: {model_variant}")
 
-    optimizer = optim.Adam(model.parameters(), lr=1e-4)
+    # Frozen EMA teacher parameters must not enter Adam state.
+    optimizer = optim.Adam(
+        (parameter for parameter in model.parameters()
+         if parameter.requires_grad),
+        lr=1e-4,
+    )
     start_epoch = 0
 
     if load_pre_trained_model:
@@ -229,6 +244,10 @@ if __name__ == '__main__':
           f"{train_config.get('descriptor_hard_negative_chunk_size', 256)}")
     print(f"  - descriptor_multiscale_gate_init: "
           f"{train_config.get('descriptor_multiscale_gate_init', 0.1)}")
+    print(f"  - descriptor_injection_ratio_cap: "
+          f"{train_config.get('descriptor_injection_ratio_cap', 0.2)}")
+    print(f"  - descriptor_injection_norm_control_enabled: "
+          f"{train_config.get('descriptor_injection_norm_control_enabled', False)}")
     print(f"  - descriptor_gate_max: "
           f"{train_config.get('descriptor_gate_max', 0.2)}")
     print(f"  - descriptor_spatial_gate_hidden_channels: "
@@ -275,6 +294,14 @@ if __name__ == '__main__':
           f"{train_config.get('checkpoint_path_template')}")
     print(f"  - refuse_existing_experiment_outputs: "
           f"{train_config.get('refuse_existing_experiment_outputs', False)}")
+    print(f"  - pke_ema_teacher_enabled: "
+          f"{train_config.get('pke_ema_teacher_enabled', False)}")
+    print(f"  - pke_ema_teacher_decay: "
+          f"{train_config.get('pke_ema_teacher_decay', 0.99)}")
+    print(f"  - pke_ema_teacher_start_epoch: "
+          f"{train_config.get('pke_ema_teacher_start_epoch', 10)}")
+    print(f"  - log_pke_ema_teacher_stats: "
+          f"{train_config.get('log_pke_ema_teacher_stats', False)}")
 
     model = train_model(
         model,

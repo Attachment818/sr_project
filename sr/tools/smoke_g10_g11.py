@@ -23,6 +23,7 @@ from model.super_retina import (
     SuperRetinaWithVesselOnlyMasked,
     SuperRetinaWithMultiScaleDetectorResidual,
     SuperRetinaWithZeroStartResidualMultiScaleDescriptor,
+    SuperRetinaWithNormControlledZeroStartMultiScaleDescriptor,
 )
 
 
@@ -188,6 +189,53 @@ def check_g15_zero_start_descriptor():
     assert float(projection.weight.grad.abs().sum()) > 0
 
 
+def check_g16_norm_controlled_descriptor():
+    config = minimal_config(
+        dense_descriptor_weight=0.0,
+        descriptor_multiscale_gate_init=0.1,
+        descriptor_injection_norm_control_enabled=True,
+        descriptor_injection_ratio_cap=0.2,
+        log_descriptor_gate_stats=True,
+    )
+    base = SuperRetinaWithVesselOnlyMasked(config, device='cpu')
+    g16 = SuperRetinaWithNormControlledZeroStartMultiScaleDescriptor(
+        config, device='cpu'
+    )
+    g16.load_state_dict(base.state_dict(), strict=False)
+    probe = torch.rand(1, 1, 64, 64)
+    base.eval()
+    g16.eval()
+    base_detector, base_descriptor = base.network(probe)
+    g16_detector, g16_descriptor = g16.network(probe)
+    assert torch.equal(base_detector, g16_detector)
+    assert torch.equal(base_descriptor, g16_descriptor), (
+        'zero-start G16 descriptor must exactly equal G0'
+    )
+
+    # The control must leave a small residual untouched and cap a large one.
+    main = torch.ones(1, 256, 2, 2)
+    small = torch.full_like(main, 0.01)
+    large = torch.full_like(main, 100.0)
+    g16.eval()
+    small_controlled = g16._descriptor_injection(main, small)
+    gate = torch.sigmoid(g16.descriptor_multiscale_gate_logit)
+    assert torch.allclose(small_controlled, gate * small)
+    large_controlled = g16._descriptor_injection(main, large)
+    ratio = (
+        torch.norm(large_controlled, p=2, dim=1)
+        / torch.norm(main, p=2, dim=1)
+    )
+    assert float(ratio.max()) <= 0.200001
+
+    projection = g16.descriptor_residual_fusion[-1]
+    g16.train()
+    _, descriptor = g16.network(probe)
+    descriptor.square().mean().backward()
+    assert projection.weight.grad is not None
+    assert torch.isfinite(projection.weight.grad).all()
+    assert float(projection.weight.grad.abs().sum()) > 0
+
+
 def check_recovery_infrastructure():
     with tempfile.TemporaryDirectory() as temporary:
         root = Path(temporary)
@@ -230,6 +278,8 @@ def check_cuda(config_path):
             SuperRetinaWithMultiScaleDetectorResidual,
         'vessel_masked_zero_start_residual_multiscale':
             SuperRetinaWithZeroStartResidualMultiScaleDescriptor,
+        'vessel_masked_norm_controlled_zero_start_multiscale':
+            SuperRetinaWithNormControlledZeroStartMultiScaleDescriptor,
     }
     if model_variant not in model_classes:
         raise ValueError(
@@ -289,8 +339,9 @@ def main():
     check_pcgrad()
     check_g13_detector_residual()
     check_g15_zero_start_descriptor()
+    check_g16_norm_controlled_descriptor()
     check_recovery_infrastructure()
-    print('G10/G11/G13/G15 CPU smoke tests passed')
+    print('G10/G11/G13/G15/G16 CPU smoke tests passed')
     if args.cuda_config is not None:
         check_cuda(args.cuda_config)
 

@@ -9,7 +9,7 @@ from scipy.ndimage import map_coordinates
 from common.common_util import pre_processing, simple_nms, remove_borders, \
     sample_keypoint_desc, remove_keypoints_by_mask
 from common.inference_diagnostics import summarize_keypoints
-from model.super_retina import SuperRetina, SuperRetinaFPN, SuperRetinaWithSelfAttention, SuperRetinaWithMultiScaleDescriptor, SuperRetinaWithASPP, SuperRetinaWithoutPKE, SuperRetinaWithoutPKEWithAttention,SuperRetinaWithPerceptualLoss,SuperRetinaWithVesselRegularization,SuperRetinaWithVesselOnly,SuperRetinaWithVesselOnlyMasked,SuperRetinaWithDecoupledMultiScaleDescriptor,SuperRetinaWithResidualMultiScaleDescriptor,SuperRetinaWithSpatialGatedMultiScaleDescriptor,SuperRetinaWithAgreementGatedMultiScaleDescriptor,SuperRetinaWithMultiScaleDetectorResidual,SuperRetinaWithZeroStartResidualMultiScaleDescriptor
+from model.super_retina import SuperRetina, SuperRetinaFPN, SuperRetinaWithSelfAttention, SuperRetinaWithMultiScaleDescriptor, SuperRetinaWithASPP, SuperRetinaWithoutPKE, SuperRetinaWithoutPKEWithAttention,SuperRetinaWithPerceptualLoss,SuperRetinaWithVesselRegularization,SuperRetinaWithVesselOnly,SuperRetinaWithVesselOnlyMasked,SuperRetinaWithDecoupledMultiScaleDescriptor,SuperRetinaWithResidualMultiScaleDescriptor,SuperRetinaWithSpatialGatedMultiScaleDescriptor,SuperRetinaWithAgreementGatedMultiScaleDescriptor,SuperRetinaWithMultiScaleDetectorResidual,SuperRetinaWithZeroStartResidualMultiScaleDescriptor,SuperRetinaWithNormControlledZeroStartMultiScaleDescriptor
 from model.super_retina_attention import SuperRetinaWithAttention
 
 from PIL import Image
@@ -238,6 +238,30 @@ class Predictor:
                 model_save_path, device=device, strict=False
             )
             print('Loaded G15 zero-start residual multi-scale model')
+        elif model_type == 'vessel_masked_norm_controlled_zero_start_multiscale':
+            model = SuperRetinaWithNormControlledZeroStartMultiScaleDescriptor(
+                config={
+                    'descriptor_injection_norm_control_enabled': bool(
+                        predict_config.get(
+                            'descriptor_injection_norm_control_enabled', False
+                        )
+                    ),
+                    'descriptor_injection_ratio_cap': float(
+                        predict_config.get(
+                            'descriptor_injection_ratio_cap', 0.2
+                        )
+                    )
+                },
+                device=device,
+            )
+            model.load_pretrained_weights(
+                model_save_path, device=device, strict=False
+            )
+            print(
+                'Loaded G16 norm-controlled zero-start multi-scale model '
+                f"(enabled={model.descriptor_injection_norm_control_enabled}, "
+                f"injection cap={model.descriptor_injection_ratio_cap:.4f})"
+            )
         elif model_type == 'vessel_masked_detector_residual_multiscale':
             model = SuperRetinaWithMultiScaleDetectorResidual(
                 config=None,

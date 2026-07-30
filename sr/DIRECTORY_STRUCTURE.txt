@@ -7503,6 +7503,21 @@ sr/
 │   │   │   ├── pair_diagnostics_comparison.csv
 │   │   │   └── pair_diagnostics_report.md
 │   │   └── pipeline.log
+│   ├── seed3407_appearance_stability_audits/
+│   │   └── g0_g7_g15_d26/
+│   │       └── audit.yaml
+│   ├── seed3407_ema_teacher_pke_g14_v1/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
+│   │   └── train.yaml
+│   ├── seed3407_norm_controlled_multiscale_g16_v1/
+│   │   ├── FIMD_149/
+│   │   │   └── test.yaml
+│   │   ├── FIRE_149/
+│   │   │   └── test.yaml
+│   │   └── train.yaml
 │   ├── seed3407_inference_diagnostics/
 │   │   ├── c0_constant_masked/
 │   │   │   └── FIMD_149/
@@ -18003,9 +18018,11 @@ sr/
 │   ├── audit_pke_region_feedback.py
 │   ├── audit_pke_value_map_retention.py
 │   ├── audit_selected_matching_chain.py
+│   ├── audit_appearance_stability.py
 │   ├── audit_value_maps.py
 │   ├── compare_fimd_matching_chain.py
 │   ├── smoke_g10_g11.py
+│   ├── smoke_g14_ema_teacher.py
 │   ├── smoke_g4_multiview_feedback.py
 │   ├── smoke_g5_g6.py
 │   ├── summarize_partial_training.py

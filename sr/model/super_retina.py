@@ -1,3 +1,4 @@
+import copy
 import math
 import random
 import sys
@@ -2639,6 +2640,28 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
                     self._build_vessel_masks(x)
                     if self.pke_region_relaxed_threshold is not None or multiview_active else None
                 )
+                ema_teacher_active = (
+                    getattr(self, 'pke_ema_teacher_enabled', False)
+                    and self.current_epoch >= getattr(
+                        self, 'pke_ema_teacher_start_epoch', 0
+                    )
+                )
+                teacher_detector_pred = None
+                teacher_descriptor_pred = None
+                teacher_affine_detector_pred = None
+                teacher_affine_descriptor_pred = None
+                if ema_teacher_active:
+                    # The teacher only chooses pseudo-labels. Student tensors
+                    # remain in the detector losses below, so no student
+                    # gradient is cut by this no_grad branch.
+                    self.ema_teacher.eval()
+                    teacher_detector_pred, teacher_descriptor_pred = (
+                        self.ema_teacher.network(x)
+                    )
+                    (
+                        teacher_affine_detector_pred,
+                        teacher_affine_descriptor_pred,
+                    ) = self.ema_teacher.network(affine_x)
 
             loss_cal = self.dice
             pke_stage_points = None
@@ -2667,6 +2690,22 @@ class SuperRetinaWithVesselOnlyMasked(SuperRetinaWithVesselOnly):
                     stability_affine_descriptor_pred=(
                         None if stability_affine_descriptor_pred is None
                         else stability_affine_descriptor_pred[learn_index]
+                    ),
+                    candidate_detector_pred=(
+                        None if teacher_detector_pred is None
+                        else teacher_detector_pred[learn_index]
+                    ),
+                    validation_affine_detector_pred=(
+                        None if teacher_affine_detector_pred is None
+                        else teacher_affine_detector_pred[learn_index]
+                    ),
+                    validation_descriptor_pred=(
+                        None if teacher_descriptor_pred is None
+                        else teacher_descriptor_pred[learn_index]
+                    ),
+                    validation_affine_descriptor_pred=(
+                        None if teacher_affine_descriptor_pred is None
+                        else teacher_affine_descriptor_pred[learn_index]
                     ),
                 )
                 if self.save_pke_diagnostics:
@@ -3028,6 +3067,25 @@ class SuperRetinaWithResidualMultiScaleDescriptor(SuperRetinaWithVesselOnlyMaske
         gate = torch.sigmoid(self.descriptor_multiscale_gate_logit)
         return gate, None
 
+    def _descriptor_injection(
+        self, descriptor_main, descriptor_residual
+    ):
+        """Return the residual injected into the legacy descriptor path.
+
+        Keeping this operation behind a hook lets newer variants constrain the
+        injection without changing G7/G15 numerics or their checkpoints.
+        """
+        descriptor_gate, descriptor_agreement = self._descriptor_gate(
+            descriptor_main, descriptor_residual
+        )
+        self._record_descriptor_gate_stats(
+            descriptor_gate,
+            descriptor_main,
+            descriptor_residual,
+            descriptor_agreement,
+        )
+        return descriptor_gate * descriptor_residual
+
     def network(self, x, return_cPa=False, descriptor_only=False):
         x = self.relu(self.conv1a(x))
         conv1 = self.relu(self.conv1b(x))
@@ -3052,17 +3110,11 @@ class SuperRetinaWithResidualMultiScaleDescriptor(SuperRetinaWithVesselOnlyMaske
             ],
             dim=1,
         ))
-        descriptor_gate, descriptor_agreement = self._descriptor_gate(
+        descriptor_injection = self._descriptor_injection(
             descriptor_main, descriptor_residual
         )
-        self._record_descriptor_gate_stats(
-            descriptor_gate,
-            descriptor_main,
-            descriptor_residual,
-            descriptor_agreement,
-        )
         cDb = self.relu(self.convDb(
-            descriptor_main + descriptor_gate * descriptor_residual
+            descriptor_main + descriptor_injection
         ))
         desc = self.convDc(cDb)
         descriptor_norm = torch.norm(desc, p=2, dim=1)
@@ -3114,6 +3166,191 @@ class SuperRetinaWithZeroStartResidualMultiScaleDescriptor(
             'SuperRetinaWithZeroStartResidualMultiScaleDescriptor '
             'initialized: descriptor residual projection starts at zero'
         )
+
+
+class SuperRetinaWithNormControlledZeroStartMultiScaleDescriptor(
+    SuperRetinaWithZeroStartResidualMultiScaleDescriptor
+):
+    """G16: G15 with a per-location upper bound on residual injection.
+
+    The bound only shrinks an oversized injection. It never enlarges a weak
+    residual, and the detached main-path norm prevents the cap itself from
+    steering or shrinking the legacy G0 descriptor path.
+    """
+
+    def __init__(self, config=None, device='cpu', n_class=1):
+        super().__init__(config=config, device=device, n_class=n_class)
+        cfg = config or {}
+        self.descriptor_injection_norm_control_enabled = bool(
+            cfg.get('descriptor_injection_norm_control_enabled', False)
+        )
+        self.descriptor_injection_ratio_cap = float(
+            cfg.get('descriptor_injection_ratio_cap', 0.2)
+        )
+        if not 0.0 < self.descriptor_injection_ratio_cap <= 1.0:
+            raise ValueError(
+                'descriptor_injection_ratio_cap must be in (0, 1]'
+            )
+        self.reset_descriptor_norm_control_epoch_stats()
+        print(
+            'SuperRetinaWithNormControlledZeroStartMultiScaleDescriptor '
+            'initialized: norm control enabled='
+            f'{self.descriptor_injection_norm_control_enabled}, '
+            f'only-shrink injection cap={self.descriptor_injection_ratio_cap:.4f}'
+        )
+
+    def reset_descriptor_norm_control_epoch_stats(self):
+        self._descriptor_norm_control_epoch_stats = {
+            'calls': 0,
+            'raw_injection_ratio': 0.0,
+            'controlled_injection_ratio': 0.0,
+            'cap_active_fraction': 0.0,
+            'scale_mean': 0.0,
+        }
+
+    def reset_descriptor_gate_epoch_stats(self):
+        super().reset_descriptor_gate_epoch_stats()
+        self.reset_descriptor_norm_control_epoch_stats()
+
+    def descriptor_gate_epoch_summary(self):
+        summary = super().descriptor_gate_epoch_summary()
+        stats = self._descriptor_norm_control_epoch_stats
+        calls = max(1, stats['calls'])
+        summary.update({
+            key: stats[key] / calls
+            for key in (
+                'raw_injection_ratio',
+                'controlled_injection_ratio',
+                'cap_active_fraction',
+                'scale_mean',
+            )
+        })
+        summary['norm_control_sampled_calls'] = float(stats['calls'])
+        return summary
+
+    def _descriptor_injection(
+        self, descriptor_main, descriptor_residual
+    ):
+        gate, agreement = self._descriptor_gate(
+            descriptor_main, descriptor_residual
+        )
+        raw_injection = gate * descriptor_residual
+        if not self.descriptor_injection_norm_control_enabled:
+            self._record_descriptor_gate_stats(
+                gate, descriptor_main, descriptor_residual, agreement
+            )
+            return raw_injection
+        main_norm = torch.norm(descriptor_main, p=2, dim=1, keepdim=True)
+        raw_norm = torch.norm(raw_injection, p=2, dim=1, keepdim=True)
+        allowed_norm = (
+            self.descriptor_injection_ratio_cap * main_norm.detach()
+        )
+        scale = torch.clamp(
+            allowed_norm / raw_norm.clamp_min(1e-6), max=1.0
+        )
+        controlled_injection = raw_injection * scale
+
+        # Preserve the historical gate statistics for direct G15 comparison.
+        self._record_descriptor_gate_stats(
+            gate, descriptor_main, descriptor_residual, agreement
+        )
+        if (
+            self.training
+            and self.log_descriptor_gate_stats
+            and self._descriptor_norm_control_epoch_stats['calls']
+                < self.descriptor_gate_stats_max_calls
+        ):
+            with torch.no_grad():
+                controlled_norm = torch.norm(
+                    controlled_injection.detach(), p=2, dim=1, keepdim=True
+                )
+                denominator = main_norm.detach().clamp_min(1e-6)
+                stats = self._descriptor_norm_control_epoch_stats
+                stats['calls'] += 1
+                stats['raw_injection_ratio'] += float(
+                    (raw_norm.detach() / denominator).mean().item()
+                )
+                stats['controlled_injection_ratio'] += float(
+                    (controlled_norm / denominator).mean().item()
+                )
+                stats['cap_active_fraction'] += float(
+                    (scale.detach() < 1.0).float().mean().item()
+                )
+                stats['scale_mean'] += float(scale.detach().mean().item())
+        return controlled_injection
+
+
+class SuperRetinaWithEMATeacherPKE(SuperRetinaWithVesselOnlyMasked):
+    """G14: use a frozen EMA copy only for training-time PKE decisions."""
+
+    def __init__(self, config=None, device='cpu', n_class=1):
+        super().__init__(config=config, device=device, n_class=n_class)
+        cfg = config or {}
+        self.pke_ema_teacher_enabled = bool(
+            cfg.get('pke_ema_teacher_enabled', False)
+        )
+        self.pke_ema_teacher_decay = float(
+            cfg.get('pke_ema_teacher_decay', 0.99)
+        )
+        self.pke_ema_teacher_start_epoch = int(
+            cfg.get('pke_ema_teacher_start_epoch', 10)
+        )
+        if not 0.0 <= self.pke_ema_teacher_decay < 1.0:
+            raise ValueError('pke_ema_teacher_decay must be in [0, 1)')
+        if self.pke_ema_teacher_start_epoch < 0:
+            raise ValueError(
+                'pke_ema_teacher_start_epoch must be non-negative'
+            )
+        self.ema_teacher = copy.deepcopy(self)
+        self.ema_teacher.pke_ema_teacher_enabled = False
+        self.ema_teacher.requires_grad_(False)
+        self.ema_teacher.eval()
+        self._ema_teacher_updates = 0
+        self.to(device)
+        print(
+            'SuperRetinaWithEMATeacherPKE initialized: '
+            f'enabled={self.pke_ema_teacher_enabled}, '
+            f'decay={self.pke_ema_teacher_decay:.6f}, '
+            f'start_epoch={self.pke_ema_teacher_start_epoch}'
+        )
+
+    @torch.no_grad()
+    def update_ema_teacher(self):
+        """Update after each student optimizer step; teacher never gets grads."""
+        decay = (
+            0.0
+            if self.current_epoch < self.pke_ema_teacher_start_epoch
+            else self.pke_ema_teacher_decay
+        )
+        student_parameters = dict(self.named_parameters())
+        for name, teacher_parameter in self.ema_teacher.named_parameters():
+            teacher_parameter.mul_(decay).add_(
+                student_parameters[name].detach(), alpha=1.0 - decay
+            )
+        student_buffers = dict(self.named_buffers())
+        for name, teacher_buffer in self.ema_teacher.named_buffers():
+            teacher_buffer.copy_(student_buffers[name])
+        self._ema_teacher_updates += 1
+
+    def ema_teacher_summary(self):
+        with torch.no_grad():
+            student_parameters = dict(self.named_parameters())
+            squared_delta = sum(
+                (
+                    teacher_parameter
+                    - student_parameters[name].detach()
+                ).square().sum()
+                for name, teacher_parameter
+                in self.ema_teacher.named_parameters()
+            )
+        return {
+            'updates': float(self._ema_teacher_updates),
+            'active': float(
+                self.current_epoch >= self.pke_ema_teacher_start_epoch
+            ),
+            'decay': float(self.pke_ema_teacher_decay),
+            'parameter_delta_l2': float(squared_delta.sqrt().item()),
+        }
 
 
 class SuperRetinaWithMultiScaleDetectorResidual(

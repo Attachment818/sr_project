@@ -1,0 +1,52 @@
+AUDIT:
+  dataset_root: /home/data1/zhangjunhong/sr_project/sr/data/FIMD
+  output_dir: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_appearance_stability_audits/g0_g7_g15_d26
+  device: cuda:2
+  pairs:
+    - 01_r_t
+    - 10_r_t
+    - 20_r_t
+    - 30_r_t
+    - 39_r_t
+    - 40_r_t
+    - 50_r_t
+    - 60_r_t
+  sources:
+    - label: G0
+      test_config_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/FIMD_149/test.yaml
+      checkpoint_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_pke_geometric_admission/global_threshold_04/seed3407_global_threshold_04_ep149.pth
+    - label: G7
+      test_config_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_residual_multiscale_g7_v1/FIMD_149/test.yaml
+      checkpoint_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_residual_multiscale_g7_v1/model_149.pth
+    - label: G15
+      test_config_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/FIMD_149/test.yaml
+      checkpoint_path: /home/data1/zhangjunhong/sr_project/sr/res/seed3407_zero_start_multiscale_g15_v1/model_149.pth
+  transforms:
+    - name: identity
+      type: identity
+    - name: gamma_075
+      type: gamma
+      gamma: 0.75
+    - name: gamma_135
+      type: gamma
+      gamma: 1.35
+    - name: darker_contrast
+      type: brightness_contrast
+      brightness: -0.06
+      contrast: 0.9
+    - name: gaussian_blur_12
+      type: gaussian_blur
+      sigma: 1.2
+    - name: local_contrast_clahe
+      type: clahe
+      clip_limit: 1.5
+      tile_grid_size: 8
+    - name: low_frequency_shading
+      type: low_frequency_shading
+      amplitude: 0.2
+      angle_degrees: 30.0
+  repeatability_tolerance: 4.0
+  min_negative_distance: 16.0
+  ransac_threshold: 3.0
+  grid_size: 8
+  outer_border_margin: 48

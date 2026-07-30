@@ -238,7 +238,11 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
               value_map, config, PKE_learn=True, return_stage_points=False,
               vessel_masks=None, relaxed_non_core_thresh=None,
               stability_grid_inverse=None, stability_affine_detector_pred=None,
-              stability_affine_descriptor_pred=None):
+              stability_affine_descriptor_pred=None,
+              candidate_detector_pred=None,
+              validation_affine_detector_pred=None,
+              validation_descriptor_pred=None,
+              validation_affine_descriptor_pred=None):
     """
     pke process used for detector
     :param detector_pred: probability map from raw image
@@ -274,15 +278,37 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
     weak_feedback_multiplier = int(config.get('pke_content_weak_feedback_multiplier', 1))
     with torch.no_grad():
         h, w = detector_pred.shape[2:]
+        # G14 may select and verify pseudo-labels with an EMA teacher while
+        # keeping detector_pred on the student graph for both detector losses.
+        # None preserves the historical PKE path exactly.
+        selection_detector_pred = (
+            detector_pred
+            if candidate_detector_pred is None else candidate_detector_pred
+        )
+        selection_affine_detector_pred = (
+            affine_detector_pred
+            if validation_affine_detector_pred is None
+            else validation_affine_detector_pred
+        )
+        selection_descriptor_pred = (
+            descriptor_pred
+            if validation_descriptor_pred is None
+            else validation_descriptor_pred
+        )
+        selection_affine_descriptor_pred = (
+            affine_descriptor_pred
+            if validation_affine_descriptor_pred is None
+            else validation_affine_descriptor_pred
+        )
 
         # number of learned points
         number_pts = 0
-        candidate_points = nms(detector_pred, nms_thresh=nms_thresh, nms_size=nms_size,
+        candidate_points = nms(selection_detector_pred, nms_thresh=nms_thresh, nms_size=nms_size,
                                detector_label=initial_label, mask=True)
 
         # geometric matching
         points, affine_points = mapping_points(grid_inverse, candidate_points, h, w)
-        geo_points, affine_geo_points = geometric_filter(affine_detector_pred, points, affine_points,
+        geo_points, affine_geo_points = geometric_filter(selection_affine_detector_pred, points, affine_points,
                                                          geometric_thresh=geometric_thresh,
                                                          vessel_masks=vessel_masks,
                                                          relaxed_non_core_thresh=relaxed_non_core_thresh)
@@ -290,7 +316,7 @@ def pke_learn(detector_pred, descriptor_pred, grid_inverse, affine_detector_pred
 
         # content matching
         content_points, affine_contend_points, content_feedback_weights = content_filter(
-            descriptor_pred, affine_descriptor_pred, geo_points, affine_geo_points,
+            selection_descriptor_pred, selection_affine_descriptor_pred, geo_points, affine_geo_points,
             content_thresh=content_thresh, scale=scale, mode=content_mode,
             weak_feedback=weak_feedback, strong_feedback_multiplier=strong_feedback_multiplier,
             weak_feedback_multiplier=weak_feedback_multiplier,
