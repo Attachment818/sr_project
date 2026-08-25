@@ -18,6 +18,7 @@ env/
 # Local datasets (FIRE/Lab4/FIMD/value_maps 等)
 sr/data/
 old_sr/
+supplementary_experiments/
 
 # Checkpoints
 sr/save/
