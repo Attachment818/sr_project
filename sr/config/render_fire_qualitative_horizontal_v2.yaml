@@ -1,0 +1,14 @@
+# Horizontal-displacement candidates with a darker moving image for visual separation.
+fire_root: D:/ComputerCV/sr_project/supplementary_experiments/FIRE
+output_dir: D:/ComputerCV/sr_project/outputs/fire_qualitative_horizontal_v2
+
+pairs:
+  - P10
+  - P16
+  - P46
+
+blend_alpha: 0.5
+moving_brightness_scale: 0.62
+panel_size: 700
+control_point_radius: 34
+control_point_line_width: 8

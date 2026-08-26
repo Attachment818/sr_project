@@ -145,7 +145,10 @@ def aligned_image(fire_root: Path, pair_id: str, method: str) -> np.ndarray:
 
 
 def blend_valid_regions(
-    reference: np.ndarray, aligned: np.ndarray, alpha: float
+    reference: np.ndarray,
+    aligned: np.ndarray,
+    alpha: float,
+    moving_brightness_scale: float = 1.0,
 ) -> np.ndarray:
     if aligned.shape[:2] != reference.shape[:2]:
         aligned = cv2.resize(
@@ -154,7 +157,7 @@ def blend_valid_regions(
             interpolation=cv2.INTER_LINEAR,
         )
     reference_f = reference.astype(np.float32)
-    aligned_f = aligned.astype(np.float32)
+    aligned_f = aligned.astype(np.float32) * moving_brightness_scale
     ref_valid = np.max(reference, axis=2) >= 18
     aligned_valid = np.max(aligned, axis=2) >= 18
     both = ref_valid & aligned_valid
@@ -215,6 +218,7 @@ def render_pair(
     panel_size: int,
     radius: int,
     line_width: int,
+    moving_brightness_scale: float,
 ) -> List[dict]:
     pair_dir.mkdir(parents=True)
     individual_dir = pair_dir / "individual_panels"
@@ -229,7 +233,9 @@ def render_pair(
     for index, method in enumerate(PANEL_ORDER):
         warped = aligned_image(fire_root, pair_id, method)
         predicted = transform_points(fire_root, pair_id, method)
-        blended = blend_valid_regions(reference, warped, alpha)
+        blended = blend_valid_regions(
+            reference, warped, alpha, moving_brightness_scale
+        )
         marked = draw_control_points(
             blended, reference_points, predicted, radius, line_width
         )
@@ -279,10 +285,13 @@ def run(config: dict) -> Path:
     panel_size = int(config.get("panel_size", 700))
     radius = int(config.get("control_point_radius", 34))
     line_width = int(config.get("control_point_line_width", 8))
+    moving_brightness_scale = float(config.get("moving_brightness_scale", 1.0))
     if not 0 <= alpha <= 1:
         raise ValueError("blend_alpha must be in [0, 1]")
     if panel_size < 256 or panel_size > 1600:
         raise ValueError("panel_size must be in [256, 1600]")
+    if not 0 < moving_brightness_scale <= 1:
+        raise ValueError("moving_brightness_scale must be in (0, 1]")
     refuse_nonempty_output(output_dir)
 
     all_metrics: List[dict] = []
@@ -296,6 +305,7 @@ def run(config: dict) -> Path:
                 panel_size,
                 radius,
                 line_width,
+                moving_brightness_scale,
             )
         )
     fields = ("pair_id", "method", "mle", "max_error", "points_under_25", "points_in_canvas")
@@ -310,6 +320,7 @@ def run(config: dict) -> Path:
         "pairs": pairs,
         "panel_order": PANEL_ORDER,
         "blend_alpha": alpha,
+        "moving_brightness_scale": moving_brightness_scale,
         "control_point_colors": {
             "reference": "green",
             "transformed_query": "red",
@@ -334,6 +345,10 @@ def self_test() -> None:
     assert tuple(blended[12, 12]) == (100, 20, 10)
     assert tuple(blended[48, 48]) == (20, 100, 10)
     assert tuple(blended[28, 28]) == (60, 60, 10)
+    darkened = blend_valid_regions(reference, aligned, 0.5, 0.5)
+    assert tuple(darkened[12, 12]) == (100, 20, 10)
+    assert tuple(darkened[48, 48]) == (10, 50, 5)
+    assert tuple(darkened[28, 28]) == (55, 35, 8)
     with tempfile.TemporaryDirectory() as directory:
         output = Path(directory) / "new"
         refuse_nonempty_output(output)

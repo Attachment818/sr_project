@@ -128,6 +128,26 @@ def parse_mle_file(path: Path) -> Dict[str, float]:
     return values
 
 
+def displacement_metrics(fire_root: Path, pair_id: str) -> dict:
+    """Summarize the native query-to-reference displacement of a FIRE pair."""
+    ground_truth = read_numeric(
+        fire_root / "Ground Truth" / f"control_points_{pair_id}_1_2.txt"
+    ).reshape(-1, 4)
+    displacement = ground_truth[:, :2] - ground_truth[:, 2:]
+    mean_dx, mean_dy = displacement.mean(axis=0)
+    return {
+        "mean_displacement_x": float(mean_dx),
+        "mean_displacement_y": float(mean_dy),
+        "mean_displacement_magnitude": float(np.hypot(mean_dx, mean_dy)),
+        "displacement_angle_degrees": float(
+            np.degrees(np.arctan2(mean_dy, mean_dx))
+        ),
+        "vertical_to_horizontal_ratio": float(
+            abs(mean_dy) / max(abs(mean_dx), 1e-6)
+        ),
+    }
+
+
 def method_image_path(fire_root: Path, method: str, pair_id: str) -> Path:
     category = pair_id[0]
     number = int(pair_id[1:])
@@ -582,6 +602,7 @@ def run_audit(config: dict) -> Path:
             "ours_better_method_count": advantage_count,
             "ranking_score": score if math.isfinite(score) else "",
             "contact_sheet": str(contact_dir / f"{pair_id}_methods.jpg"),
+            **displacement_metrics(fire_root, pair_id),
         }
         for method, value in comparator_values.items():
             pair_row[f"{method}_reported_mle"] = value
@@ -613,6 +634,11 @@ def run_audit(config: dict) -> Path:
         "comparator_median_mle",
         "ours_better_method_count",
         "ranking_score",
+        "mean_displacement_x",
+        "mean_displacement_y",
+        "mean_displacement_magnitude",
+        "displacement_angle_degrees",
+        "vertical_to_horizontal_ratio",
         *[f"{method}_reported_mle" for method in MLE_FILES],
         "contact_sheet",
     ]
