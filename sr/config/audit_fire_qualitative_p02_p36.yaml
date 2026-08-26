@@ -1,0 +1,44 @@
+# Local, read-only screening of FIRE Category P qualitative candidates.
+# P01 is already used in the paper; P37 is absent from the copied FIRE data.
+fire_root: D:/ComputerCV/sr_project/supplementary_experiments/FIRE
+output_dir: D:/ComputerCV/sr_project/outputs/fire_qualitative_audit_p02_p36_v3
+
+pairs:
+  - P02
+  - P03
+  - P04
+  - P05
+  - P06
+  - P07
+  - P08
+  - P09
+  - P10
+  - P11
+  - P12
+  - P13
+  - P14
+  - P15
+  - P16
+  - P17
+  - P18
+  - P19
+  - P20
+  - P21
+  - P22
+  - P23
+  - P24
+  - P25
+  - P26
+  - P27
+  - P28
+  - P29
+  - P30
+  - P31
+  - P32
+  - P33
+  - P34
+  - P35
+  - P36
+
+contact_sheet_tile_size: 300
+write_all_contact_sheets: true

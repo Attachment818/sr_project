@@ -18059,6 +18059,8 @@ sr/
 │   ├── audit_pke_multiview_stability.py
 │   ├── audit_pke_region_feedback.py
 │   ├── audit_pke_value_map_retention.py
+│   ├── audit_fire_qualitative_candidates.py
+│   ├── render_fire_qualitative_comparison.py
 │   ├── audit_selected_matching_chain.py
 │   ├── audit_value_maps.py
 │   ├── compare_fimd_matching_chain.py
