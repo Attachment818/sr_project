@@ -1,0 +1,22 @@
+# Render shortlisted OCTA pairs in the 2x5 supplementary-paper layout.
+audit_config: D:/ComputerCV/sr_project/sr/config/audit_salc_octa_full_v1.yaml
+output_dir: D:/ComputerCV/sr_project/outputs/salc_octa_qualitative_candidates_v1
+
+pair_ids:
+  - "0045"
+  - "0087"
+  - "0029"
+  - "0097"
+
+methods:
+  - SIFT
+  - NCNet
+  - R2D2
+  - LoFTR
+  - SuperRetina
+  - RetinaRegNet
+  - Ours
+
+panel_size: 420
+columns: 5
+overlay_opacity: 0.48

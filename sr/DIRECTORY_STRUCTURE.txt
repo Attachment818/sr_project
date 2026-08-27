@@ -9,6 +9,9 @@ sr/
 │   ├── train_util.py
 │   └── vessel_mask_util.py
 ├── config/
+│   ├── audit_salc_hrf_ours_v1.yaml
+│   ├── audit_salc_octa_full_v1.yaml
+│   ├── render_salc_octa_candidates_v1.yaml
 │   ├── test.yaml
 │   ├── test_FIMD.yaml
 │   ├── test_FIMD_baseline_3408.yaml
@@ -18038,6 +18041,7 @@ sr/
 │   └── shared_ep45_perceptual_branch.pth
 ├── tools/
 │   ├── analyze_fimd_pair_diagnostics.py
+│   ├── audit_salc.py
 │   ├── audit_appearance_stability.py
 │   ├── audit_checkpoint_scalars.py
 │   ├── audit_checkpoint_tensor_series.py
@@ -18061,6 +18065,8 @@ sr/
 │   ├── audit_pke_value_map_retention.py
 │   ├── audit_fire_qualitative_candidates.py
 │   ├── render_fire_qualitative_comparison.py
+│   ├── render_salc_comparisons.py
+│   ├── salc_reference.py
 │   ├── audit_selected_matching_chain.py
 │   ├── audit_value_maps.py
 │   ├── compare_fimd_matching_chain.py
@@ -18071,6 +18077,7 @@ sr/
 │   ├── summarize_partial_training.py
 │   └── summarize_pke_diagnostics.py
 ├── predictor.py
+├── SALC_SUPPLEMENTARY_WORKFLOW.md
 ├── requirements.txt
 ├── SuperRetina.pth
 ├── test_on_FIMD.py

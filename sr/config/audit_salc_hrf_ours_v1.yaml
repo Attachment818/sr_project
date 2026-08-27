@@ -1,0 +1,53 @@
+# Validate the supplied HRF SalC implementation against the paper means.
+dataset_name: HRF
+output_dir: D:/ComputerCV/sr_project/outputs/salc_hrf_ours_v1
+
+pair_ids:
+  - "1"
+  - "2"
+  - "3"
+  - "4"
+  - "5"
+  - "6"
+  - "7"
+  - "8"
+  - "9"
+  - "10"
+  - "11"
+  - "12"
+  - "13"
+  - "14"
+  - "15"
+  - "16"
+  - "17"
+  - "18"
+
+reference:
+  directory: D:/ComputerCV/sr_project/supplementary_experiments/HRF/allQualityHRF
+  pattern: "{pair}_good.JPG"
+
+methods:
+  Source:
+    directory: D:/ComputerCV/sr_project/supplementary_experiments/HRF/allQualityHRF
+    pattern: "{pair}_bad.JPG"
+  Ours:
+    directory: D:/ComputerCV/sr_project/supplementary_experiments/HRF/align_image
+    pattern: "{pair}_bad_aligned.png"
+
+channel: green
+smoothing_radius: 25
+salient_percent: 10
+legacy_zero_interpolation: true
+primary_method: Ours
+
+expected_means:
+  Source: 0.512
+  Ours: 0.765
+expected_mean_tolerance: 0.01
+
+visualization:
+  top_k: 3
+  methods:
+    - Ours
+  panel_size: 440
+  columns: 4
