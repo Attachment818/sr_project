@@ -16,7 +16,7 @@ import shutil
 import sys
 import tempfile
 from pathlib import Path
-from typing import Dict, List, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
 
 import cv2
 import numpy as np
@@ -40,7 +40,20 @@ from tools.audit_fire_qualitative_candidates import (
 )
 
 
-PANEL_ORDER = ("Target and Source", *METHOD_ORDER)
+DEFAULT_METHODS = METHOD_ORDER
+SUPPORTED_METHODS = (*METHOD_ORDER, "LoFTR", "REMPE")
+
+
+def validate_methods(values: Sequence[str]) -> Tuple[str, ...]:
+    methods = tuple(str(value) for value in values)
+    if not methods:
+        raise ValueError("At least one comparison method is required")
+    unknown = [method for method in methods if method not in SUPPORTED_METHODS]
+    if unknown:
+        raise ValueError(f"Unsupported comparison methods: {unknown}")
+    if len(set(methods)) != len(methods):
+        raise ValueError("Duplicate methods in render config")
+    return methods
 
 
 def parse_args() -> argparse.Namespace:
@@ -71,17 +84,25 @@ def refuse_nonempty_output(output_dir: Path) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
 
-def transform_points(fire_root: Path, pair_id: str, method: str) -> np.ndarray:
+def transform_points(
+    fire_root: Path,
+    pair_id: str,
+    method: str,
+    method_result_dirs: Optional[Dict[str, Path]] = None,
+) -> np.ndarray:
     gt = read_numeric(
         fire_root / "Ground Truth" / f"control_points_{pair_id}_1_2.txt"
     ).reshape(-1, 4)
     query = gt[:, 2:]
     if method == "Target and Source":
         return query.copy()
-    if method in {"SIFT", "NCNet", "SuperPoint"}:
-        folder = {"SIFT": "SIFT", "NCNet": "ncnet", "SuperPoint": "SuperPoint"}[
-            method
-        ]
+    if method in {"SIFT", "NCNet", "SuperPoint", "LoFTR"}:
+        folder = {
+            "SIFT": "SIFT",
+            "NCNet": "ncnet",
+            "SuperPoint": "SuperPoint",
+            "LoFTR": "LoFTR",
+        }[method]
         matrix = read_numeric(
             fire_root / folder / "Homography" / f"{pair_id}_Homography.txt"
         ).reshape(3, 3)
@@ -132,12 +153,30 @@ def transform_points(fire_root: Path, pair_id: str, method: str) -> np.ndarray:
         ).reshape(3, 3)
         polynomial = read_numeric(fire_root / "ours" / "D2" / f"{pair_id}.txt")
         return apply_quadratic(apply_homography(query, homography), polynomial)
+    if method == "REMPE":
+        result_dir = (method_result_dirs or {}).get("REMPE")
+        if result_dir is None:
+            raise ValueError("REMPE requires method_result_dirs.REMPE")
+        return read_numeric(
+            result_dir
+            / f"control_points_{pair_id}_1_2_test_image_after_registration.txt"
+        ).reshape(-1, 2)
     raise KeyError(f"Unsupported method: {method}")
 
 
-def aligned_image(fire_root: Path, pair_id: str, method: str) -> np.ndarray:
+def aligned_image(
+    fire_root: Path,
+    pair_id: str,
+    method: str,
+    method_result_dirs: Optional[Dict[str, Path]] = None,
+) -> np.ndarray:
     if method == "Target and Source":
         return load_rgb(fire_root / "Images" / f"{pair_id}_2.jpg")
+    if method == "REMPE":
+        result_dir = (method_result_dirs or {}).get("REMPE")
+        if result_dir is None:
+            raise ValueError("REMPE requires method_result_dirs.REMPE")
+        return load_rgb(result_dir / "Projected_2.png")
     image = result_image(fire_root, method, pair_id)
     if image is None:
         raise FileNotFoundError(f"Aligned image missing for {pair_id}/{method}")
@@ -219,6 +258,8 @@ def render_pair(
     radius: int,
     line_width: int,
     moving_brightness_scale: float,
+    methods: Sequence[str],
+    method_result_dirs: Dict[str, Path],
 ) -> List[dict]:
     pair_dir.mkdir(parents=True)
     individual_dir = pair_dir / "individual_panels"
@@ -230,9 +271,17 @@ def render_pair(
     reference_points = gt[:, :2]
     panels: List[Image.Image] = []
     metrics: List[dict] = []
-    for index, method in enumerate(PANEL_ORDER):
-        warped = aligned_image(fire_root, pair_id, method)
-        predicted = transform_points(fire_root, pair_id, method)
+    panel_order = ("Target and Source", *methods)
+    for index, method in enumerate(panel_order):
+        warped = aligned_image(fire_root, pair_id, method, method_result_dirs)
+        predicted = transform_points(
+            fire_root, pair_id, method, method_result_dirs
+        )
+        if predicted.shape != reference_points.shape:
+            raise ValueError(
+                f"Control-point shape mismatch for {pair_id}/{method}: "
+                f"expected {reference_points.shape}, got {predicted.shape}"
+            )
         blended = blend_valid_regions(
             reference, warped, alpha, moving_brightness_scale
         )
@@ -264,7 +313,7 @@ def render_pair(
         )
 
     columns = 4
-    rows = 2
+    rows = math.ceil(len(panels) / columns)
     canvas = Image.new(
         "RGB", (columns * panel_size, rows * (panel_size + 54)), "white"
     )
@@ -281,6 +330,18 @@ def run(config: dict) -> Path:
     fire_root = Path(config["fire_root"]).expanduser().resolve()
     output_dir = Path(config["output_dir"]).expanduser().resolve()
     pairs = validate_pair_ids(config["pairs"])
+    methods = validate_methods(config.get("methods", DEFAULT_METHODS))
+    method_result_dirs = {
+        str(method): Path(path).expanduser().resolve()
+        for method, path in config.get("method_result_dirs", {}).items()
+    }
+    for method, result_dir in method_result_dirs.items():
+        if method not in methods:
+            raise ValueError(f"Unused method result directory: {method}")
+        if not result_dir.is_dir():
+            raise FileNotFoundError(
+                f"Method result directory not found for {method}: {result_dir}"
+            )
     alpha = float(config.get("blend_alpha", 0.5))
     panel_size = int(config.get("panel_size", 700))
     radius = int(config.get("control_point_radius", 34))
@@ -306,6 +367,8 @@ def run(config: dict) -> Path:
                 radius,
                 line_width,
                 moving_brightness_scale,
+                methods,
+                method_result_dirs,
             )
         )
     fields = ("pair_id", "method", "mle", "max_error", "points_under_25", "points_in_canvas")
@@ -318,9 +381,12 @@ def run(config: dict) -> Path:
     metadata = {
         "fire_root": str(fire_root),
         "pairs": pairs,
-        "panel_order": PANEL_ORDER,
+        "panel_order": ("Target and Source", *methods),
         "blend_alpha": alpha,
         "moving_brightness_scale": moving_brightness_scale,
+        "method_result_dirs": {
+            method: str(path) for method, path in method_result_dirs.items()
+        },
         "control_point_colors": {
             "reference": "green",
             "transformed_query": "red",
@@ -349,6 +415,11 @@ def self_test() -> None:
     assert tuple(darkened[12, 12]) == (100, 20, 10)
     assert tuple(darkened[48, 48]) == (10, 50, 5)
     assert tuple(darkened[28, 28]) == (55, 35, 8)
+    assert validate_methods(["SIFT", "LoFTR", "REMPE"]) == (
+        "SIFT",
+        "LoFTR",
+        "REMPE",
+    )
     with tempfile.TemporaryDirectory() as directory:
         output = Path(directory) / "new"
         refuse_nonempty_output(output)

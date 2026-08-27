@@ -45,6 +45,7 @@ MLE_FILES = {
     "SuperPoint": ("SuperPoint/SuperPoint_MLE.txt",),
     "GeoFormer": ("GeoFormer/GeoFormer_geoformer_noms_errors.txt",),
     "SuperRetina": ("SuperRetina/SuperRetina_MLE.txt",),
+    "LoFTR": ("LoFTR/LoFTR_MLE.txt",),
 }
 
 CSV_NAMES = (
@@ -157,6 +158,8 @@ def method_image_path(fire_root: Path, method: str, pair_id: str) -> Path:
         return fire_root / "ncnet" / "align_image" / f"{pair_id}_2_aligned.jpg"
     if method == "SuperPoint":
         return fire_root / "SuperPoint" / "align_image" / f"{pair_id}_2_aligned.jpg"
+    if method == "LoFTR":
+        return fire_root / "LoFTR" / "align_image" / f"{pair_id}_2_aligned.jpg"
     if method == "GeoFormer":
         return (
             fire_root
