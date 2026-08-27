@@ -38,6 +38,7 @@ METHOD_ORDER = (
     "RetinaRegNet",
     "Ours",
 )
+SUPPORTED_IMAGE_METHODS = (*METHOD_ORDER, "LoFTR")
 
 MLE_FILES = {
     "SIFT": ("SIFT/SIFT_MLE.txt",),
@@ -46,6 +47,7 @@ MLE_FILES = {
     "GeoFormer": ("GeoFormer/GeoFormer_geoformer_noms_errors.txt",),
     "SuperRetina": ("SuperRetina/SuperRetina_MLE.txt",),
     "LoFTR": ("LoFTR/LoFTR_MLE.txt",),
+    "REMPE": ("REMPE-1.1.0/REMPE_MLE.txt",),
 }
 
 CSV_NAMES = (
@@ -101,6 +103,18 @@ def validate_pair_ids(values: Sequence[str]) -> List[str]:
     if len(set(pairs)) != len(pairs):
         raise ValueError("Duplicate FIRE pair ids in audit config")
     return pairs
+
+
+def validate_methods(values: Sequence[str]) -> Tuple[str, ...]:
+    methods = tuple(str(value) for value in values)
+    if not methods:
+        raise ValueError("At least one image method is required")
+    unknown = [method for method in methods if method not in SUPPORTED_IMAGE_METHODS]
+    if unknown:
+        raise ValueError(f"Unsupported audit image methods: {unknown}")
+    if len(set(methods)) != len(methods):
+        raise ValueError("Duplicate image methods in audit config")
+    return methods
 
 
 def refuse_nonempty_output(output_dir: Path) -> None:
@@ -467,12 +481,13 @@ def write_contact_sheet(
     method_images: Dict[str, Optional[np.ndarray]],
     output_path: Path,
     tile_size: int,
+    methods: Sequence[str],
 ) -> None:
     panels: List[Tuple[str, Optional[np.ndarray]]] = [
         ("Reference", load_rgb(fire_root / "Images" / f"{pair_id}_1.jpg")),
         ("Query", load_rgb(fire_root / "Images" / f"{pair_id}_2.jpg")),
     ]
-    panels.extend((method, method_images[method]) for method in METHOD_ORDER)
+    panels.extend((method, method_images[method]) for method in methods)
     columns = 3
     rows = math.ceil(len(panels) / columns)
     header = 34
@@ -503,6 +518,7 @@ def run_audit(config: dict) -> Path:
     fire_root = Path(config["fire_root"]).expanduser().resolve()
     output_dir = Path(config["output_dir"]).expanduser().resolve()
     pairs = validate_pair_ids(config["pairs"])
+    methods = validate_methods(config.get("methods", METHOD_ORDER))
     tile_size = int(config.get("contact_sheet_tile_size", 300))
     if tile_size < 96 or tile_size > 1024:
         raise ValueError("contact_sheet_tile_size must be in [96, 1024]")
@@ -526,7 +542,7 @@ def run_audit(config: dict) -> Path:
         missing: List[str] = []
         severe_methods: List[str] = []
         warning_methods: List[str] = []
-        for method in METHOD_ORDER:
+        for method in methods:
             path = method_image_path(fire_root, method, pair_id)
             image = result_image(fire_root, method, pair_id)
             method_images[method] = image
@@ -572,6 +588,7 @@ def run_audit(config: dict) -> Path:
                 method_images,
                 contact_dir / f"{pair_id}_methods.jpg",
                 tile_size,
+                methods,
             )
 
         ours_mle = compute_ours_mle(fire_root, pair_id)
@@ -709,6 +726,7 @@ def self_test() -> None:
     assert method_image_path(Path("FIRE"), "RetinaRegNet", "A01").name == (
         "Final_Registration_Results_for_case0_show_result_.png"
     )
+    assert validate_methods(["SIFT", "LoFTR"]) == ("SIFT", "LoFTR")
 
     normal = np.zeros((256, 256, 3), dtype=np.uint8)
     cv2.circle(normal, (128, 128), 92, (180, 70, 40), thickness=-1)
