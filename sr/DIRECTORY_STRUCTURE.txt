@@ -11,6 +11,8 @@ sr/
 ├── config/
 │   ├── audit_salc_hrf_ours_v1.yaml
 │   ├── audit_salc_octa_full_v1.yaml
+│   ├── render_salc_hrf_current_p8_v1.yaml
+│   ├── render_salc_octa_final_candidates_v1.yaml
 │   ├── render_salc_octa_candidates_v1.yaml
 │   ├── test.yaml
 │   ├── test_FIMD.yaml

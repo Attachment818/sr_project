@@ -73,13 +73,18 @@ def run(render_config_path: Path) -> Path:
     panel_size = int(render.get("panel_size", 420))
     columns = int(render.get("columns", 5))
     overlay_opacity = float(render.get("overlay_opacity", 0.55))
+    filename_pattern = str(
+        render.get("filename_pattern", "{pair}_salc_comparison_2x5.png")
+    )
+    if "{pair}" not in filename_pattern:
+        raise ValueError("filename_pattern must contain {pair}")
     for pair_id in tqdm(pair_ids, desc="Render SalC comparisons", unit="pair"):
         render_pair_figure(
             pair_id,
             reference_source,
             method_sources,
             methods,
-            output_dir / f"{pair_id}_salc_comparison_2x5.png",
+            output_dir / filename_pattern.format(pair=pair_id),
             channel=str(audit.get("channel", "green")),
             smoothing_radius=float(audit.get("smoothing_radius", 25.0)),
             salient_percent=float(audit.get("salient_percent", 10.0)),
@@ -101,6 +106,9 @@ def self_test() -> None:
         pass
     else:
         raise AssertionError("Missing render config was not rejected")
+    assert "{pair}_salc_comparison_2x5.png".format(pair="0045") == (
+        "0045_salc_comparison_2x5.png"
+    )
     print("SalC comparison renderer self-test passed")
 
 

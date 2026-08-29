@@ -23,6 +23,8 @@
 - `tools/render_salc_comparisons.py`：对已选 pair 生成补充材料版式，不重跑全量统计。
 - `config/audit_salc_hrf_ours_v1.yaml`：HRF Source/Ours 审计。
 - `config/audit_salc_octa_full_v1.yaml`：OCTA 100 对、9 组输入的全量审计。
+- `config/render_salc_hrf_current_p8_v1.yaml`：使用现有数据生成 HRF pair 8 的 Source/Ours 原型图。
+- `config/render_salc_octa_final_candidates_v1.yaml`：使用较强显示对比生成 OCTA pair 0045/0087 最终候选图。
 - `config/render_salc_octa_candidates_v1.yaml`：OCTA 候选 pair `0045/0087/0029/0097` 的 2×5 图。
 
 ## 本地执行

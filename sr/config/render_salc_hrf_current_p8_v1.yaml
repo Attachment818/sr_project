@@ -1,0 +1,15 @@
+# Render the strongest available HRF Source/Ours prototype.
+# This is not a complete multi-method comparison because comparator outputs are absent.
+audit_config: D:/ComputerCV/sr_project/sr/config/audit_salc_hrf_ours_v1.yaml
+output_dir: D:/ComputerCV/sr_project/outputs/salc_hrf_current_p8_final_v1
+
+pair_ids:
+  - "8"
+
+methods:
+  - Ours
+
+panel_size: 520
+columns: 4
+overlay_opacity: 0.72
+filename_pattern: "{pair}_salc_comparison_1x4.png"
