@@ -1,0 +1,17 @@
+# Compose the historical FIMD02 overlays without altering their annotations.
+output_dir: D:/ComputerCV/sr_project/outputs/fimd02_existing_comparison_final_v1
+output_filename: fimd02_existing_comparison_1x4.png
+columns: 4
+panel_size: 560
+header_height: 48
+font_size: 22
+
+panels:
+  - title: Target and source
+    path: D:/ComputerCV/sr_project/supplementary_experiments/fimd/target_and_source_FIMD02.jpg
+  - title: SuperRetina
+    path: D:/ComputerCV/sr_project/supplementary_experiments/fimd/overlay_result_SuperRetina_FIMD02.jpg
+  - title: RetinaRegNet
+    path: D:/ComputerCV/sr_project/supplementary_experiments/fimd/overlay_result_RRN_FIMD02.jpg
+  - title: Ours
+    path: D:/ComputerCV/sr_project/supplementary_experiments/fimd/overlay_result_Ours_FIMD02.jpg

@@ -73,6 +73,7 @@ def run(render_config_path: Path) -> Path:
     panel_size = int(render.get("panel_size", 420))
     columns = int(render.get("columns", 5))
     overlay_opacity = float(render.get("overlay_opacity", 0.55))
+    font_size = int(render.get("font_size", 10))
     filename_pattern = str(
         render.get("filename_pattern", "{pair}_salc_comparison_2x5.png")
     )
@@ -94,6 +95,7 @@ def run(render_config_path: Path) -> Path:
             panel_size=panel_size,
             columns=columns,
             overlay_opacity=overlay_opacity,
+            font_size=font_size,
         )
     print(f"Wrote selected SalC comparisons: {output_dir}")
     return output_dir

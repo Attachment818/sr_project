@@ -9,9 +9,12 @@ sr/
 │   ├── train_util.py
 │   └── vessel_mask_util.py
 ├── config/
+│   ├── audit_salc_hrf_multimethod_v1.yaml
 │   ├── audit_salc_hrf_ours_v1.yaml
 │   ├── audit_salc_octa_full_v1.yaml
+│   ├── compose_fimd02_existing_v1.yaml
 │   ├── render_salc_hrf_current_p8_v1.yaml
+│   ├── render_salc_hrf_pair11_v1.yaml
 │   ├── render_salc_octa_final_candidates_v1.yaml
 │   ├── render_salc_octa_candidates_v1.yaml
 │   ├── test.yaml
@@ -18044,6 +18047,7 @@ sr/
 ├── tools/
 │   ├── analyze_fimd_pair_diagnostics.py
 │   ├── audit_salc.py
+│   ├── compose_existing_qualitative.py
 │   ├── audit_appearance_stability.py
 │   ├── audit_checkpoint_scalars.py
 │   ├── audit_checkpoint_tensor_series.py

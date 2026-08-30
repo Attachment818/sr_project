@@ -110,7 +110,18 @@ def write_csv(path: Path, rows: Sequence[Mapping[str, object]], fields: Sequence
         writer.writerows(rows)
 
 
-def panel(image: np.ndarray, title: str, size: int) -> Image.Image:
+def load_font(size: int) -> ImageFont.ImageFont:
+    if size <= 0:
+        raise ValueError("font_size must be positive")
+    for name in ("arial.ttf", "DejaVuSans.ttf"):
+        try:
+            return ImageFont.truetype(name, size=size)
+        except OSError:
+            continue
+    return ImageFont.load_default()
+
+
+def panel(image: np.ndarray, title: str, size: int, font_size: int) -> Image.Image:
     header = 38
     canvas = Image.new("RGB", (size, size + header), "white")
     content = Image.fromarray(image).convert("RGB")
@@ -119,7 +130,7 @@ def panel(image: np.ndarray, title: str, size: int) -> Image.Image:
     y = header + (size - content.height) // 2
     canvas.paste(content, (x, y))
     draw = ImageDraw.Draw(canvas)
-    font = ImageFont.load_default()
+    font = load_font(font_size)
     box = draw.textbbox((0, 0), title, font=font)
     draw.text(((size - (box[2] - box[0])) // 2, 12), title, fill="black", font=font)
     return canvas
@@ -139,6 +150,7 @@ def render_pair_figure(
     panel_size: int,
     columns: int,
     overlay_opacity: float,
+    font_size: int,
 ) -> None:
     reference_raw = load_image(source_path(reference_source, pair_id))
     reference_gray = as_unit_gray(reference_raw, channel)
@@ -203,7 +215,7 @@ def render_pair_figure(
         "white",
     )
     for index, (title, image) in enumerate(images):
-        tile = panel(image, title, panel_size)
+        tile = panel(image, title, panel_size, font_size)
         sheet.paste(
             tile,
             ((index % columns) * panel_size, (index // columns) * (panel_size + 38)),
@@ -400,6 +412,7 @@ def run(config_path: Path) -> Path:
         panel_size = int(visualization.get("panel_size", 420))
         columns = int(visualization.get("columns", 5))
         overlay_opacity = float(visualization.get("overlay_opacity", 0.55))
+        font_size = int(visualization.get("font_size", 10))
         for row in tqdm(
             candidate_rows[:top_k],
             desc=f"Render {config['dataset_name']}",
@@ -419,6 +432,7 @@ def run(config_path: Path) -> Path:
                 panel_size=panel_size,
                 columns=columns,
                 overlay_opacity=overlay_opacity,
+                font_size=font_size,
             )
 
     print(f"Wrote SalC audit: {output_dir}")

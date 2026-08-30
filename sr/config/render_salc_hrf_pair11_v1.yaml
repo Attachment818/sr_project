@@ -1,0 +1,21 @@
+# Render the only shared HRF pair where Ours has the highest audited SalC.
+audit_config: D:/ComputerCV/sr_project/sr/config/audit_salc_hrf_multimethod_v1.yaml
+output_dir: D:/ComputerCV/sr_project/outputs/salc_hrf_pair11_final_v1
+
+pair_ids:
+  - "11"
+
+methods:
+  - NCNet
+  - SuperRetina
+  - R2D2
+  - GLAMpoints
+  - LoFTR
+  - SuperPoint
+  - Ours
+
+panel_size: 520
+columns: 5
+overlay_opacity: 0.72
+font_size: 22
+filename_pattern: "{pair}_salc_comparison_2x5.png"

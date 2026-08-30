@@ -1,0 +1,65 @@
+# Audit the nine HRF pairs shared by all selected qualitative methods.
+dataset_name: HRF_multimethod
+output_dir: D:/ComputerCV/sr_project/outputs/salc_hrf_multimethod_v1
+
+pair_ids:
+  - "1"
+  - "2"
+  - "4"
+  - "7"
+  - "10"
+  - "11"
+  - "12"
+  - "17"
+  - "18"
+
+reference:
+  directory: D:/ComputerCV/sr_project/supplementary_experiments/HRF/allQualityHRF
+  pattern: "{pair}_good.JPG"
+
+methods:
+  Source:
+    directory: D:/ComputerCV/sr_project/supplementary_experiments/HRF/allQualityHRF
+    pattern: "{pair}_bad.JPG"
+  NCNet:
+    directory: D:/ComputerCV/sr_project/supplementary_experiments/HRF/ncnet/align_image
+    pattern: "{pair}_bad_aligned.JPG"
+  SuperRetina:
+    directory: D:/ComputerCV/sr_project/supplementary_experiments/HRF/SuperRetina/align_image
+    pattern: "{pair}_bad_aligned.JPG"
+  R2D2:
+    directory: D:/ComputerCV/sr_project/supplementary_experiments/HRF/r2d2(cpu)/align_image
+    pattern: "{pair}_bad_aligned.JPG"
+  GLAMpoints:
+    directory: D:/ComputerCV/sr_project/supplementary_experiments/HRF/GLAMpoints(cpu)/align_image
+    pattern: "{pair}_bad_aligned.JPG"
+  LoFTR:
+    directory: D:/ComputerCV/sr_project/supplementary_experiments/HRF/LoFTR/align_image
+    pattern: "{pair}_bad_aligned.JPG"
+  SuperPoint:
+    directory: D:/ComputerCV/sr_project/supplementary_experiments/HRF/SuperPoint/align_image
+    pattern: "{pair}_bad_aligned.JPG"
+  Ours:
+    directory: D:/ComputerCV/sr_project/supplementary_experiments/HRF/align_image
+    pattern: "{pair}_bad_aligned.png"
+
+channel: green
+smoothing_radius: 25
+salient_percent: 10
+legacy_zero_interpolation: true
+primary_method: Ours
+
+visualization:
+  top_k: 9
+  methods:
+    - NCNet
+    - SuperRetina
+    - R2D2
+    - GLAMpoints
+    - LoFTR
+    - SuperPoint
+    - Ours
+  panel_size: 420
+  columns: 5
+  overlay_opacity: 0.72
+  font_size: 22
