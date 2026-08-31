@@ -10,6 +10,7 @@ sr/
 │   └── vessel_mask_util.py
 ├── config/
 │   ├── audit_salc_hrf_multimethod_v1.yaml
+│   ├── audit_salc_hrf_table_extension_v1.yaml
 │   ├── audit_salc_hrf_ours_v1.yaml
 │   ├── audit_salc_octa_full_v1.yaml
 │   ├── compose_fimd02_existing_v1.yaml
@@ -18049,6 +18050,7 @@ sr/
 ├── tools/
 │   ├── analyze_fimd_pair_diagnostics.py
 │   ├── audit_salc.py
+│   ├── audit_salc_table_extension.py
 │   ├── compose_existing_qualitative.py
 │   ├── render_salc_parameter_sweep.py
 │   ├── audit_appearance_stability.py

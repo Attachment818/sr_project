@@ -20,10 +20,12 @@
 
 - `tools/salc_reference.py`：SalC 参考实现、显著性叠加图及自测。
 - `tools/audit_salc.py`：按 YAML 批量计算每对、每方法 SalC，输出 CSV/JSON，并按 Ours 相对最强对照的差值排序。
+- `tools/audit_salc_table_extension.py`：在方法成功数不一致时，输出成功样本均值、缺失配准保留 source 的统一口径均值、失败 pair 和每对平均时间。
 - `tools/render_salc_comparisons.py`：对已选 pair 生成补充材料版式，不重跑全量统计。
 - `tools/render_salc_parameter_sweep.py`：在不修改配准图的前提下，对比 SalC 结构参数和纯显示参数，并在标题中保留实际 SalC。
 - `tools/compose_existing_qualitative.py`：将已有定性结果按配置排版，不修改原图。
 - `config/audit_salc_hrf_multimethod_v1.yaml`：HRF 9个共同pair的多方法SalC审计。
+- `config/audit_salc_hrf_table_extension_v1.yaml`：为 HRF 表格新增 R2D2、GLAMpoints、LoFTR、SuperPoint 四行的18对统一口径审计。
 - `config/compose_fimd02_existing_v1.yaml`：FIMD02现有叠加成品4面板图。
 - `config/audit_salc_hrf_ours_v1.yaml`：HRF Source/Ours 审计。
 - `config/audit_salc_octa_full_v1.yaml`：OCTA 100 对、9 组输入的全量审计。
@@ -41,6 +43,8 @@ D:\Anaconda_envs\envs\sr\python.exe sr\tools\audit_salc.py --config sr\config\au
 
 D:\Anaconda_envs\envs\sr\python.exe sr\tools\audit_salc.py --config sr\config\audit_salc_octa_full_v1.yaml
 
+D:\Anaconda_envs\envs\sr\python.exe sr\tools\audit_salc_table_extension.py --config sr\config\audit_salc_hrf_table_extension_v1.yaml
+
 D:\Anaconda_envs\envs\sr\python.exe sr\tools\render_salc_comparisons.py --render-config sr\config\render_salc_octa_candidates_v1.yaml
 ```
 
@@ -51,6 +55,7 @@ D:\Anaconda_envs\envs\sr\python.exe sr\tools\render_salc_comparisons.py --render
 - OCTA：Python 复算保持了论文中的整体排序，Ours 仍最高；但部分方法与学长表格相差约 0.01–0.02，因此生成图可用于候选审阅，最终定量数字仍以论文原表为准。
 - HRF：Source 复算为 0.524（论文 0.512），Ours 为 0.713（论文 0.765）。Source 较接近而 Ours 差距明显，更可能是当前 `align_image` 与论文实验版本不同；在确认数据前不应把该均值写入论文。
 - HRF 多方法共同子集：9 个共同 pair 上，Ours、SuperRetina、R2D2 的平均 SalC 分别为 0.684、0.700、0.699。pair 11 是唯一一个 Ours 高于全部对照的共同样本（Ours 0.804，最强对照 SuperRetina 0.800），但差值仅约 0.004。因此 pair 11 只能作为当前历史数据下的候选定性图，不能据此声称 Ours 整体优于所有方法，也不应为追求视觉优势而修改配准结果。
+- HRF 表格新增方法：R2D2 和 GLAMpoints 均有 18/18 对结果，SalC 分别为 72.48% 和 68.49%。LoFTR 有 16/18 对、SuperPoint 有 11/18 对；缺失配准按保持 source 不变处理后，统一18对 SalC 分别为 50.23% 和 49.99%。对应平均时间为 17.3、24.0、0.9、2.8 秒/对。LoFTR 缺失 pair 3/6，SuperPoint 缺失 pair 5/8/9/13/14/15/16，论文中需在评价协议或表注说明失败处理方式。
 - HRF 参数对照：在 pair 7/11/12 上，保持论文协议 `radius=25, p=10`，仅将 `gamma` 从 0.65 改为 0.45、`opacity` 从 0.72 改为 1.0，并按 reference FOV 统一裁切，能明显增强可读性且 SalC 完全不变。`radius=10` 会引入大量细碎噪声，`p=5` 会丢失过多结构，`radius=40` 会使血管过度粗化；这些结构参数不用于最终论文图。
 - FIMD：当前只有 FIMD02 的 Target/Source、SuperRetina、RetinaRegNet 和 Ours 四张已标注叠加成品。它们可直接排版，且 Ours 的红绿控制点视觉重合更好；由于缺少 `Job1_FIMD_MLE.txt` 和未叠加的原始/配准图，不能重算 Ours 的 FIMD02 MLE，也不能对这些成品重算 SalC。
 - OCTA 当前优先人工审阅 pair `0045`，其次是 `0087`、`0029`、`0097`。候选排序只是辅助，最终需同时排除裁剪、黑边和非物理畸变。

@@ -1,0 +1,57 @@
+dataset_name: HRF_table_extension
+output_dir: D:/ComputerCV/sr_project/outputs/salc_hrf_table_extension_v1
+
+pair_ids:
+  - "1"
+  - "2"
+  - "3"
+  - "4"
+  - "5"
+  - "6"
+  - "7"
+  - "8"
+  - "9"
+  - "10"
+  - "11"
+  - "12"
+  - "13"
+  - "14"
+  - "15"
+  - "16"
+  - "17"
+  - "18"
+
+reference:
+  directory: D:/ComputerCV/sr_project/supplementary_experiments/HRF/allQualityHRF
+  pattern: "{pair}_good.JPG"
+
+source:
+  directory: D:/ComputerCV/sr_project/supplementary_experiments/HRF/allQualityHRF
+  pattern: "{pair}_bad.JPG"
+
+methods:
+  R2D2:
+    directory: D:/ComputerCV/sr_project/supplementary_experiments/HRF/r2d2(cpu)/align_image
+    pattern: "{pair}_bad_aligned.JPG"
+    time_file: D:/ComputerCV/sr_project/supplementary_experiments/HRF/r2d2(cpu)/total_registration_time.txt
+    attempted_count: 18
+  GLAMpoints:
+    directory: D:/ComputerCV/sr_project/supplementary_experiments/HRF/GLAMpoints(cpu)/align_image
+    pattern: "{pair}_bad_aligned.JPG"
+    time_file: D:/ComputerCV/sr_project/supplementary_experiments/HRF/GLAMpoints(cpu)/total_registration_time.txt
+    attempted_count: 18
+  LoFTR:
+    directory: D:/ComputerCV/sr_project/supplementary_experiments/HRF/LoFTR/align_image
+    pattern: "{pair}_bad_aligned.JPG"
+    time_file: D:/ComputerCV/sr_project/supplementary_experiments/HRF/LoFTR/total_registration_time.txt
+    attempted_count: 18
+  SuperPoint:
+    directory: D:/ComputerCV/sr_project/supplementary_experiments/HRF/SuperPoint/align_image
+    pattern: "{pair}_bad_aligned.JPG"
+    time_file: D:/ComputerCV/sr_project/supplementary_experiments/HRF/SuperPoint/total_registration_time.txt
+    attempted_count: 18
+
+channel: green
+smoothing_radius: 25
+salient_percent: 10
+legacy_zero_interpolation: true
