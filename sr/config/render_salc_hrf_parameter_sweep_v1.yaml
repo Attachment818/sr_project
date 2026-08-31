@@ -1,0 +1,50 @@
+# Compare metric parameters and display-only parameters without altering aligned images.
+audit_config: D:/ComputerCV/sr_project/sr/config/audit_salc_hrf_multimethod_v1.yaml
+output_dir: D:/ComputerCV/sr_project/outputs/salc_hrf_parameter_sweep_v1
+
+pair_ids:
+  - "7"
+  - "11"
+  - "12"
+
+methods:
+  - Source
+  - Ours
+
+crop_to_reference_fov: true
+crop_margin_fraction: 0.02
+panel_size: 460
+columns: 4
+font_size: 18
+
+variants:
+  - name: protocol
+    smoothing_radius: 25
+    salient_percent: 10
+    gamma: 0.65
+    opacity: 0.72
+  - name: display_dark
+    smoothing_radius: 25
+    salient_percent: 10
+    gamma: 0.45
+    opacity: 1.0
+  - name: sparse_5pct
+    smoothing_radius: 25
+    salient_percent: 5
+    gamma: 0.45
+    opacity: 1.0
+  - name: dense_15pct
+    smoothing_radius: 25
+    salient_percent: 15
+    gamma: 0.45
+    opacity: 1.0
+  - name: fine_radius10
+    smoothing_radius: 10
+    salient_percent: 10
+    gamma: 0.45
+    opacity: 1.0
+  - name: smooth_radius40
+    smoothing_radius: 40
+    salient_percent: 10
+    gamma: 0.45
+    opacity: 1.0

@@ -136,6 +136,37 @@ def panel(image: np.ndarray, title: str, size: int, font_size: int) -> Image.Ima
     return canvas
 
 
+def reference_fov_crop_box(
+    reference: np.ndarray,
+    margin_fraction: float,
+) -> Tuple[int, int, int, int]:
+    """Return a display-only crop around the non-black reference fundus field."""
+    if reference.ndim != 2:
+        raise ValueError("Reference crop image must be two-dimensional")
+    if margin_fraction < 0:
+        raise ValueError("crop_margin_fraction must be non-negative")
+    peak = float(np.max(reference)) if reference.size else 0.0
+    mask = reference > max(peak * 0.04, 1.0 / 255.0)
+    rows, cols = np.nonzero(mask)
+    if rows.size == 0:
+        return 0, 0, reference.shape[1], reference.shape[0]
+    height, width = reference.shape
+    margin = int(round(max(height, width) * margin_fraction))
+    return (
+        max(0, int(cols.min()) - margin),
+        max(0, int(rows.min()) - margin),
+        min(width, int(cols.max()) + 1 + margin),
+        min(height, int(rows.max()) + 1 + margin),
+    )
+
+
+def crop_array(image: np.ndarray, box: Tuple[int, int, int, int] | None) -> np.ndarray:
+    if box is None:
+        return image
+    left, top, right, bottom = box
+    return image[top:bottom, left:right]
+
+
 def render_pair_figure(
     pair_id: str,
     reference_source: Tuple[Path, str],
@@ -151,6 +182,9 @@ def render_pair_figure(
     columns: int,
     overlay_opacity: float,
     font_size: int,
+    overlay_gamma: float = 0.65,
+    crop_to_reference_fov: bool = False,
+    crop_margin_fraction: float = 0.02,
 ) -> None:
     reference_raw = load_image(source_path(reference_source, pair_id))
     reference_gray = as_unit_gray(reference_raw, channel)
@@ -159,6 +193,11 @@ def render_pair_figure(
         smoothing_radius=smoothing_radius,
         salient_percent=salient_percent,
         legacy_zero_interpolation=False,
+    )
+    crop_box = (
+        reference_fov_crop_box(reference_gray, crop_margin_fraction)
+        if crop_to_reference_fov
+        else None
     )
     source_raw = load_image(source_path(method_sources["Source"], pair_id))
     source_gray = as_unit_gray(source_raw, channel)
@@ -170,13 +209,14 @@ def render_pair_figure(
     )
 
     images: List[Tuple[str, np.ndarray]] = [
-        ("Target image", rgb_preview(reference_raw)),
-        ("Source image", rgb_preview(source_raw)),
+        ("Target image", crop_array(rgb_preview(reference_raw), crop_box)),
+        ("Source image", crop_array(rgb_preview(source_raw), crop_box)),
         (
             "Target and source",
             salience_overlay(
                 reference_salience,
                 source_salience,
+                gamma=overlay_gamma,
                 opacity=overlay_opacity,
             ),
         ),
@@ -200,13 +240,21 @@ def render_pair_figure(
         images.append(
             (
                 method,
-                salience_overlay(
-                    reference_salience,
-                    method_salience,
-                    opacity=overlay_opacity,
+                crop_array(
+                    salience_overlay(
+                        reference_salience,
+                        method_salience,
+                        gamma=overlay_gamma,
+                        opacity=overlay_opacity,
+                    ),
+                    crop_box,
                 ),
             )
         )
+
+    # The source overlay is created before the method loop and must use the
+    # same display crop as every registered result.
+    images[2] = (images[2][0], crop_array(images[2][1], crop_box))
 
     rows = math.ceil(len(images) / columns)
     sheet = Image.new(
@@ -412,6 +460,13 @@ def run(config_path: Path) -> Path:
         panel_size = int(visualization.get("panel_size", 420))
         columns = int(visualization.get("columns", 5))
         overlay_opacity = float(visualization.get("overlay_opacity", 0.55))
+        overlay_gamma = float(visualization.get("overlay_gamma", 0.65))
+        crop_to_reference_fov = bool(
+            visualization.get("crop_to_reference_fov", False)
+        )
+        crop_margin_fraction = float(
+            visualization.get("crop_margin_fraction", 0.02)
+        )
         font_size = int(visualization.get("font_size", 10))
         for row in tqdm(
             candidate_rows[:top_k],
@@ -433,6 +488,9 @@ def run(config_path: Path) -> Path:
                 columns=columns,
                 overlay_opacity=overlay_opacity,
                 font_size=font_size,
+                overlay_gamma=overlay_gamma,
+                crop_to_reference_fov=crop_to_reference_fov,
+                crop_margin_fraction=crop_margin_fraction,
             )
 
     print(f"Wrote SalC audit: {output_dir}")
@@ -451,6 +509,9 @@ def self_test() -> None:
         assert "{pair}" in str(error)
     else:
         raise AssertionError("Missing pair placeholder was not rejected")
+    crop_test = np.zeros((20, 30), dtype=np.float64)
+    crop_test[4:16, 6:25] = 1.0
+    assert reference_fov_crop_box(crop_test, 0.0) == (6, 4, 25, 16)
     print("SalC audit self-test passed")
 
 
