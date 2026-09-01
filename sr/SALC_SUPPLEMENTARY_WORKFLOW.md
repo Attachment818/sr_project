@@ -34,6 +34,8 @@
 - `config/render_salc_hrf_pair11_display_v2.yaml`：保持 HRF 论文协议不变，仅加深线条并按参考视野统一裁切的 pair 11 候选图。
 - `config/render_salc_hrf_parameter_sweep_v1.yaml`：对 HRF pair 7/11/12 比较论文协议、显示加深、显著像素比例和滤波尺度。
 - `config/render_salc_octa_final_candidates_v1.yaml`：使用较强显示对比生成 OCTA pair 0045/0087 最终候选图。
+- `config/render_salc_octa_parameter_sweep_v1.yaml`：对 OCTA pair 0045/0087 比较原协议、纯显示加深以及三组去散斑结构参数。
+- `config/render_salc_octa_final_candidates_r3_p4_v2.yaml`：使用 `radius=3, p=4` 生成 OCTA pair 0045/0087 的去散斑定性候选图；不替换表格中 `radius=1, p=4` 的定量结果。
 - `config/render_salc_octa_candidates_v1.yaml`：OCTA 候选 pair `0045/0087/0029/0097` 的 2×5 图。
 
 ## 本地执行
@@ -53,6 +55,7 @@ D:\Anaconda_envs\envs\sr\python.exe sr\tools\render_salc_comparisons.py --render
 ## 当前验证结论
 
 - OCTA：Python 复算保持了论文中的整体排序，Ours 仍最高；但部分方法与学长表格相差约 0.01–0.02，因此生成图可用于候选审阅，最终定量数字仍以论文原表为准。
+- OCTA 参数对照：仅将 `gamma/opacity` 改为 `0.35/1.0` 能加深线条，但不能消除 `radius=1` 的散斑。`radius=3, p=4` 能明显改善连续血管的可读性；`radius=5` 开始丢失细血管，`p=2` 过稀。在 pair 0045/0087 的 `radius=3, p=4` 反事实下，Ours SalC 为 0.844/0.838，相对最强对照高约 0.044/0.029。该参数只用于定性图，不回填原定量表。
 - HRF：Source 复算为 0.524（论文 0.512），Ours 为 0.713（论文 0.765）。Source 较接近而 Ours 差距明显，更可能是当前 `align_image` 与论文实验版本不同；在确认数据前不应把该均值写入论文。
 - HRF 多方法共同子集：9 个共同 pair 上，Ours、SuperRetina、R2D2 的平均 SalC 分别为 0.684、0.700、0.699。pair 11 是唯一一个 Ours 高于全部对照的共同样本（Ours 0.804，最强对照 SuperRetina 0.800），但差值仅约 0.004。因此 pair 11 只能作为当前历史数据下的候选定性图，不能据此声称 Ours 整体优于所有方法，也不应为追求视觉优势而修改配准结果。
 - HRF 表格新增方法：R2D2 和 GLAMpoints 均有 18/18 对结果，SalC 分别为 72.48% 和 68.49%。LoFTR 有 16/18 对、SuperPoint 有 11/18 对；缺失配准按保持 source 不变处理后，统一18对 SalC 分别为 50.23% 和 49.99%。对应平均时间为 17.3、24.0、0.9、2.8 秒/对。LoFTR 缺失 pair 3/6，SuperPoint 缺失 pair 5/8/9/13/14/15/16，论文中需在评价协议或表注说明失败处理方式。

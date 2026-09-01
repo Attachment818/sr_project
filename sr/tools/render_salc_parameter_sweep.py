@@ -126,7 +126,7 @@ def run(config_path: Path) -> Path:
 
     progress = tqdm(
         total=len(pair_ids) * len(variants) * (len(methods) + 1),
-        desc="Render HRF parameter sweep",
+        desc="Render SalC parameter sweep",
         unit="salience",
     )
     try:

@@ -43,6 +43,21 @@ def load_render_config(path: Path) -> dict:
     return config
 
 
+def resolve_salc_parameters(render: dict, audit: dict) -> tuple[float, float]:
+    """Resolve optional visualization parameters without changing old configs."""
+    smoothing_radius = float(
+        render.get("smoothing_radius", audit.get("smoothing_radius", 25.0))
+    )
+    salient_percent = float(
+        render.get("salient_percent", audit.get("salient_percent", 10.0))
+    )
+    if smoothing_radius < 0:
+        raise ValueError("smoothing_radius must be non-negative")
+    if not 0 < salient_percent <= 100:
+        raise ValueError("salient_percent must be in (0, 100]")
+    return smoothing_radius, salient_percent
+
+
 def run(render_config_path: Path) -> Path:
     render = load_render_config(render_config_path)
     audit_config_path = Path(str(render["audit_config"])).expanduser().resolve()
@@ -74,6 +89,7 @@ def run(render_config_path: Path) -> Path:
     columns = int(render.get("columns", 5))
     overlay_opacity = float(render.get("overlay_opacity", 0.55))
     overlay_gamma = float(render.get("overlay_gamma", 0.65))
+    smoothing_radius, salient_percent = resolve_salc_parameters(render, audit)
     crop_to_reference_fov = bool(render.get("crop_to_reference_fov", False))
     crop_margin_fraction = float(render.get("crop_margin_fraction", 0.02))
     font_size = int(render.get("font_size", 10))
@@ -90,8 +106,8 @@ def run(render_config_path: Path) -> Path:
             methods,
             output_dir / filename_pattern.format(pair=pair_id),
             channel=str(audit.get("channel", "green")),
-            smoothing_radius=float(audit.get("smoothing_radius", 25.0)),
-            salient_percent=float(audit.get("salient_percent", 10.0)),
+            smoothing_radius=smoothing_radius,
+            salient_percent=salient_percent,
             legacy_zero_interpolation=bool(
                 audit.get("legacy_zero_interpolation", True)
             ),
@@ -117,6 +133,13 @@ def self_test() -> None:
     assert "{pair}_salc_comparison_2x5.png".format(pair="0045") == (
         "0045_salc_comparison_2x5.png"
     )
+    assert resolve_salc_parameters(
+        {}, {"smoothing_radius": 1, "salient_percent": 4}
+    ) == (1.0, 4.0)
+    assert resolve_salc_parameters(
+        {"smoothing_radius": 3, "salient_percent": 4},
+        {"smoothing_radius": 1, "salient_percent": 4},
+    ) == (3.0, 4.0)
     print("SalC comparison renderer self-test passed")
 
 

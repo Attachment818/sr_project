@@ -1,0 +1,57 @@
+# Compare OCTA SalC protocol parameters and display-only enhancement.
+# The protocol SalC values remain defined by radius=1 and p=4. Variants with
+# different radius/p are qualitative counterfactuals and must not replace the
+# quantitative table without an explicit evaluation-protocol change.
+audit_config: D:/ComputerCV/sr_project/sr/config/audit_salc_octa_full_v1.yaml
+output_dir: D:/ComputerCV/sr_project/outputs/salc_octa_parameter_sweep_v1
+
+pair_ids:
+  - "0045"
+  - "0087"
+
+methods:
+  - Source
+  - SIFT
+  - R2D2
+  - SuperRetina
+  - RetinaRegNet
+  - Ours
+
+crop_to_reference_fov: false
+panel_size: 340
+columns: 6
+font_size: 17
+
+variants:
+  # Current paper protocol and current display strength.
+  - name: protocol
+    smoothing_radius: 1
+    salient_percent: 4
+    gamma: 0.65
+    opacity: 0.72
+
+  # Display-only enhancement: SalC is identical to protocol.
+  - name: protocol_dark
+    smoothing_radius: 1
+    salient_percent: 4
+    gamma: 0.35
+    opacity: 1.0
+
+  # Structural counterfactuals for reducing OCTA speckle responses.
+  - name: smooth_r3_p4
+    smoothing_radius: 3
+    salient_percent: 4
+    gamma: 0.40
+    opacity: 1.0
+
+  - name: smooth_r5_p4
+    smoothing_radius: 5
+    salient_percent: 4
+    gamma: 0.40
+    opacity: 1.0
+
+  - name: vessel_focus_r3_p2
+    smoothing_radius: 3
+    salient_percent: 2
+    gamma: 0.40
+    opacity: 1.0

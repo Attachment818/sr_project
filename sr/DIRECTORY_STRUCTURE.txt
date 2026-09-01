@@ -19,6 +19,8 @@ sr/
 │   ├── render_salc_hrf_pair11_v1.yaml
 │   ├── render_salc_hrf_pair11_display_v2.yaml
 │   ├── render_salc_octa_final_candidates_v1.yaml
+│   ├── render_salc_octa_final_candidates_r3_p4_v2.yaml
+│   ├── render_salc_octa_parameter_sweep_v1.yaml
 │   ├── render_salc_octa_candidates_v1.yaml
 │   ├── test.yaml
 │   ├── test_FIMD.yaml

@@ -1,0 +1,26 @@
+# OCTA qualitative candidate using the parameter-sweep recommendation.
+# This changes visualization structure only. Quantitative table values remain
+# based on the selected OCTA protocol in audit_salc_octa_full_v1.yaml (r=1,p=4).
+audit_config: D:/ComputerCV/sr_project/sr/config/audit_salc_octa_full_v1.yaml
+output_dir: D:/ComputerCV/sr_project/outputs/salc_octa_final_candidates_r3_p4_v2
+
+pair_ids:
+  - "0045"
+  - "0087"
+
+methods:
+  - SIFT
+  - NCNet
+  - R2D2
+  - LoFTR
+  - SuperRetina
+  - RetinaRegNet
+  - Ours
+
+smoothing_radius: 3
+salient_percent: 4
+overlay_gamma: 0.40
+overlay_opacity: 1.0
+panel_size: 520
+columns: 5
+font_size: 14
