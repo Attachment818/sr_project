@@ -1,0 +1,46 @@
+% Standalone HRF comparison table.
+% Reference numbers follow ICME_camera_ready.pdf. LoFTR [24] and R2D2 [25]
+% assume that the two new references are appended in this order. When this
+% table is inserted into a complete paper, replace literal numbers with \cite{}.
+\begin{table}[t]
+  \caption{Evaluation comparison on the HRF dataset. The best result is
+  marked in bold, and the second-best result is shown in blue.}
+  \label{tab:hrf_comparison_extended}
+  \centering
+  \footnotesize
+  \setlength{\tabcolsep}{4.2pt}
+  \renewcommand{\arraystretch}{1.04}
+  \begin{tabular}{@{}lcc@{}}
+    \toprule
+    Method & SalC $\uparrow$ & Time (s) \\
+    \midrule
+    Source image              & 51.2\%                 & --     \\
+    REMPE~[21]                & 69.0\%                 & 410.3  \\
+    Harris-PIIFD~[22]         & 65.5\%                 & 10.1   \\
+    SURF-PIIFD-RPM~[23]       & 48.4\%                 & 3913.5 \\
+    NCNet~[3]                 & 51.2\%                 & 0.6    \\
+    SuperRetina~[5]           & 69.7\%                 & 9.0    \\
+    LoFTR~[24]$^{*\dagger}$  & 50.2\%                 & 0.9    \\
+    SuperPoint~[1]$^{*\dagger}$
+                               & 50.0\%                 & 2.8    \\
+    GLAMpoints~[9]$^{\dagger}$
+                               & 68.5\%                 & 24.0   \\
+    R2D2~[25]$^{\dagger}$    & 72.5\%                 & 17.3   \\
+    para-LAP~[18]             & 69.5\%                 & 240.3  \\
+    2-phasePara~[19]          & 70.0\%                 & 9.0    \\
+    RetinaRegNet~[7]          & \textcolor{blue}{76.2\%}
+                                                         & 61.8   \\
+    Ours                      & \textbf{76.5\%}         & 8.5    \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{2pt}
+  \begin{minipage}{\columnwidth}
+    \scriptsize
+    $^{*}$For a failed registration without an aligned output, the source
+    image is retained when calculating the 18-pair mean SalC. LoFTR has
+    16/18 aligned outputs and SuperPoint has 11/18.\\
+    $^{\dagger}$The added-method runtimes are taken from historical run
+    records and were not measured in a unified hardware environment.
+  \end{minipage}
+\end{table}

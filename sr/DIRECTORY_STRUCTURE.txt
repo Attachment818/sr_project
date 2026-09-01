@@ -18089,6 +18089,12 @@ sr/
 │   └── summarize_pke_diagnostics.py
 ├── predictor.py
 ├── SALC_SUPPLEMENTARY_WORKFLOW.md
+├── paper_tables/
+│   └── hrf_comparison/
+│       ├── hrf_table.tex
+│       ├── hrf_table_content.tex
+│       ├── new_references.bib
+│       └── README.md
 ├── FIMD_REPRODUCTION_PLAN.md
 ├── requirements.txt
 ├── SuperRetina.pth

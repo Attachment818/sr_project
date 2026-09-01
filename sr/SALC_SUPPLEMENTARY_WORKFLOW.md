@@ -63,6 +63,7 @@ D:\Anaconda_envs\envs\sr\python.exe sr\tools\render_salc_comparisons.py --render
 ## 当前推荐交付物
 
 - HRF：优先审阅 `outputs/salc_hrf_pair11_display_v2/11_salc_comparison_2x5.png`。它保持论文 SalC 协议，只增强显示并统一裁切；提交前仍需说明它来自历史结果版本，Ours 对最强对照的量化优势很小。
+- HRF 表格：`paper_tables/hrf_comparison/hrf_table_content.tex` 是可直接复制到论文的表格环境；`hrf_table.tex` 是独立预览入口。新增的 LoFTR、SuperPoint、GLAMpoints 和 R2D2 行使用上述 18 对统一口径结果，并通过表注区分失败样本处理和非统一硬件时间。
 - FIMD：`outputs/fimd02_existing_comparison_final_v1/fimd02_existing_comparison_1x4.png`。这是一张已有结果的无损排版图，不代表重新运行了四种方法。
 - 若论文需要 HRF 上稳定且明显的 Ours 优势，应优先找回论文最终版 Ours aligned images，或用明确 checkpoint 重新运行 Ours；不应通过筛图或显示参数掩盖当前历史版本不一致。
 
